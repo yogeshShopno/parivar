@@ -6,7 +6,7 @@ npm start
 
 *.env
 archive
-*.json
+# *.json
 *.log
 dist
 

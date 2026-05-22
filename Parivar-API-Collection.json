@@ -1,0 +1,934 @@
+{
+  "info": {
+    "_postman_id": "parivar-collection-v1",
+    "name": "Parivar API Collection",
+    "description": "Collection for Parivar API - grouped folder-wise. All variables pre-configured.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api",
+      "type": "string",
+      "description": "Base URL for the API"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "Authentication token (Bearer token) - Update after login"
+    },
+    {
+      "key": "phone_number",
+      "value": "9876543210",
+      "type": "string",
+      "description": "Test phone number for authentication"
+    },
+    {
+      "key": "email",
+      "value": "john@example.com",
+      "type": "string",
+      "description": "Test email for user login/registration"
+    },
+    {
+      "key": "password",
+      "value": "12345",
+      "type": "string",
+      "description": "Test password for user login/registration"
+    },
+    {
+      "key": "otp",
+      "value": "123456",
+      "type": "string",
+      "description": "One-Time Password for OTP verification"
+    },
+    {
+      "key": "user_id",
+      "value": "12345",
+      "type": "string",
+      "description": "Test user ID for API calls"
+    },
+    {
+      "key": "member_id",
+      "value": "12345",
+      "type": "string",
+      "description": "Test member ID for directory operations"
+    },
+    {
+      "key": "country_id",
+      "value": "1",
+      "type": "string",
+      "description": "Test country ID"
+    },
+    {
+      "key": "state_id",
+      "value": "1",
+      "type": "string",
+      "description": "Test state ID"
+    },
+    {
+      "key": "city_id",
+      "value": "1",
+      "type": "string",
+      "description": "Test city ID"
+    },
+    {
+      "key": "business_category_id",
+      "value": "1",
+      "type": "string",
+      "description": "Test business category ID"
+    },
+    {
+      "key": "post_id",
+      "value": "abcd1234",
+      "type": "string",
+      "description": "Test post ID"
+    },
+    {
+      "key": "business_id",
+      "value": "abcd1234",
+      "type": "string",
+      "description": "Test business ID"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (send OTP)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.environment.set('phone_number', pm.request.body.raw.phone_number);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"number\": \"{{phone_number}}\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login (verify OTP)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"number\": \"{{phone_number}}\", \"otp\": \"{{otp}}\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Select Account Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"member_id\": \"{{member_id}}\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/select_account_login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "select_account_login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Version Code (protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/version_code",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "version_code"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Register (create user)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"first_name\": \"John\", \"number\": \"{{phone_number}}\", \"email\": \"{{email}}\", \"password\": \"{{password}}\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login (email/password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"{{email}}\", \"password\": \"{{password}}\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Profile (protected)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Users List (protected)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                ""
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID (protected)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User (PUT by id, protected)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"first_name\": \"John Updated\", \"city_id\": \"{{city_id}}\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User (POST /update, protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"id\": \"{{user_id}}\", \"first_name\": \"John Updated\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/update",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "update"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feed",
+      "item": [
+        {
+          "name": "Home (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/feed/home",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "home"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Gallery (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/feed/gallery",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "gallery"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Events (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/feed/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "events"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Festivals (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/feed/festivals",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "festivals"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Post (multipart/form-data, protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "My post title",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Post description here",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/feed/add_post",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "add_post"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Posts (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/feed/all_post_list",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "all_post_list"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Post by ID (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/feed/posts/{{post_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "feed",
+                "posts",
+                "{{post_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Directory",
+      "item": [
+        {
+          "name": "Members (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/directory/members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "directory",
+                "members"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Family Members (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"member_id\": \"{{member_id}}\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/directory/family_members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "directory",
+                "family_members"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Committee Members (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/directory/committee_members",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "directory",
+                "committee_members"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Country List (GET)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/directory/country_list",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "directory",
+                "country_list"
+              ]
+            }
+          }
+        },
+        {
+          "name": "State List (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"country_id\": \"{{country_id}}\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/directory/state_list",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "directory",
+                "state_list"
+              ]
+            }
+          }
+        },
+        {
+          "name": "City List (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"state_id\": \"{{state_id}}\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/directory/city_list",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "directory",
+                "city_list"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Business",
+      "item": [
+        {
+          "name": "Business Category List (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/business/business_category_list",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "business",
+                "business_category_list"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Business Details (multipart/form-data, protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "business_category_id",
+                  "value": "{{business_category_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "business_name",
+                  "value": "My Shop",
+                  "type": "text"
+                },
+                {
+                  "key": "number",
+                  "value": "{{phone_number}}",
+                  "type": "text"
+                },
+                {
+                  "key": "country_id",
+                  "value": "{{country_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "state_id",
+                  "value": "{{state_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "city_id",
+                  "value": "{{city_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "123 Market St",
+                  "type": "text"
+                },
+                {
+                  "key": "location_link",
+                  "value": "https://maps.example.com/?q=loc",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/business/add_business_details",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "business",
+                "add_business_details"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Business List (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/business/business_details_list",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "business",
+                "business_details_list"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Businesses (alias) (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/businesses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "businesses"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Business by ID (GET)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/businesses/{{business_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "businesses",
+                "{{business_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Config",
+      "item": [
+        {
+          "name": "Get Config (GET)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/config",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "config"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Config (POST)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"app_name\": \"Parivar\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/config",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "config"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
