@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const citySchema = new mongoose.Schema({
   id: {
     type: String,
-    required: true,
-    unique: true
+    unique: true,
+    sparse: true
   },
   state_id: {
     type: String,
@@ -13,11 +13,16 @@ const citySchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    required: true,
+    default: '',
     trim: true
+  },
+  city: {
+    type: String,
+    default: ''
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 module.exports = mongoose.model('City', citySchema);

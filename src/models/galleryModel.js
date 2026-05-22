@@ -19,9 +19,22 @@ const gallerySchema = new mongoose.Schema({
     type: String,
     default: 'General',
     trim: true
+  },
+  year: {
+    type: String,
+    default: ''
+  },
+  gallery_category_id: {
+    type: String,
+    default: ''
+  },
+  event_category: {
+    type: String,
+    default: ''
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 module.exports = mongoose.model('Gallery', gallerySchema);

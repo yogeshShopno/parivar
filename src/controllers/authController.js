@@ -1,114 +1,116 @@
-const User = require('../models/userModels');
 const jwt = require('jsonwebtoken');
+const User = require('../models/userModels');
+const { apiResponse, memberPublicId } = require('../utils/apiResponse');
 
-// 1. POST /login - Enter phone number and OTP
+const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfamilykey';
+const MEMBER_TOKEN_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
+const STATIC_OTP = process.env.LOGIN_OTP || '123456';
+
+const requestData = (req) => ({
+  ...req.query,
+  ...req.body
+});
+
+const tokenPayloadFor = (member) => ({
+  id: memberPublicId(member),
+  first_name: member.first_name || '',
+  middle_name: member.middle_name || '',
+  last_name: member.last_name || '',
+  number: member.number || '',
+  iat: Math.floor(Date.now() / 1000),
+  exp: Math.floor(Date.now() / 1000) + 86400
+});
+
+const signArchiveToken = (payload) => {
+  const { exp, iat, ...claims } = payload;
+  return jwt.sign(claims, JWT_SECRET, {
+    expiresIn: MEMBER_TOKEN_EXPIRES_IN
+  });
+};
+
 const login = async (req, res) => {
   try {
-    const { number, otp } = req.body;
+    const { number, otp } = requestData(req);
 
-    if (!number || !otp) {
-      return res.status(400).json({ message: 'Number and OTP are required' });
+    if (!number) {
+      return apiResponse(res, 400, 'Number is required');
     }
 
-    // Standard simulated OTP check
-    if (otp !== '123456') {
-      return res.status(401).json({ message: 'Invalid OTP code' });
+    const users = await User.find({ number: String(number) }).select('-password').sort({ member_id: 1, _id: 1 });
+
+    if (!users.length) {
+      return apiResponse(res, 400, 'Invalid number');
     }
 
-    // Find all member accounts linked to this phone number
-    const accounts = await User.find({ number });
-
-    if (accounts.length === 0) {
-      return res.status(404).json({
-        message: 'No profiles found associated with this number. Please register.'
+    if (!otp) {
+      return apiResponse(res, 200, 'OTP send successfully', {
+        multiple_numbers: users.length > 1
       });
     }
 
-    // Generate a temporary administrative/selection token
-    const token = jwt.sign(
-      { number },
-      process.env.JWT_SECRET || 'supersecretfamilykey',
-      { expiresIn: '1h' }
-    );
+    if (String(otp) !== STATIC_OTP) {
+      return apiResponse(res, 400, 'Invalid OTP');
+    }
 
-    res.status(200).json({
-      message: 'OTP verified successfully',
-      data: {
-        token,
-        accounts: accounts.map(acc => ({
-          member_id: acc.member_id,
-          first_name: acc.first_name,
-          middle_name: acc.middle_name,
-          last_name: acc.last_name,
-          relation: acc.relation
+    if (users.length > 1) {
+      return apiResponse(res, 200, 'Multiple accounts found', {
+        multiple_numbers: true,
+        users: users.map((user) => ({
+          id: memberPublicId(user),
+          first_name: user.first_name || '',
+          middle_name: user.middle_name || '',
+          last_name: user.last_name || '',
+          number: user.number || ''
         }))
-      }
+      });
+    }
+
+    const payload = tokenPayloadFor(users[0]);
+    const token = signArchiveToken(payload);
+
+    return apiResponse(res, 200, 'Login successful', {
+      multiple_numbers: false,
+      token,
+      user: payload
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error in login', error: error.message });
+    return apiResponse(res, 500, 'Error in login', { error: error.message });
   }
 };
 
-// 2. POST /select_account_login - Choose specific member profile
 const selectAccountLogin = async (req, res) => {
   try {
-    const { member_id, number } = req.body;
+    const { member_id } = requestData(req);
 
-    if (!member_id || !number) {
-      return res.status(400).json({ message: 'Member ID and number are required' });
+    if (!member_id) {
+      return apiResponse(res, 400, 'Member ID is required');
     }
 
-    // Find specific profile matching member_id and primary number
-    const member = await User.findOne({ member_id, number });
+    const user = await User.findOne({
+      $or: [
+        { member_id: String(member_id) },
+        { id: String(member_id) }
+      ]
+    }).select('-password');
 
-    if (!member) {
-      return res.status(404).json({ message: 'Profile not found or number mismatch' });
+    if (!user) {
+      return apiResponse(res, 400, 'Invalid member');
     }
 
-    // Generate the final authorization token (toakn) for this specific member
-    const token = jwt.sign(
-      { id: member._id, member_id: member.member_id },
-      process.env.JWT_SECRET || 'supersecretfamilykey',
-      { expiresIn: '30d' }
-    );
+    const payload = tokenPayloadFor(user);
+    const token = signArchiveToken(payload);
 
-    res.status(200).json({
-      message: 'Profile selected successfully',
-      data: {
-        token,
-        member: {
-          member_id: member.member_id,
-          first_name: member.first_name,
-          middle_name: member.middle_name,
-          last_name: member.last_name,
-          email: member.email,
-          number: member.number,
-          relation: member.relation,
-          is_committee: member.is_committee,
-          committee_role: member.committee_role
-        }
-      }
+    return apiResponse(res, 200, 'Login successful', {
+      token,
+      user: payload
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error selecting account', error: error.message });
+    return apiResponse(res, 500, 'Error selecting account', { error: error.message });
   }
 };
 
-// 3. POST /version_code - Check app version
 const versionCode = async (req, res) => {
-  try {
-    res.status(200).json({
-      message: 'Version code retrieved successfully',
-      data: {
-        version_name: '1.0.0',
-        version_code: 10,
-        force_update: false,
-        update_url: 'https://play.google.com/store'
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Error retrieving version', error: error.message });
-  }
+  return apiResponse(res, 200, 'Version code fetch successfully', []);
 };
 
 module.exports = {

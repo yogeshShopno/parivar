@@ -25,9 +25,19 @@ const postSchema = new mongoose.Schema({
   image: {
     type: String,
     default: ''
+  },
+  status: {
+    type: Number,
+    default: 1,
+    index: true
+  },
+  cdate: {
+    type: String,
+    default: ''
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 module.exports = mongoose.model('Post', postSchema);

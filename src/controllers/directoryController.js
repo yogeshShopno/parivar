@@ -2,111 +2,189 @@ const User = require('../models/userModels');
 const Country = require('../models/countryModel');
 const State = require('../models/stateModel');
 const City = require('../models/cityModel');
+const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
 
-// 1. POST /members - List of all primary family heads
+const requestData = (req) => ({
+  ...req.query,
+  ...req.body
+});
+
+const asName = (doc, key) => doc?.[key] || doc?.name || '';
+
+const locationMaps = async () => {
+  const [countries, states, cities] = await Promise.all([
+    Country.find().lean(),
+    State.find().lean(),
+    City.find().lean()
+  ]);
+
+  return {
+    countries: new Map(countries.map((item) => [String(item.id || item._id), item])),
+    states: new Map(states.map((item) => [String(item.id || item._id), item])),
+    cities: new Map(cities.map((item) => [String(item.id || item._id), item]))
+  };
+};
+
+const memberRow = (req, member, maps = {}) => {
+  const id = memberPublicId(member);
+  const country = maps.countries?.get(String(member.country_id));
+  const state = maps.states?.get(String(member.state_id));
+  const city = maps.cities?.get(String(member.city_id));
+
+  return {
+    id,
+    family_code: member.family_code || member.member_id || id,
+    full_name: fullName(member),
+    number: member.number || '',
+    district_id: member.district_id || '',
+    taluka_id: member.taluka_id || '',
+    city_id: member.city_id || '',
+    village_id: member.village_id || '',
+    address: member.address || '',
+    district_name: member.district_name || '',
+    taluka_name: member.taluka_name || '',
+    city_name: member.city_name || asName(city, 'city'),
+    village_name: member.village_name || '',
+    country_id: member.country_id || '',
+    state_id: member.state_id || '',
+    country_name: member.country_name || asName(country, 'country'),
+    state_name: member.state_name || asName(state, 'state'),
+    image: publicUrl(req, member.image || member.profile_image || '')
+  };
+};
+
 const getMembers = async (req, res) => {
   try {
-    // Standard directories list members who are heads of their family (i.e. no parent)
-    const members = await User.find({
+    const query = {
       $or: [
+        { parent_id: null },
+        { parent_id: '' },
         { parent_member_id: null },
         { parent_member_id: '' },
         { relation: 'Self' }
       ]
-    });
+    };
 
-    res.status(200).json({
-      message: 'Members directory retrieved successfully',
-      data: members
-    });
+    const members = await User.find(query).select('-password').sort({ _id: -1 }).lean();
+    const maps = await locationMaps();
+
+    return apiResponse(res, 200, 'Memebers Data fetch successful', members.map((member) => memberRow(req, member, maps)));
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving directory', error: error.message });
+    return apiResponse(res, 500, 'Error retrieving directory', { error: error.message });
   }
 };
 
-// 2. POST /family_members - List of family members for a primary member
 const getFamilyMembers = async (req, res) => {
   try {
-    const { member_id } = req.body;
+    const { member_id } = requestData(req);
 
     if (!member_id) {
-      return res.status(400).json({ message: 'Member ID is required' });
+      return apiResponse(res, 401, 'Invalid member');
     }
 
-    // Retrieve all members whose parent_member_id is the selected head member
-    const family = await User.find({ parent_member_id: member_id });
+    const parent = await User.findOne({ member_id: String(member_id) }).select('-password').lean();
 
-    res.status(200).json({
-      message: 'Family tree retrieved successfully',
-      data: family
-    });
+    if (!parent) {
+      return apiResponse(res, 401, 'Invalid member');
+    }
+
+    const family = await User.find({
+      $or: [
+        { parent_id: String(member_id) },
+        { parent_member_id: String(member_id) }
+      ]
+    }).select('-password').sort({ _id: -1 }).lean();
+    const maps = await locationMaps();
+
+    return apiResponse(res, 200, 'Family Memeber Data fetch successful', family.map((member) => {
+      const merged = {
+        ...member,
+        family_code: parent.family_code || parent.member_id,
+        district_id: parent.district_id || '',
+        taluka_id: parent.taluka_id || '',
+        city_id: parent.city_id || '',
+        village_id: parent.village_id || '',
+        country_id: parent.country_id || '',
+        state_id: parent.state_id || '',
+        address: parent.address || ''
+      };
+
+      return memberRow(req, merged, maps);
+    }));
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving family tree', error: error.message });
+    return apiResponse(res, 500, 'Error retrieving family tree', { error: error.message });
   }
 };
 
-// 3. POST /kamiti_members - List of committee board members
 const getKamitiMembers = async (req, res) => {
   try {
-    const committee = await User.find({ is_committee: true });
+    const committee = await User.find({
+      $or: [
+        { is_committee: true },
+        { user_role_id: { $ne: 1 }, status: 1 }
+      ]
+    }).select('-password').sort({ _id: -1 }).lean();
 
-    res.status(200).json({
-      message: 'Committee members retrieved successfully',
-      data: committee
-    });
+    const data = committee.map((member) => ({
+      id: memberPublicId(member),
+      full_name: member.full_name || fullName(member),
+      number: member.number || '',
+      role: member.username || member.committee_role || '',
+      designation: member.designation || '',
+      image: publicUrl(req, member.signature || member.image || member.profile_image || '')
+    }));
+
+    return apiResponse(res, 200, 'Kamiti Memeber Data fetch successful', data);
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving committee', error: error.message });
+    return apiResponse(res, 500, 'Error retrieving committee', { error: error.message });
   }
 };
 
-// 4. POST /country_list - Geographic countries
 const getCountryList = async (req, res) => {
   try {
-    const countries = await Country.find();
-    res.status(200).json({
-      message: 'Countries retrieved successfully',
-      data: countries
-    });
+    const countries = await Country.find().sort({ _id: -1 }).lean();
+    return apiResponse(res, 200, 'Country data fetch successfully', countries.map((country) => ({
+      id: country.id || String(country._id),
+      country: country.country || country.name || ''
+    })));
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving countries', error: error.message });
+    return apiResponse(res, 500, 'Error retrieving countries', { error: error.message });
   }
 };
 
-// 5. POST /state_list - Geographic states matching country_id
 const getStateList = async (req, res) => {
   try {
-    const { country_id } = req.body;
+    const { country_id } = requestData(req);
 
     if (!country_id) {
-      return res.status(400).json({ message: 'Country ID is required' });
+      return apiResponse(res, 401, 'Country id is required');
     }
 
-    const states = await State.find({ country_id });
-    res.status(200).json({
-      message: 'States retrieved successfully',
-      data: states
-    });
+    const states = await State.find({ country_id: String(country_id) }).sort({ _id: -1 }).lean();
+    return apiResponse(res, 200, 'State data fetch successfully', states.map((state) => ({
+      id: state.id || String(state._id),
+      state: state.state || state.name || ''
+    })));
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving states', error: error.message });
+    return apiResponse(res, 500, 'Error retrieving states', { error: error.message });
   }
 };
 
-// 6. POST /city_list - Geographic cities matching state_id
 const getCityList = async (req, res) => {
   try {
-    const { state_id } = req.body;
+    const { state_id } = requestData(req);
 
     if (!state_id) {
-      return res.status(400).json({ message: 'State ID is required' });
+      return apiResponse(res, 401, 'State id is required');
     }
 
-    const cities = await City.find({ state_id });
-    res.status(200).json({
-      message: 'Cities retrieved successfully',
-      data: cities
-    });
+    const cities = await City.find({ state_id: String(state_id) }).sort({ _id: -1 }).lean();
+    return apiResponse(res, 200, 'City data fetch successfully', cities.map((city) => ({
+      id: city.id || String(city._id),
+      city: city.city || city.name || ''
+    })));
   } catch (error) {
-    res.status(500).json({ message: 'Error retrieving cities', error: error.message });
+    return apiResponse(res, 500, 'Error retrieving cities', { error: error.message });
   }
 };
 

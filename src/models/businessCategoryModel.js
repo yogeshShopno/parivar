@@ -3,21 +3,26 @@ const mongoose = require('mongoose');
 const businessCategorySchema = new mongoose.Schema({
   id: {
     type: String,
-    required: true,
-    unique: true
+    unique: true,
+    sparse: true
   },
   name: {
     type: String,
-    required: true,
+    default: '',
     trim: true
   },
   state_id: {
     type: String,
-    required: true,
+    default: '',
     index: true
+  },
+  business: {
+    type: String,
+    default: ''
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 module.exports = mongoose.model('BusinessCategory', businessCategorySchema);

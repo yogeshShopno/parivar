@@ -23,9 +23,44 @@ const eventSchema = new mongoose.Schema({
     type: String,
     default: '',
     trim: true
+  },
+  event_category_id: {
+    type: String,
+    default: ''
+  },
+  event_category_name: {
+    type: String,
+    default: ''
+  },
+  event_name: {
+    type: String,
+    default: ''
+  },
+  event_location: {
+    type: String,
+    default: ''
+  },
+  location_link: {
+    type: String,
+    default: ''
+  },
+  start_time: {
+    type: Date
+  },
+  end_time: {
+    type: Date
+  },
+  entry_type: {
+    type: String,
+    default: ''
+  },
+  event_description: {
+    type: String,
+    default: ''
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 module.exports = mongoose.model('Event', eventSchema);

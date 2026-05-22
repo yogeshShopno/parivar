@@ -1,5 +1,23 @@
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const User = require('../models/userModels');
+
+const isInvalidTokenValue = (token) => {
+  if (!token) {
+    return true;
+  }
+
+  const normalized = token.trim().toLowerCase();
+
+  return [
+    'bearer',
+    'null',
+    'undefined',
+    '{{token}}',
+    '{{toakn}}',
+    '{{admin-toakn}}'
+  ].includes(normalized);
+};
 
 const getTokenFromRequest = (req) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
@@ -13,16 +31,40 @@ const getTokenFromRequest = (req) => {
   const trimmedHeader = headerValue.trim();
   const bearerMatch = trimmedHeader.match(/^Bearer\s+(.+)$/i);
 
-  return (bearerMatch ? bearerMatch[1] : trimmedHeader).trim();
+  const token = (bearerMatch ? bearerMatch[1] : trimmedHeader).trim();
+
+  return isInvalidTokenValue(token) ? null : token;
 };
 
 const findUserFromToken = async (decoded) => {
-  if (decoded.id) {
-    return User.findById(decoded.id).select('-password');
+  const userId = decoded.id || decoded._id || decoded.userId;
+
+  if (userId && mongoose.isValidObjectId(userId)) {
+    const user = await User.findById(userId).select('-password');
+
+    if (user) {
+      return user;
+    }
+  }
+
+  if (userId) {
+    const user = await User.findOne({ member_id: String(userId) }).select('-password');
+
+    if (user) {
+      return user;
+    }
   }
 
   if (decoded.member_id) {
-    return User.findOne({ member_id: decoded.member_id }).select('-password');
+    const user = await User.findOne({ member_id: String(decoded.member_id) }).select('-password');
+
+    if (user) {
+      return user;
+    }
+  }
+
+  if (decoded.number) {
+    return User.findOne({ number: String(decoded.number) }).select('-password');
   }
 
   return null;
@@ -32,7 +74,19 @@ const protect = async (req, res, next) => {
   const token = getTokenFromRequest(req);
 
   if (!token) {
-    return res.status(401).json({ message: 'Not authorized, no token provided' });
+    return res.status(401).json({
+      status: 401,
+      message: 'Unauthorized: Token missing',
+      data: []
+    });
+  }
+
+  if (token.split('.').length !== 3) {
+    return res.status(401).json({
+      status: 401,
+      message: 'Unauthorized: Invalid or expired token',
+      data: []
+    });
   }
 
   try {
@@ -40,22 +94,37 @@ const protect = async (req, res, next) => {
     req.user = await findUserFromToken(decoded);
 
     if (!req.user) {
-      return res.status(401).json({ message: 'Not authorized, user not found for this token' });
+      return res.status(401).json({
+        status: 401,
+        message: 'Unauthorized: Invalid or expired token',
+        data: []
+      });
     }
 
     return next();
   } catch (error) {
-    console.error('JWT Verification Error:', error.message);
-
     if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'Not authorized, token expired' });
+      return res.status(401).json({
+        status: 401,
+        message: 'Unauthorized: Invalid or expired token',
+        data: []
+      });
     }
 
     if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({ message: 'Not authorized, invalid token' });
+      return res.status(401).json({
+        status: 401,
+        message: 'Unauthorized: Invalid or expired token',
+        data: []
+      });
     }
 
-    return res.status(401).json({ message: 'Not authorized, token failed' });
+    console.error('JWT Verification Error:', error.message);
+    return res.status(401).json({
+      status: 401,
+      message: 'Unauthorized: Invalid or expired token',
+      data: []
+    });
   }
 };
 

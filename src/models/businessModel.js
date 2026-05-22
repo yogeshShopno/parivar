@@ -10,7 +10,6 @@ const businessSchema = new mongoose.Schema({
   member_id: {
     type: String,
     required: true,
-    unique: true, // One business listing per member in this community structure
     index: true
   },
   business_category_id: {
@@ -92,9 +91,39 @@ const businessSchema = new mongoose.Schema({
   gallery_images: {
     type: [String], // Array to store paths/URLs of gallery_image_1 to gallery_image_5
     default: []
+  },
+  gallery_image_1: {
+    type: String,
+    default: ''
+  },
+  gallery_image_2: {
+    type: String,
+    default: ''
+  },
+  gallery_image_3: {
+    type: String,
+    default: ''
+  },
+  gallery_image_4: {
+    type: String,
+    default: ''
+  },
+  gallery_image_5: {
+    type: String,
+    default: ''
+  },
+  status: {
+    type: Number,
+    default: 1,
+    index: true
+  },
+  cdate: {
+    type: String,
+    default: ''
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 module.exports = mongoose.model('Business', businessSchema);

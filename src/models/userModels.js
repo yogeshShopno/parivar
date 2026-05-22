@@ -88,9 +88,35 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
     trim: true
+  },
+  parent_id: {
+    type: String,
+    default: null,
+    index: true
+  },
+  family_code: {
+    type: String,
+    default: ''
+  },
+  district_id: {
+    type: String,
+    default: ''
+  },
+  taluka_id: {
+    type: String,
+    default: ''
+  },
+  village_id: {
+    type: String,
+    default: ''
+  },
+  image: {
+    type: String,
+    default: ''
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 // Pre-save hook to hash password if it was modified

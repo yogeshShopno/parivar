@@ -18,9 +18,30 @@ const festivalSchema = new mongoose.Schema({
   date: {
     type: Date,
     default: Date.now
+  },
+  festival_name: {
+    type: String,
+    default: ''
+  },
+  festival_date: {
+    type: String,
+    default: ''
+  },
+  button_name: {
+    type: String,
+    default: ''
+  },
+  button_link: {
+    type: String,
+    default: ''
+  },
+  festival_description: {
+    type: String,
+    default: ''
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 module.exports = mongoose.model('Festival', festivalSchema);

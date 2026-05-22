@@ -3,8 +3,8 @@ const mongoose = require('mongoose');
 const stateSchema = new mongoose.Schema({
   id: {
     type: String,
-    required: true,
-    unique: true
+    unique: true,
+    sparse: true
   },
   country_id: {
     type: String,
@@ -13,11 +13,16 @@ const stateSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    required: true,
+    default: '',
     trim: true
+  },
+  state: {
+    type: String,
+    default: ''
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 module.exports = mongoose.model('State', stateSchema);

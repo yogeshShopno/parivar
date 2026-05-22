@@ -8,5 +8,6 @@ const router = express.Router();
 router.post('/login', parseForm, login);
 router.post('/select_account_login', parseForm, selectAccountLogin);
 router.post('/version_code', protect, parseForm, versionCode);
+router.get('/version_code', protect, versionCode);
 
 module.exports = router;

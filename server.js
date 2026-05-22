@@ -17,6 +17,17 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-Requested-With, Accept, Origin');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).send();
+  }
+
+  return next();
+});
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.get('/', (req, res) => {
@@ -24,7 +35,11 @@ app.get('/', (req, res) => {
 });
 
 app.post('/test', (req, res) => {
-  res.status(200).json({ message: 'Parivar API is working' });
+  res.status(200).json({
+    status: 200,
+    message: 'PARIVAR.APP API WORKING',
+    data: []
+  });
 });
 
 // Postman collection routes are root-level, so keep them mounted directly.
@@ -42,12 +57,20 @@ app.use('/api/feed', feedRoutes);
 app.use('/api/users', userRoutes);
 
 app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
+  res.status(404).json({
+    status: 404,
+    message: 'Route not found',
+    data: []
+  });
 });
 
 app.use((error, req, res, next) => {
   if (error) {
-    return res.status(400).json({ message: error.message });
+    return res.status(400).json({
+      status: 400,
+      message: error.message,
+      data: []
+    });
   }
 
   return next();

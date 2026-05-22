@@ -17,6 +17,8 @@ const seedUsers = [
     password: "Naimish@123",
     number: "123465789"
   }
+
+  
 ];
 
 module.exports = seedUsers;
