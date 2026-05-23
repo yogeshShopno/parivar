@@ -1,976 +1,3027 @@
 {
   "info": {
-    "_postman_id": "parivar-collection-v1",
+    "_postman_id": "621040b6-ff1e-4068-a326-e618faf16b49",
     "name": "Parivar API Collection",
-    "description": "Collection for Parivar API - grouped folder-wise. All variables pre-configured.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
-  "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:5000/api",
-      "type": "string",
-      "description": "Base URL for the API"
-    },
-    {
-      "key": "token",
-      "value": "",
-      "type": "string",
-      "description": "Authentication token (Bearer token) - Update after login"
-    },
-    {
-      "key": "phone_number",
-      "value": "9876543210",
-      "type": "string",
-      "description": "Test phone number for authentication"
-    },
-    {
-      "key": "email",
-      "value": "john@example.com",
-      "type": "string",
-      "description": "Test email for user login/registration"
-    },
-    {
-      "key": "password",
-      "value": "12345",
-      "type": "string",
-      "description": "Test password for user login/registration"
-    },
-    {
-      "key": "otp",
-      "value": "123456",
-      "type": "string",
-      "description": "One-Time Password for OTP verification"
-    },
-    {
-      "key": "user_id",
-      "value": "12345",
-      "type": "string",
-      "description": "Test user ID for API calls"
-    },
-    {
-      "key": "member_id",
-      "value": "12345",
-      "type": "string",
-      "description": "Test member ID for directory operations"
-    },
-    {
-      "key": "country_id",
-      "value": "1",
-      "type": "string",
-      "description": "Test country ID"
-    },
-    {
-      "key": "state_id",
-      "value": "1",
-      "type": "string",
-      "description": "Test state ID"
-    },
-    {
-      "key": "city_id",
-      "value": "1",
-      "type": "string",
-      "description": "Test city ID"
-    },
-    {
-      "key": "business_category_id",
-      "value": "1",
-      "type": "string",
-      "description": "Test business category ID"
-    },
-    {
-      "key": "post_id",
-      "value": "abcd1234",
-      "type": "string",
-      "description": "Test post ID"
-    },
-    {
-      "key": "business_id",
-      "value": "abcd1234",
-      "type": "string",
-      "description": "Test business ID"
-    }
-  ],
   "item": [
     {
-      "name": "Auth",
+      "name": "1. Authentication",
       "item": [
         {
-          "name": "Login (send OTP)",
+          "name": "Login (Request OTP)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "number",
+                  "value": "7990881893",
+                  "type": "text",
+                  "description": "Primary phone number to receive OTP"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
-                  "if (pm.response.code === 200) {",
-                  "    pm.environment.set('phone_number', pm.request.body.formdata.find(item => item.key === 'number').value);",
+                  "// Parse Response",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Status is 200\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (jsonData.data) {",
+                  "    pm.environment.set(\"multiple_numbers\", jsonData.data.multiple_numbers);",
                   "}"
-                ]
+                ],
+                "type": "text/javascript"
               }
             }
-          ],
-          "request": {
-            "method": "POST",
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "number",
-                  "value": "{{phone_number}}",
-                  "type": "text"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{base_url}}/auth/login",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "auth",
-                "login"
-              ]
-            }
-          }
+          ]
         },
         {
-          "name": "Login (verify OTP)",
+          "name": "Login (Verify OTP - Single Account)",
           "request": {
             "method": "POST",
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
                   "key": "number",
-                  "value": "{{phone_number}}",
-                  "type": "text"
+                  "value": "7990881893",
+                  "type": "text",
+                  "description": "Primary phone number"
                 },
                 {
                   "key": "otp",
-                  "value": "{{otp}}",
-                  "type": "text"
+                  "value": "123456",
+                  "type": "text",
+                  "description": "OTP sent via SMS (Default is 123456)"
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/auth/login",
+              "raw": "{{baseUrl}}/auth/login",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "auth",
                 "login"
               ]
             }
-          }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Save Bearer Token",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Login successful\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(jsonData.message).to.include(\"Login successful\");",
+                  "});",
+                  "if (jsonData.data?.token) {",
+                  "    pm.environment.set(\"token\", jsonData.data.token);",
+                  "    pm.environment.set(\"member_id\", jsonData.data.user?.id || \"\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login (Verify OTP - Multiple Accounts)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "number",
+                  "value": "9876543210",
+                  "type": "text",
+                  "description": "Phone number shared across multiple family members"
+                },
+                {
+                  "key": "otp",
+                  "value": "123456",
+                  "type": "text",
+                  "description": "Static OTP"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Returns multiple accounts list",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Multiple accounts response received\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(jsonData.message).to.include(\"Multiple accounts found\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
           "name": "Select Account Login",
           "request": {
             "method": "POST",
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
                   "key": "member_id",
-                  "value": "{{member_id}}",
-                  "type": "text"
+                  "value": "24",
+                  "type": "text",
+                  "description": "Member ID selected from multi-account list"
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/auth/select_account_login",
+              "raw": "{{baseUrl}}/auth/select_account_login",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "auth",
                 "select_account_login"
               ]
             }
-          }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Save selected token",
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Login via selected account successful\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (jsonData.data?.token) {",
+                  "    pm.environment.set(\"token\", jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
-          "name": "Version Code (protected)",
+          "name": "Get Version Code",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
             "url": {
-              "raw": "{{base_url}}/auth/version_code",
+              "raw": "{{baseUrl}}/auth/version_code",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "auth",
                 "version_code"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
             }
-          }
+          },
+          "response": []
+        },
+        {
+          "name": "Post Version Code",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/version_code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "version_code"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "Users",
+      "name": "2. User Management",
       "item": [
         {
-          "name": "Register (create user)",
+          "name": "Register User (Self)",
           "request": {
             "method": "POST",
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
                   "key": "first_name",
-                  "value": "John",
-                  "type": "text"
+                  "value": "Yogesh",
+                  "type": "text",
+                  "description": ""
                 },
                 {
-                  "key": "number",
-                  "value": "{{phone_number}}",
-                  "type": "text"
+                  "key": "middle_name",
+                  "value": "Kumar",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "last_name",
+                  "value": "Sharma",
+                  "type": "text",
+                  "description": ""
                 },
                 {
                   "key": "email",
-                  "value": "{{email}}",
-                  "type": "text"
+                  "value": "yogesh@example.com",
+                  "type": "text",
+                  "description": ""
                 },
                 {
                   "key": "password",
-                  "value": "{{password}}",
-                  "type": "text"
+                  "value": "12345",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number",
+                  "value": "7990881893",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "gender",
+                  "value": "Male",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "dob",
+                  "value": "1995-08-15",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "blood_group",
+                  "value": "O+",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "relation",
+                  "value": "Self",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "is_committee",
+                  "value": "false",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "profile_image",
+                  "value": "",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "country_id",
+                  "value": "IN",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "state_id",
+                  "value": "GJ",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "city_id",
+                  "value": "AMD",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "address",
+                  "value": "123 Parivar Street, Ahmedabad",
+                  "type": "text",
+                  "description": ""
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/users/register",
+              "raw": "{{baseUrl}}/users/register",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "users",
                 "register"
               ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Login (email/password)",
+          "name": "User Login (Email & Password)",
           "request": {
             "method": "POST",
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
                   "key": "email",
-                  "value": "{{email}}",
-                  "type": "text"
+                  "value": "yogesh@example.com",
+                  "type": "text",
+                  "description": ""
                 },
                 {
                   "key": "password",
-                  "value": "{{password}}",
-                  "type": "text"
+                  "value": "12345",
+                  "type": "text",
+                  "description": ""
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/users/login",
+              "raw": "{{baseUrl}}/users/login",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "users",
                 "login"
               ]
             }
-          }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "pm.test(\"Login with email successful\", () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (jsonData.token) {",
+                  "    pm.environment.set(\"token\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
-          "name": "Get Profile (protected)",
+          "name": "Get Authenticated User Profile",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
             "url": {
-              "raw": "{{base_url}}/users/profile",
+              "raw": "{{baseUrl}}/users/profile",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "users",
                 "profile"
               ]
-            }
-          }
-        },
-        {
-          "name": "Get Users List (protected)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/users",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "users"
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Get User by ID (protected)",
+          "name": "Add Family Member (By Admin/Staff)",
           "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "parent_member_id",
+                  "value": "24",
+                  "type": "text",
+                  "description": "Primary family member ID"
+                },
+                {
+                  "key": "first_name",
+                  "value": "Priya",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "middle_name",
+                  "value": "Yogesh",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "last_name",
+                  "value": "Sharma",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "email",
+                  "value": "priya.sharma@example.com",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "password",
+                  "value": "12345",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number",
+                  "value": "7990881893",
+                  "type": "text",
+                  "description": "Family members can share the number"
+                },
+                {
+                  "key": "gender",
+                  "value": "Female",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "dob",
+                  "value": "1997-05-20",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "blood_group",
+                  "value": "A+",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "relation",
+                  "value": "Spouse",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "country_id",
+                  "value": "IN",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "state_id",
+                  "value": "GJ",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "city_id",
+                  "value": "AMD",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "address",
+                  "value": "123 Parivar Street, Ahmedabad",
+                  "type": "text",
+                  "description": ""
+                }
+              ]
+            },
             "url": {
-              "raw": "{{base_url}}/users/{{user_id}}",
+              "raw": "{{baseUrl}}/users/add",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "users",
-                "{{user_id}}"
+                "add"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Update User (PUT by id, protected)",
+          "name": "Register User (Alternative URL POST)",
           "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "method": "POST",
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
                   "key": "first_name",
-                  "value": "John Updated",
-                  "type": "text"
+                  "value": "Amit",
+                  "type": "text",
+                  "description": ""
                 },
                 {
-                  "key": "city_id",
-                  "value": "{{city_id}}",
-                  "type": "text"
+                  "key": "middle_name",
+                  "value": "Kumar",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "last_name",
+                  "value": "Patel",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number",
+                  "value": "9123456789",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "relation",
+                  "value": "Self",
+                  "type": "text",
+                  "description": ""
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/users/{{user_id}}",
+              "raw": "{{baseUrl}}/users/",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Users List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/list?search=Yogesh&is_committee=false&country_id=IN&state_id=GJ&city_id=AMD",
+              "host": [
+                "{{baseUrl}}"
               ],
               "path": [
                 "users",
-                "{{user_id}}"
+                "list"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "Yogesh",
+                  "description": "Search by name/number/email"
+                },
+                {
+                  "key": "is_committee",
+                  "value": "false",
+                  "description": "Filter by committee membership"
+                },
+                {
+                  "key": "country_id",
+                  "value": "IN",
+                  "description": "Filter by country"
+                },
+                {
+                  "key": "state_id",
+                  "value": "GJ",
+                  "description": "Filter by state"
+                },
+                {
+                  "key": "city_id",
+                  "value": "AMD",
+                  "description": "Filter by city"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Update User (POST /update, protected)",
+          "name": "Get Users List (Alternative Root GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/24",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "24"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User by ID Parameter (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": "Yogesh (Updated)",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "middle_name",
+                  "value": "Kumar",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "last_name",
+                  "value": "Sharma",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "email",
+                  "value": "yogesh.sharma@example.com",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number",
+                  "value": "7990881893",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "address",
+                  "value": "456 Parivar Boulevard, Ahmedabad",
+                  "type": "text",
+                  "description": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/24",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "24"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User by Body ID (POST)",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
                   "key": "id",
-                  "value": "{{user_id}}",
-                  "type": "text"
+                  "value": "24",
+                  "type": "text",
+                  "description": "Member ID of the user to update"
                 },
                 {
                   "key": "first_name",
-                  "value": "John Updated",
-                  "type": "text"
+                  "value": "Yogesh (Updated via POST)",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number",
+                  "value": "7990881893",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "address",
+                  "value": "789 Parivar Court, Ahmedabad",
+                  "type": "text",
+                  "description": ""
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/users/update",
+              "raw": "{{baseUrl}}/users/update",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "users",
                 "update"
               ]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Feed",
-      "item": [
-        {
-          "name": "Home (GET)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/feed/home",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "feed",
-                "home"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Gallery (GET)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/feed/gallery",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "feed",
-                "gallery"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Events (GET)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/feed/events",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "feed",
-                "events"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Festivals (GET)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/feed/festivals",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "feed",
-                "festivals"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Add Post (multipart/form-data, protected)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
                 {
-                  "key": "title",
-                  "value": "My post title",
-                  "type": "text"
-                },
-                {
-                  "key": "description",
-                  "value": "Post description here",
-                  "type": "text"
-                },
-                {
-                  "key": "image",
-                  "type": "file"
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
                 }
               ]
-            },
-            "url": {
-              "raw": "{{base_url}}/feed/add_post",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "feed",
-                "add_post"
-              ]
             }
-          }
-        },
-        {
-          "name": "Get All Posts (GET)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/feed/all_post_list",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "feed",
-                "all_post_list"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Post by ID (GET)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/feed/posts/{{post_id}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "feed",
-                "posts",
-                "{{post_id}}"
-              ]
-            }
-          }
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "Directory",
+      "name": "3. Directory",
       "item": [
         {
-          "name": "Members (GET)",
+          "name": "Get Members (GET)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
             "url": {
-              "raw": "{{base_url}}/directory/members",
+              "raw": "{{baseUrl}}/directory/members",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "directory",
                 "members"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Family Members (POST)",
+          "name": "Get Members (POST)",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/directory/members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "directory",
+                "members"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Member by ID Parameter (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/directory/members/24",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "directory",
+                "members",
+                "24"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Family Members (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/directory/family_members?member_id=24",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "directory",
+                "family_members"
+              ],
+              "query": [
+                {
+                  "key": "member_id",
+                  "value": "24",
+                  "description": "ID of the parent member"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Family Members (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
                   "key": "member_id",
-                  "value": "{{member_id}}",
-                  "type": "text"
+                  "value": "24",
+                  "type": "text",
+                  "description": "ID of the parent member"
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/directory/family_members",
+              "raw": "{{baseUrl}}/directory/family_members",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "directory",
                 "family_members"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Committee Members (GET)",
+          "name": "Get Committee Members (GET)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
             "url": {
-              "raw": "{{base_url}}/directory/committee_members",
+              "raw": "{{baseUrl}}/directory/committee_members",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "directory",
                 "committee_members"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Country List (GET)",
+          "name": "Get Committee Members (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/directory/committee_members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "directory",
+                "committee_members"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Country List (GET)",
           "request": {
             "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
             "url": {
-              "raw": "{{base_url}}/directory/country_list",
+              "raw": "{{baseUrl}}/directory/country_list",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "directory",
                 "country_list"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "State List (POST)",
+          "name": "Get Country List (POST)",
           "request": {
             "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/directory/country_list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "directory",
+                "country_list"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get State List (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/directory/state_list?country_id=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "directory",
+                "state_list"
+              ],
+              "query": [
+                {
+                  "key": "country_id",
+                  "value": "5",
+                  "description": "Country ID"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get State List (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
                   "key": "country_id",
-                  "value": "{{country_id}}",
-                  "type": "text"
+                  "value": "5",
+                  "type": "text",
+                  "description": "Country ID"
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/directory/state_list",
+              "raw": "{{baseUrl}}/directory/state_list",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "directory",
                 "state_list"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "City List (POST)",
+          "name": "Get City List (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/directory/city_list?state_id=4126",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "directory",
+                "city_list"
+              ],
+              "query": [
+                {
+                  "key": "state_id",
+                  "value": "4126",
+                  "description": "State ID"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get City List (POST)",
           "request": {
             "method": "POST",
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
                   "key": "state_id",
-                  "value": "{{state_id}}",
-                  "type": "text"
+                  "value": "4126",
+                  "type": "text",
+                  "description": "State ID"
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/directory/city_list",
+              "raw": "{{baseUrl}}/directory/city_list",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "directory",
                 "city_list"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
             }
-          }
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "Business",
+      "name": "4. Business Directory",
       "item": [
         {
-          "name": "Business Category List (GET)",
+          "name": "Get Business Category List (GET)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
             "url": {
-              "raw": "{{base_url}}/business/business_category_list",
+              "raw": "{{baseUrl}}/business/business_category_list",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "business",
                 "business_category_list"
               ]
-            }
-          }
-        },
-        {
-          "name": "Add Business Details (multipart/form-data, protected)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
                 {
-                  "key": "business_category_id",
-                  "value": "{{business_category_id}}",
-                  "type": "text"
-                },
-                {
-                  "key": "business_name",
-                  "value": "My Shop",
-                  "type": "text"
-                },
-                {
-                  "key": "number",
-                  "value": "{{phone_number}}",
-                  "type": "text"
-                },
-                {
-                  "key": "country_id",
-                  "value": "{{country_id}}",
-                  "type": "text"
-                },
-                {
-                  "key": "state_id",
-                  "value": "{{state_id}}",
-                  "type": "text"
-                },
-                {
-                  "key": "city_id",
-                  "value": "{{city_id}}",
-                  "type": "text"
-                },
-                {
-                  "key": "address",
-                  "value": "123 Market St",
-                  "type": "text"
-                },
-                {
-                  "key": "location_link",
-                  "value": "https://maps.example.com/?q=loc",
-                  "type": "text"
-                },
-                {
-                  "key": "image",
-                  "type": "file"
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
                 }
               ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Business Category List (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
             },
             "url": {
-              "raw": "{{base_url}}/business/add_business_details",
+              "raw": "{{baseUrl}}/business/business_category_list",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "business",
-                "add_business_details"
+                "business_category_list"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
               ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Get Business List (GET)",
+          "name": "Get Business Details List (GET)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
             "url": {
-              "raw": "{{base_url}}/business/business_details_list",
+              "raw": "{{baseUrl}}/business/business_details_list",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "business",
                 "business_details_list"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Get Businesses (alias) (GET)",
+          "name": "Get Business Details List (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/business/business_details_list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business",
+                "business_details_list"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Businesses List",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
             "url": {
-              "raw": "{{base_url}}/business/businesses",
+              "raw": "{{baseUrl}}/business/businesses",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "business",
                 "businesses"
               ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
             }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Get Business by ID (GET)",
+          "name": "Get Business Details By ID Parameter (GET)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
             "url": {
-              "raw": "{{base_url}}/business/businesses/{{business_id}}",
+              "raw": "{{baseUrl}}/business/businesses/654321",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "business",
                 "businesses",
-                "{{business_id}}"
+                "654321"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
               ]
             }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Config",
-      "item": [
-        {
-          "name": "Get Config (GET)",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/config",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "config"
-              ]
-            }
-          }
+          },
+          "response": []
         },
         {
-          "name": "Update Config (POST)",
+          "name": "Add Business Details (Scenario: Add New)",
           "request": {
             "method": "POST",
+            "header": [],
             "body": {
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "app_name",
-                  "value": "Parivar",
-                  "type": "text"
+                  "key": "business_category_id",
+                  "value": "BC01",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "business_name",
+                  "value": "Parivar Sweets & Family Dining",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number",
+                  "value": "9876543210",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "country_id",
+                  "value": "IN",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "state_id",
+                  "value": "GJ",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "city_id",
+                  "value": "AMD",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "address",
+                  "value": "123 Family Lane, Satellite, Ahmedabad",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "location_link",
+                  "value": "https://maps.example.com/parivar-sweets",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number_2",
+                  "value": "9876501234",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "about_us",
+                  "value": "Traditional sweets, snacks, and family-friendly dining in the heart of the community.",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "facebook",
+                  "value": "https://facebook.com/parivar.sweets",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "instagram",
+                  "value": "https://instagram.com/parivar_sweets",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "pinterest",
+                  "value": "",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "youtube",
+                  "value": "",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "website",
+                  "value": "https://parivar.example.com",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "{{upload_path}}1.jpg",
+                  "description": "Image/File upload field"
+                },
+                {
+                  "key": "gallery_image_1",
+                  "type": "file",
+                  "src": "{{upload_path}}2.jpg",
+                  "description": "Image/File upload field"
+                },
+                {
+                  "key": "gallery_image_2",
+                  "type": "file",
+                  "src": "{{upload_path}}3.jpg",
+                  "description": "Image/File upload field"
+                },
+                {
+                  "key": "gallery_image_3",
+                  "type": "file",
+                  "src": "{{upload_path}}4.jpg",
+                  "description": "Image/File upload field"
+                },
+                {
+                  "key": "gallery_image_4",
+                  "type": "file",
+                  "src": "{{upload_path}}5.jpg",
+                  "description": "Image/File upload field"
+                },
+                {
+                  "key": "gallery_image_5",
+                  "type": "file",
+                  "src": "{{upload_path}}6.jpg",
+                  "description": "Image/File upload field"
                 }
               ]
             },
             "url": {
-              "raw": "{{base_url}}/config",
+              "raw": "{{baseUrl}}/business/add_business_details",
               "host": [
-                "{{base_url}}"
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business",
+                "add_business_details"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Business Details (Scenario: Edit - POST with ID)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "id",
+                  "value": "654321",
+                  "type": "text",
+                  "description": "Business ID to edit"
+                },
+                {
+                  "key": "business_category_id",
+                  "value": "BC01",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "business_name",
+                  "value": "Parivar Sweets & Family Dining (Updated)",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number",
+                  "value": "9876543210",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "country_id",
+                  "value": "IN",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "state_id",
+                  "value": "GJ",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "city_id",
+                  "value": "AMD",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "address",
+                  "value": "123 Family Lane, Satellite, Ahmedabad",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "location_link",
+                  "value": "https://maps.example.com/parivar-sweets",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number_2",
+                  "value": "9876501234",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "about_us",
+                  "value": "Updated Traditional sweets, snacks, and family-friendly dining.",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "facebook",
+                  "value": "https://facebook.com/parivar.sweets",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "instagram",
+                  "value": "https://instagram.com/parivar_sweets",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "pinterest",
+                  "value": "",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "youtube",
+                  "value": "",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "website",
+                  "value": "https://parivar.example.com",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "{{upload_path}}1.jpg",
+                  "description": "Image/File upload field"
+                },
+                {
+                  "key": "gallery_image_1",
+                  "type": "file",
+                  "src": "{{upload_path}}2.jpg",
+                  "description": "Image/File upload field"
+                },
+                {
+                  "key": "gallery_image_2",
+                  "type": "file",
+                  "src": "{{upload_path}}3.jpg",
+                  "description": "Image/File upload field"
+                },
+                {
+                  "key": "gallery_image_3",
+                  "type": "file",
+                  "src": "{{upload_path}}4.jpg",
+                  "description": "Image/File upload field"
+                },
+                {
+                  "key": "gallery_image_4",
+                  "type": "file",
+                  "src": "{{upload_path}}5.jpg",
+                  "description": "Image/File upload field"
+                },
+                {
+                  "key": "gallery_image_5",
+                  "type": "file",
+                  "src": "{{upload_path}}6.jpg",
+                  "description": "Image/File upload field"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/business/add_business_details",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business",
+                "add_business_details"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Business Details (Scenario: Edit - PUT with ID)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "id",
+                  "value": "654321",
+                  "type": "text",
+                  "description": "Business ID to edit"
+                },
+                {
+                  "key": "business_category_id",
+                  "value": "BC01",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "business_name",
+                  "value": "Parivar Sweets & Family Dining (Updated via PUT)",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number",
+                  "value": "9876543210",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "country_id",
+                  "value": "IN",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "state_id",
+                  "value": "GJ",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "city_id",
+                  "value": "AMD",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "address",
+                  "value": "123 Family Lane, Satellite, Ahmedabad",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "location_link",
+                  "value": "https://maps.example.com/parivar-sweets",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number_2",
+                  "value": "9876501234",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "about_us",
+                  "value": "Traditional sweets, snacks, and family-friendly dining.",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "facebook",
+                  "value": "https://facebook.com/parivar.sweets",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "instagram",
+                  "value": "https://instagram.com/parivar_sweets",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "pinterest",
+                  "value": "",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "youtube",
+                  "value": "",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "website",
+                  "value": "https://parivar.example.com",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "{{upload_path}}1.jpg",
+                  "description": "Image/File upload field"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/business/add_business_details",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business",
+                "add_business_details"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Business by ID Parameter (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "business_category_id",
+                  "value": "BC01",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "business_name",
+                  "value": "Parivar Sweets & Family Dining (Updated via Param PUT)",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number",
+                  "value": "9876543210",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "country_id",
+                  "value": "IN",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "state_id",
+                  "value": "GJ",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "city_id",
+                  "value": "AMD",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "address",
+                  "value": "123 Family Lane, Satellite, Ahmedabad",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "location_link",
+                  "value": "https://maps.example.com/parivar-sweets",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "number_2",
+                  "value": "9876501234",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "about_us",
+                  "value": "Traditional sweets, snacks, and family-friendly dining.",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "facebook",
+                  "value": "https://facebook.com/parivar.sweets",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "instagram",
+                  "value": "https://instagram.com/parivar_sweets",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "pinterest",
+                  "value": "",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "youtube",
+                  "value": "",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "website",
+                  "value": "https://parivar.example.com",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "{{upload_path}}1.jpg",
+                  "description": "Image/File upload field"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/business/businesses/654321",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "business",
+                "businesses",
+                "654321"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Feed & Posts",
+      "item": [
+        {
+          "name": "Get Home Data (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/home",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "home"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Home Data (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/home",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "home"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Gallery List (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/gallery",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "gallery"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Gallery List (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/gallery",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "gallery"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Events List (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "events"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Events List (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "events"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Festivals List (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/festivals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "festivals"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Festivals List (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/festivals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "festivals"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Posts (GET /posts)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "posts"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Posts (GET /all_post_list)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/all_post_list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "all_post_list"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Posts (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/all_post_list",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "all_post_list"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Post By ID Parameter (GET)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/posts/888888",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "posts",
+                "888888"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Post (Scenario: Add New)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Summer Festival Planning",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "description",
+                  "value": "Join our community planning meeting for the upcoming summer festival.",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "{{upload_path}}5.jpg",
+                  "description": "Image/File upload field"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/add_post",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "add_post"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Post (Scenario: Edit - POST with ID)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "id",
+                  "value": "888888",
+                  "type": "text",
+                  "description": "ID of the post to update"
+                },
+                {
+                  "key": "title",
+                  "value": "Summer Festival Planning (Updated)",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "description",
+                  "value": "Join our community planning meeting for the upcoming summer festival (Updated description).",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "{{upload_path}}5.jpg",
+                  "description": "Image/File upload field"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/add_post",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "add_post"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Post (Scenario: Edit - PUT with ID)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "id",
+                  "value": "888888",
+                  "type": "text",
+                  "description": "ID of the post to update"
+                },
+                {
+                  "key": "title",
+                  "value": "Summer Festival Planning (Updated via PUT)",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "description",
+                  "value": "Join our community planning meeting for the upcoming summer festival (Updated via PUT).",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "{{upload_path}}5.jpg",
+                  "description": "Image/File upload field"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/add_post",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "add_post"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Edit Post by ID Parameter (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "Summer Festival Planning (Updated via Param PUT)",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "description",
+                  "value": "Join our community planning meeting for the upcoming summer festival (Updated via Param PUT).",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "{{upload_path}}5.jpg",
+                  "description": "Image/File upload field"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/feed/posts/888888",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feed",
+                "posts",
+                "888888"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Application Config",
+      "item": [
+        {
+          "name": "Get Application Configuration",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseUrl}}/config",
+              "host": [
+                "{{baseUrl}}"
               ],
               "path": [
                 "config"
               ]
             }
-          }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Configuration (POST)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "primaryColor",
+                  "value": "#E65100",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "secondaryColor",
+                  "value": "#F4C95D",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "backgroundColor",
+                  "value": "#FFF8F0",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "textColor",
+                  "value": "#4E342E",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "buttonColor",
+                  "value": "#E65100",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "fontColor",
+                  "value": "#FFFFFF",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "borderColor",
+                  "value": "#E8D9C8",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "gradientStart",
+                  "value": "#E65100",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "gradientEnd",
+                  "value": "#7B0D1C",
+                  "type": "text",
+                  "description": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/config",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "config"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Configuration (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "primaryColor",
+                  "value": "#E65100",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "secondaryColor",
+                  "value": "#F4C95D",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "backgroundColor",
+                  "value": "#FFF8F0",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "textColor",
+                  "value": "#4E342E",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "buttonColor",
+                  "value": "#E65100",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "fontColor",
+                  "value": "#FFFFFF",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "borderColor",
+                  "value": "#E8D9C8",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "gradientStart",
+                  "value": "#E65100",
+                  "type": "text",
+                  "description": ""
+                },
+                {
+                  "key": "gradientEnd",
+                  "value": "#7B0D1C",
+                  "type": "text",
+                  "description": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/config",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "config"
+              ]
+            }
+          },
+          "response": []
         }
       ]
+    },
+    {
+      "name": "7. Root Level & Miscellaneous",
+      "item": [
+        {
+          "name": "Parivar Welcome Status (GET Root)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/../",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ".."
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Parivar Working Check (POST Root)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "20$tgbsv09u",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "insuraa",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/../test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "..",
+                "test"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "upload_path",
+      "value": "./postman/files/",
+      "type": "string"
     }
   ]
 }
