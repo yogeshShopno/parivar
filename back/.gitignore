@@ -1,0 +1,12 @@
+node_modules
+.env
+
+npm install
+npm start
+
+*.env
+archive
+# *.json
+*.log
+dist
+

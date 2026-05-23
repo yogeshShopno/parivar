@@ -8,6 +8,7 @@ const configRoutes = require('./src/routes/configRoutes');
 const directoryRoutes = require('./src/routes/directoryRoutes');
 const feedRoutes = require('./src/routes/feedRoutes');
 const userRoutes = require('./src/routes/userRoutes');
+const adminRoutes = require('./src/routes/adminRoutes');
 
 const connectDB = require('./src/config/database');
 connectDB();
@@ -55,6 +56,8 @@ app.use('/api/config', configRoutes);
 app.use('/api/directory', directoryRoutes);
 app.use('/api/feed', feedRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/admin', adminRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
