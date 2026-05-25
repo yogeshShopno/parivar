@@ -1,18 +1,6 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import AdminCrudPage from './AdminCrudPage'
-
-const labels = {
-  business: 'Business',
-  country: 'Country',
-  state: 'State',
-  district: 'District',
-  taluka: 'Taluka',
-  city: 'City',
-  village: 'Village',
-  area: 'Area',
-  'blood-group': 'Blood Group',
-  'event-category': 'Event Category'
-}
+import { masterLabels } from '../config/navigation'
 
 const parentLabels = {
   state: 'Country ID',
@@ -24,12 +12,27 @@ const parentLabels = {
 }
 
 export default function MasterPage({ type }) {
-  const label = labels[type] || 'Master'
-  const fields = [
+  const label = masterLabels[type]
+  const fields = useMemo(() => [
     { name: 'name', label: `${label} Name` },
     ...(parentLabels[type] ? [{ name: 'parent_id', label: parentLabels[type] }] : []),
     { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Active' }, { value: 0, label: 'Inactive' }] }
-  ]
+  ], [label, type])
+
+  const columns = useMemo(() => [
+    { key: 'id', label: 'ID' },
+    { key: 'name', label: 'Name' },
+    { key: 'parent_id', label: 'Parent' },
+    { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
+  ], [])
+
+  if (!label) {
+    return (
+      <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-6 text-sm text-rose-300">
+        Unknown master menu selected.
+      </div>
+    )
+  }
 
   return (
     <AdminCrudPage
@@ -37,12 +40,7 @@ export default function MasterPage({ type }) {
       subtitle={`Manage ${label.toLowerCase()} master records`}
       endpoint={`/masters/${type}`}
       fields={fields}
-      columns={[
-        { key: 'id', label: 'ID' },
-        { key: 'name', label: 'Name' },
-        { key: 'parent_id', label: 'Parent' },
-        { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
-      ]}
+      columns={columns}
       getRowTitle={(row) => row.name}
     />
   )

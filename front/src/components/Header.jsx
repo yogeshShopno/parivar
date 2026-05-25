@@ -2,6 +2,7 @@ import React, { useContext } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { LogOut, Search, Bell, Sparkles } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext'
+import { masterLabels, routeTitles } from '../config/navigation'
 
 export default function Header() {
   const { logout, user } = useContext(AuthContext)
@@ -13,35 +14,13 @@ export default function Header() {
     navigate('/login')
   }
 
-  // Get human-readable page name based on route
   const getPageTitle = () => {
-    switch (location.pathname) {
-      case '/':
-        return 'System Overview'
-      case '/users':
-        return 'Member Directory'
-      case '/committee':
-        return 'Kamiti Members'
-      case '/festivals':
-        return 'Festivals'
-      case '/events':
-        return 'Events'
-      case '/gallery':
-        return 'Gallery'
-      case '/banners':
-        return 'Banner Manager'
-      case '/businesses':
-        return 'Business Index'
-      case '/posts':
-        return 'Feed Moderator'
-      case '/contact-inquiries':
-        return 'Contact Inquiry'
-      case '/settings':
-        return 'Theme Customizer'
-      default:
-        if (location.pathname.startsWith('/masters/')) return 'Masters'
-        return 'Admin Panel'
+    if (routeTitles[location.pathname]) return routeTitles[location.pathname]
+    if (location.pathname.startsWith('/masters/')) {
+      const type = location.pathname.split('/').pop()
+      return `${masterLabels[type] || 'Master'} Master`
     }
+    return 'Admin Panel'
   }
 
   return (

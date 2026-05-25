@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Edit2, RefreshCw, Search, Sparkles } from 'lucide-react'
 import api from '../lib/api'
 import Modal from '../components/Modal'
@@ -12,23 +12,41 @@ export default function CommitteeMembers() {
   const [selected, setSelected] = useState(null)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const requestIdRef = useRef(0)
 
-  useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async (options = {}) => {
+    const requestId = requestIdRef.current + 1
+    requestIdRef.current = requestId
     setLoading(true)
     try {
-      const res = await api.get('/users', { params: { is_committee: true } })
+      const res = await api.get('/users', {
+        params: { is_committee: true },
+        signal: options.signal
+      })
+      if (requestId !== requestIdRef.current) return
       setUsers(res.data?.data || res.data || [])
       setError('')
     } catch (err) {
-      setError('Failed to load committee members')
+      if (err.code === 'ERR_CANCELED') return
+      const timeoutMessage = err.code === 'ETIMEDOUT' || err.code === 'ECONNABORTED'
+        ? 'Committee request timed out. Please check the backend connection and try again.'
+        : 'Failed to load committee members'
+      setError(timeoutMessage)
     } finally {
-      setLoading(false)
+      if (requestId === requestIdRef.current && !options.signal?.aborted) {
+        setLoading(false)
+      }
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetchUsers({ signal: controller.signal })
+
+    return () => {
+      controller.abort()
+    }
+  }, [fetchUsers])
 
   const handleSubmit = async (formData) => {
     if (!selected) return
@@ -52,7 +70,7 @@ export default function CommitteeMembers() {
     <div className="space-y-6 animate-slide-up select-none">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white">Kamiti Member</h2>
+          <h2 className="text-xl font-bold text-white">Committee Members</h2>
           <p className="text-slate-400 text-xs mt-0.5">Manage committee member roles and profile details</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">

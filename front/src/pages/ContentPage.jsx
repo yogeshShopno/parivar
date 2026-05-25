@@ -94,5 +94,13 @@ const definitions = {
 }
 
 export default function ContentPage({ type }) {
+  if (!definitions[type]) {
+    return (
+      <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-6 text-sm text-rose-300">
+        Unknown content menu selected.
+      </div>
+    )
+  }
+
   return <AdminCrudPage {...definitions[type]} getRowTitle={(row) => row.title || row.subject || row.name} />
 }

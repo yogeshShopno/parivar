@@ -51,7 +51,13 @@ const businessUpload = upload.fields([
 
 // Multer single image upload for posts
 const postUpload = upload.single('image');
-const parseForm = upload.none();
+const parseForm = (req, res, next) => {
+  if (!req.is('multipart/form-data')) {
+    return next();
+  }
+
+  return upload.none()(req, res, next);
+};
 
 module.exports = {
   upload,

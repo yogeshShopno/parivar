@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Edit2, Trash2, Plus, Search, Filter, RefreshCw, Eye, Calendar, Sparkles } from 'lucide-react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Edit2, Trash2, Plus, Search, RefreshCw, Sparkles, Users as UsersIcon } from 'lucide-react'
 import api from '../lib/api'
 import Modal from '../components/Modal'
 import UserForm from '../components/UserForm'
@@ -18,32 +18,50 @@ export default function Users() {
   const [filterGender, setFilterGender] = useState('')
   const [filterBloodGroup, setFilterBloodGroup] = useState('')
   const [filterCommittee, setFilterCommittee] = useState('')
+  const requestIdRef = useRef(0)
 
-  // Fetch users
-  useEffect(() => {
-    fetchUsers()
-  }, [filterGender, filterBloodGroup, filterCommittee])
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async (options = {}) => {
+    const requestId = requestIdRef.current + 1
+    requestIdRef.current = requestId
     setLoading(true)
     try {
+      const nextSearch = options.searchQuery ?? searchQuery
+      const nextGender = options.filterGender ?? filterGender
+      const nextBloodGroup = options.filterBloodGroup ?? filterBloodGroup
+      const nextCommittee = options.filterCommittee ?? filterCommittee
       const params = {}
-      if (searchQuery) params.search = searchQuery
-      if (filterGender) params.gender = filterGender
-      if (filterBloodGroup) params.blood_group = filterBloodGroup
-      if (filterCommittee) params.is_committee = filterCommittee
+      if (nextSearch) params.search = nextSearch
+      if (nextGender) params.gender = nextGender
+      if (nextBloodGroup) params.blood_group = nextBloodGroup
+      if (nextCommittee) params.is_committee = nextCommittee
 
-      const res = await api.get('/users', { params })
+      const res = await api.get('/users', { params, signal: options.signal })
+      if (requestId !== requestIdRef.current) return
       const data = res.data?.data || res.data || []
       setUsers(data)
       setError('')
     } catch (err) {
-      setError('Failed to load members from server')
+      if (err.code === 'ERR_CANCELED') return
+      const timeoutMessage = err.code === 'ETIMEDOUT' || err.code === 'ECONNABORTED'
+        ? 'Members request timed out. Please check the backend connection and try again.'
+        : 'Failed to load members from server'
+      setError(timeoutMessage)
       console.error(err)
     } finally {
-      setLoading(false)
+      if (requestId === requestIdRef.current && !options.signal?.aborted) {
+        setLoading(false)
+      }
     }
-  }
+  }, [filterBloodGroup, filterCommittee, filterGender, searchQuery])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    fetchUsers({ signal: controller.signal })
+
+    return () => {
+      controller.abort()
+    }
+  }, [fetchUsers])
 
   // Handle Search submit
   const handleSearchSubmit = (e) => {
@@ -114,8 +132,12 @@ export default function Users() {
     setFilterGender('')
     setFilterBloodGroup('')
     setFilterCommittee('')
-    // Refetch after clearing states
-    setTimeout(() => fetchUsers(), 50)
+    fetchUsers({
+      searchQuery: '',
+      filterGender: '',
+      filterBloodGroup: '',
+      filterCommittee: ''
+    })
   }
 
   return (
@@ -225,7 +247,7 @@ export default function Users() {
         </div>
       ) : users.length === 0 ? (
         <div className="bg-[#0d1325]/40 border border-white/[0.06] rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
-          <Users className="w-12 h-12 text-slate-600" />
+          <UsersIcon className="w-12 h-12 text-slate-600" />
           <div>
             <h4 className="font-bold text-slate-200">No registry matches found</h4>
             <p className="text-slate-500 text-xs mt-1">Try expanding your search criteria or register a new member</p>

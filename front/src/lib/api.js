@@ -10,7 +10,11 @@ export const assetUrl = (path) => {
 
 const api = axios.create({
   baseURL: `${API_BASE}/api/admin`,
-  headers: { 'Content-Type': 'application/json' }
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 12000,
+  transitional: {
+    clarifyTimeoutError: true
+  }
 })
 
 // Add token to all requests
