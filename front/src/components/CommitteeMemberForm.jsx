@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { normalizeRoleId } from '../lib/roles'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-slate-950/40 text-slate-200 border border-white/[0.08] focus:border-brand-500/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-brand-500/10 transition-all'
 
@@ -19,7 +20,7 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
       full_name: member?.name || '',
       phone: member?.phone || '',
       password: '',
-      role_id: member?.role_id || '',
+      role_id: normalizeRoleId(member?.role_id),
       designation: member?.designation || member?.committee_role || '',
       status: Number(member?.status ?? 1),
       image: null

@@ -13,36 +13,36 @@ import {
 } from 'lucide-react'
 
 export const coreNavigation = [
-  { to: '/', label: 'Dashboard', icon: Home, end: true, title: 'System Overview' },
-  { to: '/committee', label: 'Committee Members', icon: UserCog, title: 'Committee Members' },
-  { to: '/roles', label: 'Roles', icon: ShieldCheck, title: 'Roles & Permissions' },
-  { to: '/users', label: 'Members', icon: Users, title: 'Member Directory' },
-  { to: '/festivals', label: 'Festivals', icon: CalendarDays, title: 'Festivals' },
-  { to: '/events', label: 'Events', icon: CalendarDays, title: 'Events' },
-  { to: '/gallery', label: 'Gallery', icon: Image, title: 'Gallery' },
-  { to: '/banners', label: 'Banners', icon: Megaphone, title: 'Banner Manager' },
-  { to: '/businesses', label: 'Businesses', icon: Briefcase, title: 'Business Index' },
-  { to: '/posts', label: 'Feed Posts', icon: FileText, title: 'Feed Moderator' },
-  { to: '/news', label: 'News', icon: FileText, title: 'News Moderator' },
+  { to: '/', label: 'Dashboard', icon: Home, end: true, title: 'System Overview', permission: 'dashboard.view' },
+  { to: '/committee', label: 'Committee Members', icon: UserCog, title: 'Committee Members', permission: 'committee.list' },
+  { to: '/roles', label: 'Roles', icon: ShieldCheck, title: 'Roles & Permissions', permission: 'roles.list' },
+  { to: '/users', label: 'Members', icon: Users, title: 'Member Directory', permission: 'members.list' },
+  { to: '/festivals', label: 'Festivals', icon: CalendarDays, title: 'Festivals', permission: 'festivals.list' },
+  { to: '/events', label: 'Events', icon: CalendarDays, title: 'Events', permission: 'events.list' },
+  { to: '/gallery', label: 'Gallery', icon: Image, title: 'Gallery', permission: 'gallery.list' },
+  { to: '/banners', label: 'Banners', icon: Megaphone, title: 'Banner Manager', permission: 'banners.list' },
+  { to: '/businesses', label: 'Businesses', icon: Briefcase, title: 'Business Index', permission: 'businesses.list' },
+  { to: '/posts', label: 'Feed Posts', icon: FileText, title: 'Feed Moderator', permission: 'posts.list' },
+  { to: '/news', label: 'News', icon: FileText, title: 'News Moderator', permission: 'news.list' },
 
-  { to: '/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries' }
+  { to: '/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries', permission: 'contact-inquiries.list' }
 ]
 
 export const masterNavigation = [
-  { type: 'business', label: 'Business' },
-  { type: 'country', label: 'Country' },
-  { type: 'state', label: 'State' },
-  { type: 'district', label: 'District' },
-  { type: 'taluka', label: 'Taluka' },
-  { type: 'city', label: 'City' },
-  { type: 'village', label: 'Village' },
-  { type: 'area', label: 'Area' },
-  { type: 'blood-group', label: 'Blood Group' },
-  { type: 'event-category', label: 'Event Category' }
+  { type: 'business', label: 'Business', permission: 'businesses.list' },
+  { type: 'country', label: 'Country', permission: 'country.list' },
+  { type: 'state', label: 'State', permission: 'state.list' },
+  { type: 'district', label: 'District', permission: 'district.list' },
+  { type: 'taluka', label: 'Taluka', permission: 'taluka.list' },
+  { type: 'city', label: 'City', permission: 'city.list' },
+  { type: 'village', label: 'Village', permission: 'village.list' },
+  { type: 'area', label: 'Area', permission: 'area.list' },
+  { type: 'blood-group', label: 'Blood Group', permission: 'blood-group.list' },
+  { type: 'event-category', label: 'Event Category', permission: 'event-category.list' }
 ]
 
 export const configurationNavigation = [
-  { to: '/settings', label: 'Theme Config', icon: Settings, title: 'Theme Customizer' }
+  { to: '/settings', label: 'Theme Config', icon: Settings, title: 'Theme Customizer', permission: 'settings.edit' }
 ]
 
 export const routeTitles = [

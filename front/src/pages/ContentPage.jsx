@@ -5,7 +5,7 @@ const definitions = {
   festivals: {
     title: 'Festivals',
     subtitle: 'Create and maintain festival announcements',
-    endpoint: '/festivals',
+    endpoint: '/content/festivals',
     fields: [
       { name: 'title', label: 'Title' },
       { name: 'description', label: 'Description', type: 'textarea' },
@@ -24,7 +24,7 @@ const definitions = {
   events: {
     title: 'Events',
     subtitle: 'Manage event listings and calendar details',
-    endpoint: '/events',
+    endpoint: '/content/events',
     fields: [
       { name: 'title', label: 'Title' },
       { name: 'description', label: 'Description', type: 'textarea' },
@@ -44,7 +44,7 @@ const definitions = {
   gallery: {
     title: 'Gallery',
     subtitle: 'Maintain gallery images and categories',
-    endpoint: '/gallery',
+    endpoint: '/content/gallery',
     fields: [
       { name: 'title', label: 'Title' },
       { name: 'description', label: 'Description', type: 'textarea' },
@@ -62,7 +62,7 @@ const definitions = {
   banners: {
     title: 'Banner',
     subtitle: 'Control app banner slides and links',
-    endpoint: '/banners',
+    endpoint: '/content/banners',
     fields: [
       { name: 'title', label: 'Title' },
       { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
@@ -80,7 +80,7 @@ const definitions = {
   inquiries: {
     title: 'Contact Inquiry',
     subtitle: 'Track and update messages from contact forms',
-    endpoint: '/contact-inquiries',
+    endpoint: '/content/contact-inquiries',
     fields: [
       { name: 'name', label: 'Name' },
       { name: 'email', label: 'Email', type: 'email' },

@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Edit2, Plus, RefreshCw, Search, ShieldCheck, Trash2 } from 'lucide-react'
 import api from '../lib/api'
+import { buildPermissionGroups, normalizeRoles, unwrapApiData } from '../lib/roles'
 import Modal from '../components/Modal'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-slate-950/40 text-slate-200 border border-white/[0.08] focus:border-brand-500/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-brand-500/10'
+const emptyRoleForm = { name: '', description: '', status: 1, permissions: [] }
 
 export default function Roles() {
   const [roles, setRoles] = useState([])
@@ -15,7 +17,7 @@ export default function Roles() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [formData, setFormData] = useState({ name: '', status: 1, permissions: [] })
+  const [formData, setFormData] = useState(emptyRoleForm)
 
   useEffect(() => {
     fetchAll()
@@ -28,8 +30,8 @@ export default function Roles() {
         api.get('/roles'),
         api.get('/permissions')
       ])
-      setRoles(rolesRes.data?.data || rolesRes.data || [])
-      setPermissionConfig(permissionsRes.data?.data || permissionsRes.data || { actions: [], modules: [] })
+      setRoles(normalizeRoles(unwrapApiData(rolesRes)))
+      setPermissionConfig(buildPermissionGroups(unwrapApiData(permissionsRes, { actions: [], modules: [], permissions: [] })))
       setError('')
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load roles')
@@ -40,7 +42,7 @@ export default function Roles() {
 
   const openCreate = () => {
     setSelected(null)
-    setFormData({ name: '', status: 1, permissions: [] })
+    setFormData(emptyRoleForm)
     setIsModalOpen(true)
   }
 
@@ -48,8 +50,9 @@ export default function Roles() {
     setSelected(role)
     setFormData({
       name: role.name || '',
+      description: role.description || '',
       status: Number(role.status ?? 1),
-      permissions: role.permissions || []
+      permissions: Array.isArray(role.permissions) ? role.permissions : []
     })
     setIsModalOpen(true)
   }
@@ -116,6 +119,9 @@ export default function Roles() {
   const filteredRoles = useMemo(() => (
     roles.filter((role) => JSON.stringify(role).toLowerCase().includes(search.toLowerCase()))
   ), [roles, search])
+  const permissionGridStyle = {
+    gridTemplateColumns: `minmax(150px, 1fr) repeat(${permissionConfig.actions.length}, minmax(64px, 72px))`
+  }
 
   return (
     <div className="space-y-6 animate-slide-up select-none">
@@ -164,7 +170,10 @@ export default function Roles() {
                       <div className="h-9 w-9 rounded-lg bg-brand-500/10 border border-brand-500/20 flex items-center justify-center">
                         <ShieldCheck className="w-4 h-4 text-brand-300" />
                       </div>
-                      <div className="font-semibold text-slate-200">{role.name}</div>
+                      <div>
+                        <div className="font-semibold text-slate-200">{role.name}</div>
+                        {role.description && <div className="mt-0.5 text-[10px] text-slate-500">{role.description}</div>}
+                      </div>
                     </div>
                   </td>
                   <td className="p-4">{role.permission_count || 0} selected</td>
@@ -188,10 +197,14 @@ export default function Roles() {
 
       <Modal isOpen={isModalOpen} title={selected ? 'Edit Role' : 'Add Role'} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSave} className="space-y-5 max-h-[78vh] overflow-y-auto pr-1">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Role Name *</label>
               <input type="text" placeholder="Enter Role Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={fieldClass} disabled={saving} />
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Description</label>
+              <input type="text" placeholder="Short role description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className={fieldClass} disabled={saving} />
             </div>
             <div>
               <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Status</label>
@@ -203,22 +216,27 @@ export default function Roles() {
           </div>
 
           <div>
-            <div className="grid grid-cols-[minmax(150px,1fr)_repeat(4,minmax(64px,72px))] gap-2 border-b border-white/[0.06] pb-2 text-[10px] uppercase font-bold text-slate-500">
+            <div className="grid gap-2 border-b border-white/[0.06] pb-2 text-[10px] uppercase font-bold text-slate-500" style={permissionGridStyle}>
               <div>Permission</div>
               {permissionConfig.actions.map((action) => <div key={action.key} className="text-center">{action.label}</div>)}
             </div>
             <div className="divide-y divide-white/[0.04]">
               {permissionConfig.modules.map((module) => (
-                <div key={module.key} className="grid grid-cols-[minmax(150px,1fr)_repeat(4,minmax(64px,72px))] gap-2 py-3 items-center">
+                <div key={module.key} className="grid gap-2 py-3 items-center" style={permissionGridStyle}>
                   <label className="flex items-center gap-2 text-xs font-semibold text-slate-200 cursor-pointer">
                     <input type="checkbox" checked={module.permissions.every((permission) => formData.permissions.includes(permission.key))} onChange={() => toggleModule(module)} className="rounded bg-slate-950/40 border-white/[0.08] text-brand-500" />
                     {module.label}
                   </label>
-                  {module.permissions.map((permission) => (
-                    <label key={permission.key} className="flex justify-center">
-                      <input type="checkbox" checked={formData.permissions.includes(permission.key)} onChange={() => togglePermission(permission.key)} className="rounded bg-slate-950/40 border-white/[0.08] text-brand-500" />
-                    </label>
-                  ))}
+                  {permissionConfig.actions.map((action) => {
+                    const permission = module.permissions.find((item) => item.action === action.key)
+                    return permission ? (
+                      <label key={permission.key} className="flex justify-center">
+                        <input type="checkbox" checked={formData.permissions.includes(permission.key)} onChange={() => togglePermission(permission.key)} className="rounded bg-slate-950/40 border-white/[0.08] text-brand-500" />
+                      </label>
+                    ) : (
+                      <div key={`${module.key}-${action.key}`} />
+                    )
+                  })}
                 </div>
               ))}
             </div>

@@ -2,15 +2,9 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 
-const authRoutes = require('./src/routes/authRoutes');
-const businessRoutes = require('./src/routes/businessRoutes');
-const configRoutes = require('./src/routes/configRoutes');
-const directoryRoutes = require('./src/routes/directoryRoutes');
-const feedRoutes = require('./src/routes/feedRoutes');
-const memberUserRoutes = require('./src/routes/member/userRoutes');
 const memberRoutes = require('./src/routes/member');
 const adminRoutes = require('./src/routes/admin');
-const newsRoutes = require('./src/routes/newsRoutes');
+const adminUserRoutes = require('./src/routes/admin/userRoutes');
 const connectDB = require('./src/config/database');
 connectDB();
 
@@ -51,27 +45,12 @@ app.post('/test', (req, res) => {
   });
 });
 
-// Postman collection routes are root-level, so keep them mounted directly.
-app.use('/', authRoutes);
-app.use('/', businessRoutes);
-app.use('/', directoryRoutes);
-app.use('/', feedRoutes);
-
-// Namespaced aliases for app/admin usage.
-app.use('/api/auth', authRoutes);
-app.use('/api/business', businessRoutes);
-app.use('/api/config', configRoutes);
-app.use('/api/directory', directoryRoutes);
-app.use('/api/feed', feedRoutes);
-
-// Member-facing APIs. /api/users is kept for the existing mobile/Postman contract.
-app.use('/api/users', memberUserRoutes);
-app.use('/api/member', memberRoutes);
-
-// Admin dashboard APIs.
+// Admin/software APIs.
+app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/admin', adminRoutes);
-app.use('/api/news', newsRoutes);
+
+// Member/mobile APIs.
+app.use('/api', memberRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Edit2, Plus, RefreshCw, Search, Sparkles } from 'lucide-react'
 import api from '../lib/api'
+import { normalizeRoles, unwrapApiData } from '../lib/roles'
 import Modal from '../components/Modal'
 import CommitteeMemberForm from '../components/CommitteeMemberForm'
 
@@ -44,7 +45,7 @@ export default function CommitteeMembers() {
   const fetchRoles = useCallback(async () => {
     try {
       const res = await api.get('/roles')
-      setRoles(res.data?.data || res.data || [])
+      setRoles(normalizeRoles(unwrapApiData(res)))
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load roles')
     }

@@ -153,6 +153,7 @@ const legacyPermissionFor = (permission) => {
     'gallery.': 'gallery.manage',
     'banners.': 'banners.manage',
     'businesses.': 'businesses.manage',
+    'news.': 'news.manage',
     'posts.': 'posts.manage',
     'contact-inquiries.': 'contact-inquiries.manage',
     'settings.': 'settings.manage',

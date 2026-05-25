@@ -55,7 +55,7 @@ export default function SettingsPage() {
     setError('')
     setSuccess('')
     try {
-      const res = await api.put('admin/update_app_theme', config)
+      const res = await api.put('/update_app_theme', config)
       setSuccess('Platform theme branding updated successfully! Changes will reflect across mobile & web environments.')
       setTimeout(() => setSuccess(''), 4000)
     } catch (err) {

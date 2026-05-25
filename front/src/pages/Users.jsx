@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Edit2, Trash2, Plus, Search, RefreshCw, Sparkles, Users as UsersIcon } from 'lucide-react'
 import api from '../lib/api'
+import { normalizeRoles, unwrapApiData } from '../lib/roles'
 import Modal from '../components/Modal'
 import UserForm from '../components/UserForm'
 
@@ -68,7 +69,7 @@ export default function Users() {
     const fetchRoles = async () => {
       try {
         const res = await api.get('/roles')
-        setRoles(res.data?.data || res.data || [])
+        setRoles(normalizeRoles(unwrapApiData(res)))
       } catch (err) {
         console.error(err)
       }

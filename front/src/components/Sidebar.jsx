@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { Shield } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext'
 import { configurationNavigation, coreNavigation, masterNavigation } from '../config/navigation'
+import { hasPermission } from '../lib/permissions'
 
 const LinkItem = ({ to, icon: Icon, label, end }) => (
   <NavLink
@@ -37,6 +38,9 @@ const SectionLabel = ({ children }) => (
 
 export default function Sidebar() {
   const { user } = useContext(AuthContext)
+  const visibleCoreNavigation = coreNavigation.filter((item) => hasPermission(user, item.permission))
+  const visibleMasterNavigation = masterNavigation.filter((item) => hasPermission(user, item.permission))
+  const visibleConfigurationNavigation = configurationNavigation.filter((item) => hasPermission(user, item.permission))
 
   return (
     <aside className="fixed left-0 top-0 z-30 flex h-screen w-64 flex-col border-r border-white/[0.06] bg-[#0d1325]/95 p-5 shadow-glass-md backdrop-blur-xl">
@@ -57,36 +61,44 @@ export default function Sidebar() {
       <nav className="min-h-0 flex-1 overflow-y-auto pr-1">
         <SectionLabel>Core Operations</SectionLabel>
         <div className="space-y-1">
-          {coreNavigation.map((item) => (
+          {visibleCoreNavigation.map((item) => (
             <LinkItem key={item.to} {...item} />
           ))}
         </div>
 
-        <SectionLabel>Masters</SectionLabel>
-        <div className="ml-4 space-y-1 border-l border-brand-500/40 pl-3">
-          {masterNavigation.map(({ type, label }) => (
-            <NavLink
-              key={type}
-              to={`/masters/${type}`}
-              end
-              className={({ isActive }) =>
-                `block min-h-8 w-full rounded-md px-3 py-2 text-xs transition-colors ${
-                  isActive ? 'bg-brand-500/15 text-brand-300' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-                }`
-              }
-              title={`${label} Master`}
-            >
-              {label}
-            </NavLink>
-          ))}
-        </div>
+        {visibleMasterNavigation.length > 0 && (
+          <>
+            <SectionLabel>Masters</SectionLabel>
+            <div className="ml-4 space-y-1 border-l border-brand-500/40 pl-3">
+              {visibleMasterNavigation.map(({ type, label }) => (
+                <NavLink
+                  key={type}
+                  to={`/masters/${type}`}
+                  end
+                  className={({ isActive }) =>
+                    `block min-h-8 w-full rounded-md px-3 py-2 text-xs transition-colors ${
+                      isActive ? 'bg-brand-500/15 text-brand-300' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                    }`
+                  }
+                  title={`${label} Master`}
+                >
+                  {label}
+                </NavLink>
+              ))}
+            </div>
+          </>
+        )}
 
-        <SectionLabel>Configuration</SectionLabel>
-        <div className="space-y-1">
-          {configurationNavigation.map((item) => (
-            <LinkItem key={item.to} {...item} />
-          ))}
-        </div>
+        {visibleConfigurationNavigation.length > 0 && (
+          <>
+            <SectionLabel>Configuration</SectionLabel>
+            <div className="space-y-1">
+              {visibleConfigurationNavigation.map((item) => (
+                <LinkItem key={item.to} {...item} />
+              ))}
+            </div>
+          </>
+        )}
       </nav>
 
       {user && (

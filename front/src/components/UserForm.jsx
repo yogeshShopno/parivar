@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { normalizeRoleId } from '../lib/roles'
 
 export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
   const [formData, setFormData] = useState({
@@ -42,7 +43,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
         relation: user.relation || 'Self',
         is_committee: user.is_committee || false,
         committee_role: user.committee_role || '',
-        role_id: user.role_id || '',
+        role_id: normalizeRoleId(user.role_id),
         address: user.address || '',
         password: ''
       })

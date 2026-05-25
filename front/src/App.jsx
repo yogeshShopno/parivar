@@ -1,6 +1,6 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
-import { AuthProvider } from './context/AuthContext'
+import { AuthContext, AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import Login from './pages/Login'
@@ -14,6 +14,7 @@ import Roles from './pages/Roles'
 import ContentPage from './pages/ContentPage'
 import MasterPage from './pages/MasterPage'
 import News from './pages/News'
+import { hasPermission } from './lib/permissions'
 
 export default function App() {
   return (
@@ -28,21 +29,21 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Dashboard />} />
-          <Route path="committee" element={<CommitteeMembers />} />
-          <Route path="roles" element={<Roles />} />
-          <Route path="users" element={<Users />} />
-          <Route path="festivals" element={<ContentPage type="festivals" />} />
-          <Route path="events" element={<ContentPage type="events" />} />
-          <Route path="gallery" element={<ContentPage type="gallery" />} />
-          <Route path="banners" element={<ContentPage type="banners" />} />
-          <Route path="businesses" element={<Businesses />} />
-          <Route path="posts" element={<Feed />} />
-          <Route path="news" element={<News />} />
+          <Route index element={<PermissionRoute permission="dashboard.view"><Dashboard /></PermissionRoute>} />
+          <Route path="committee" element={<PermissionRoute permission="committee.list"><CommitteeMembers /></PermissionRoute>} />
+          <Route path="roles" element={<PermissionRoute permission="roles.list"><Roles /></PermissionRoute>} />
+          <Route path="users" element={<PermissionRoute permission="members.list"><Users /></PermissionRoute>} />
+          <Route path="festivals" element={<PermissionRoute permission="festivals.list"><ContentPage type="festivals" /></PermissionRoute>} />
+          <Route path="events" element={<PermissionRoute permission="events.list"><ContentPage type="events" /></PermissionRoute>} />
+          <Route path="gallery" element={<PermissionRoute permission="gallery.list"><ContentPage type="gallery" /></PermissionRoute>} />
+          <Route path="banners" element={<PermissionRoute permission="banners.list"><ContentPage type="banners" /></PermissionRoute>} />
+          <Route path="businesses" element={<PermissionRoute permission="businesses.list"><Businesses /></PermissionRoute>} />
+          <Route path="posts" element={<PermissionRoute permission="posts.list"><Feed /></PermissionRoute>} />
+          <Route path="news" element={<PermissionRoute permission="news.list"><News /></PermissionRoute>} />
 
-          <Route path="contact-inquiries" element={<ContentPage type="inquiries" />} />
+          <Route path="contact-inquiries" element={<PermissionRoute permission="contact-inquiries.list"><ContentPage type="inquiries" /></PermissionRoute>} />
           <Route path="masters/:type" element={<MasterRoute />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="settings" element={<PermissionRoute permission="settings.edit"><Settings /></PermissionRoute>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -52,5 +53,20 @@ export default function App() {
 
 function MasterRoute() {
   const { type } = useParams()
-  return <MasterPage type={type} />
+  const permission = `${type === 'business' ? 'businesses' : type}.list`
+  return <PermissionRoute permission={permission}><MasterPage type={type} /></PermissionRoute>
+}
+
+function PermissionRoute({ permission, children }) {
+  const { user } = useContext(AuthContext)
+
+  if (!hasPermission(user, permission)) {
+    return (
+      <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-6 text-sm text-rose-200">
+        You do not have permission to access this page.
+      </div>
+    )
+  }
+
+  return children
 }
