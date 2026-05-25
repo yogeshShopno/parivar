@@ -5,6 +5,7 @@ const Config = require('../models/configModel');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { apiResponse, fullName, memberPublicId } = require('../utils/apiResponse');
+const { getRolePermissions } = require('../middleware/auth');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfamilykey';
 
@@ -17,7 +18,7 @@ const login = async (req, res) => {
       return apiResponse(res, 400, 'Email and password are required');
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({ email: email.toLowerCase() }).populate('role_id');
     if (!user) {
       return apiResponse(res, 401, 'Invalid email or password');
     }
@@ -27,8 +28,10 @@ const login = async (req, res) => {
       return apiResponse(res, 401, 'Invalid email or password');
     }
 
-    // Restrict access to committee members / admin users
-    if (!user.is_committee && user.relation !== 'Self') {
+    const permissions = getRolePermissions(user);
+
+    // Restrict access to committee members, legacy self admins, or users with an assigned role.
+    if (!user.is_committee && user.relation !== 'Self' && permissions.length === 0) {
       return apiResponse(res, 403, 'Access denied: Insufficient permissions');
     }
 
@@ -44,7 +47,11 @@ const login = async (req, res) => {
       email: user.email,
       role: user.is_committee ? 'admin' : 'user',
       is_committee: user.is_committee,
-      committee_role: user.committee_role
+      committee_role: user.committee_role,
+      role_id: user.role_id?._id ? String(user.role_id._id) : '',
+      role_name: user.role_id?.name || '',
+      permissions,
+      is_super_admin: !user.role_id && (user.is_committee || user.relation === 'Self')
     };
 
     return apiResponse(res, 200, 'Login successful', {
@@ -103,7 +110,7 @@ const getUsers = async (req, res) => {
       ];
     }
 
-    const users = await User.find(query).select('-password').sort({ createdAt: -1 });
+    const users = await User.find(query).select('-password').populate('role_id').sort({ createdAt: -1 });
     
     // Map backend user to the fields expected by standard layout or user forms
     const formatted = users.map(u => ({
@@ -121,6 +128,9 @@ const getUsers = async (req, res) => {
       relation: u.relation || 'Self',
       is_committee: u.is_committee || false,
       committee_role: u.committee_role || '',
+      role_id: u.role_id?._id ? String(u.role_id._id) : '',
+      role_name: u.role_id?.name || '',
+      permissions: getRolePermissions(u),
       address: u.address || '',
       role: u.is_committee ? 'admin' : 'user'
     }));
@@ -133,7 +143,7 @@ const getUsers = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { first_name, middle_name, last_name, email, phone, password, gender, dob, blood_group, relation, is_committee, committee_role, address } = req.body;
+    const { first_name, middle_name, last_name, email, phone, password, gender, dob, blood_group, relation, is_committee, committee_role, role_id, address } = req.body;
 
     if (!first_name || !phone) {
       return apiResponse(res, 400, 'First name and phone number are required');
@@ -146,6 +156,8 @@ const createUser = async (req, res) => {
       return Number.isFinite(num) && num > max ? num : max;
     }, 0);
     const nextMemberId = String(highestId > 0 ? highestId + 1 : Date.now());
+
+    const assignedRoleId = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
 
     const newUser = new User({
       member_id: nextMemberId,
@@ -161,6 +173,7 @@ const createUser = async (req, res) => {
       relation: relation || 'Self',
       is_committee: is_committee === true || is_committee === 'true',
       committee_role: committee_role || '',
+      role_id: assignedRoleId,
       address: address || ''
     });
 
@@ -181,7 +194,7 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { first_name, middle_name, last_name, email, phone, gender, dob, blood_group, relation, is_committee, committee_role, address, password } = req.body;
+    const { first_name, middle_name, last_name, email, phone, gender, dob, blood_group, relation, is_committee, committee_role, role_id, address, password } = req.body;
 
     const user = await User.findOne({ member_id: id });
     if (!user) {
@@ -199,6 +212,7 @@ const updateUser = async (req, res) => {
     if (relation !== undefined) user.relation = relation;
     if (is_committee !== undefined) user.is_committee = is_committee === true || is_committee === 'true';
     if (committee_role !== undefined) user.committee_role = committee_role;
+    if (role_id !== undefined) user.role_id = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
     if (address !== undefined) user.address = address;
     if (password) user.password = password;
 

@@ -209,12 +209,12 @@ const events = [
 const users = [
 	{
 		member_id: '101',
-		first_name: 'Ramesh',
-		middle_name: 'K',
-		last_name: 'parikh',
-		email: 'ramesh.parikh@example.com',
-		password: 'password123',
-		number: '7990881893', // Login number
+		first_name: 'Bhavik',
+		middle_name: '',
+		last_name: 'wala',
+		email: 'bhavikwala@gmail.com',
+		password: 'Bhavik@123',
+		number: '8866779008', // Login number
 		gender: 'Male',
 		dob: new Date('1975-04-12'),
 		blood_group: 'B+',

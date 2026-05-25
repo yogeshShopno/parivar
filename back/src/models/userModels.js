@@ -68,6 +68,12 @@ const userSchema = new mongoose.Schema({
     default: '',
     trim: true
   },
+  role_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Role',
+    default: null,
+    index: true
+  },
   profile_image: {
     type: String,
     default: ''
