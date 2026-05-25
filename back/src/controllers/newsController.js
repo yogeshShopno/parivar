@@ -28,7 +28,10 @@ const addNews = async (req, res) => {
     try {
         const data = { ...req.body };
         if (req.file) {
-            data.image_url = `/uploads/${req.file.filename}`;
+            data.image = {
+                data: req.file.buffer,
+                contentType: req.file.mimetype
+            };
         }
 
         const news = new News(data);
@@ -43,7 +46,10 @@ const updateNews = async (req, res) => {
     try {
         const updateData = { ...req.body };
         if (req.file) {
-            updateData.image_url = `/uploads/${req.file.filename}`;
+            updateData.image = {
+                data: req.file.buffer,
+                contentType: req.file.mimetype
+            };
         }
 
         const news = await News.findByIdAndUpdate(req.params.id, updateData, { new: true });
