@@ -23,6 +23,8 @@ export const coreNavigation = [
   { to: '/banners', label: 'Banners', icon: Megaphone, title: 'Banner Manager' },
   { to: '/businesses', label: 'Businesses', icon: Briefcase, title: 'Business Index' },
   { to: '/posts', label: 'Feed Posts', icon: FileText, title: 'Feed Moderator' },
+  { to: '/news', label: 'News', icon: FileText, title: 'News Moderator' },
+
   { to: '/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries' }
 ]
 

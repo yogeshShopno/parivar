@@ -13,6 +13,7 @@ import CommitteeMembers from './pages/CommitteeMembers'
 import Roles from './pages/Roles'
 import ContentPage from './pages/ContentPage'
 import MasterPage from './pages/MasterPage'
+import News from './pages/News'
 
 export default function App() {
   return (
@@ -37,6 +38,8 @@ export default function App() {
           <Route path="banners" element={<ContentPage type="banners" />} />
           <Route path="businesses" element={<Businesses />} />
           <Route path="posts" element={<Feed />} />
+          <Route path="news" element={<News />} />
+
           <Route path="contact-inquiries" element={<ContentPage type="inquiries" />} />
           <Route path="masters/:type" element={<MasterRoute />} />
           <Route path="settings" element={<Settings />} />

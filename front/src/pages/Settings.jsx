@@ -26,7 +26,7 @@ export default function SettingsPage() {
   const fetchConfig = async () => {
     setLoading(true)
     try {
-      const res = await api.get('/config')
+      const res = await api.get('/get_app_theme')
       const data = res.data?.data || res.data || {}
       // Remove Mongoose properties
       const cleaned = {
@@ -55,7 +55,7 @@ export default function SettingsPage() {
     setError('')
     setSuccess('')
     try {
-      const res = await api.put('/config', config)
+      const res = await api.put('admin/update_app_theme', config)
       setSuccess('Platform theme branding updated successfully! Changes will reflect across mobile & web environments.')
       setTimeout(() => setSuccess(''), 4000)
     } catch (err) {
