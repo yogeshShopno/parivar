@@ -11,6 +11,7 @@ const Gallery = require('../src/models/galleryModel');
 const Festival = require('../src/models/festivalModel');
 const Event = require('../src/models/eventModel');
 const Config = require('../src/models/configModel');
+const Role = require('../src/models/roleModel');
 const User = require('../src/models/userModels');
 const News = require('../src/models/newsModel');
 const seedData = require('./seedData');
@@ -26,6 +27,7 @@ const collections = [
 	{ name: 'festivals', model: Festival, data: seedData.festivals },
 	{ name: 'events', model: Event, data: seedData.events },
 	{ name: 'configs', model: Config, data: seedData.configs },
+	{ name: 'roles', model: Role, data: seedData.roles },
 	{ name: 'news', model: News, data: seedData.news }
 ];
 
@@ -56,9 +58,15 @@ const seedDB = async () => {
 		await User.deleteMany();
 		console.log('Existing users cleared.');
 
-		console.log('Inserting seed users...');
-		for (const user of seedData.users) {
-			await User.create(user);
+	const superAdminRole = await Role.findOne({ name: 'Super Admin' });
+
+	console.log('Inserting seed users...');
+	for (const user of seedData.users) {
+		const userPayload = { ...user };
+		if (userPayload.email && userPayload.email.toLowerCase() === 'bhavikwala@gmail.com' && superAdminRole) {
+			userPayload.role_id = superAdminRole._id;
+		}
+		await User.create(userPayload);
 		}
 		console.log(`Successfully seeded ${seedData.users.length} users! 🎉`);
 

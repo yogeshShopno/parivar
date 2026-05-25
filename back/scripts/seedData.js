@@ -1,3 +1,5 @@
+const { ALL_PERMISSION_KEYS } = require('../src/config/permissions');
+
 const countries = [
 	{ id: '1', name: 'India', country: 'India' },
 	{ id: '2', name: 'United States', country: 'United States' }
@@ -331,6 +333,15 @@ const configs = [
 	}
 ];
 
+const roles = [
+	{
+		name: 'Super Admin',
+		description: 'Administrator with all permissions',
+		permissions: ALL_PERMISSION_KEYS,
+		status: 1
+	}
+];
+
 const news = [
 	{
 		news_id: 'NEWS001',
@@ -368,6 +379,7 @@ module.exports = {
 	festivals,
 	events,
 	users,
+	roles,
 	configs,
 	news
 };
