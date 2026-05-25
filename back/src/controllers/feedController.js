@@ -4,6 +4,7 @@ const Festival = require('../models/festivalModel');
 const Gallery = require('../models/galleryModel');
 const User = require('../models/userModels');
 const { apiResponse, fullName, memberPublicId, publicUrl, toArchiveDate } = require('../utils/apiResponse');
+const { ownedByActorQuery, ownerFields, ownerOrLegacyMemberQuery } = require('../utils/ownership');
 
 const requestData = (req) => ({
   ...req.query,
@@ -20,7 +21,7 @@ const getHome = async (req, res) => {
 
 const getGallery = async (req, res) => {
   try {
-    const images = await Gallery.find().sort({ _id: -1 }).lean();
+    const images = await Gallery.find(ownerOrLegacyMemberQuery(req)).sort({ _id: -1 }).lean();
     const byYear = new Map();
 
     images.forEach((item) => {
@@ -63,7 +64,7 @@ const getGallery = async (req, res) => {
 
 const getEvents = async (req, res) => {
   try {
-    const events = await Event.find().sort({ _id: -1 }).lean();
+    const events = await Event.find(ownerOrLegacyMemberQuery(req)).sort({ _id: -1 }).lean();
     const data = events.map((event) => ({
       id: event.id || String(event._id),
       event_category_id: event.event_category_id || '',
@@ -86,7 +87,7 @@ const getEvents = async (req, res) => {
 
 const getFestivals = async (req, res) => {
   try {
-    const festivals = await Festival.find().sort({ _id: -1 }).lean();
+    const festivals = await Festival.find(ownerOrLegacyMemberQuery(req)).sort({ _id: -1 }).lean();
     const data = festivals.map((festival) => ({
       id: festival.id || String(festival._id),
       festival_name: festival.festival_name || festival.title || '',
@@ -103,12 +104,25 @@ const getFestivals = async (req, res) => {
   }
 };
 
-const findPostByRequestId = (id) => {
+const tenantStatusQuery = () => ({
+  $or: [
+    { status: 2 },
+    { status: 1 },
+    { status: { $exists: false } }
+  ]
+});
+
+const findPostByRequestId = (req, id) => {
   return Post.findOne({
-    $or: [
-      { id: String(id) },
-      { _id: String(id).match(/^[a-f\d]{24}$/i) ? id : undefined }
-    ].filter((condition) => Object.values(condition)[0] !== undefined)
+    $and: [
+      ownedByActorQuery(req),
+      {
+        $or: [
+          { id: String(id) },
+          { _id: String(id).match(/^[a-f\d]{24}$/i) ? id : undefined }
+        ].filter((condition) => Object.values(condition)[0] !== undefined)
+      }
+    ]
   });
 };
 
@@ -124,7 +138,8 @@ const addPost = async (req, res) => {
       member_id: currentMemberId(req),
       title,
       description,
-      status: 1
+      status: 1,
+      ...ownerFields(req)
     };
 
     if (req.file) {
@@ -132,7 +147,7 @@ const addPost = async (req, res) => {
     }
 
     if (id) {
-      const existing = await findPostByRequestId(id);
+      const existing = await findPostByRequestId(req, id);
 
       if (!existing) {
         return apiResponse(res, 401, 'Invalid edit');
@@ -155,13 +170,18 @@ const addPost = async (req, res) => {
 const getAllPostList = async (req, res) => {
   try {
     const posts = await Post.find({
-      $or: [
-        { status: 2 },
-        { status: { $exists: false } }
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        tenantStatusQuery()
       ]
     }).sort({ _id: -1 }).lean();
     const memberIds = [...new Set(posts.map((post) => String(post.member_id || '')).filter(Boolean))];
-    const members = await User.find({ member_id: { $in: memberIds } }).select('-password').lean();
+    const members = await User.find({
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        { member_id: { $in: memberIds } }
+      ]
+    }).select('-password').lean();
     const memberMap = new Map(members.map((member) => [String(member.member_id), member]));
     const ownId = currentMemberId(req);
 

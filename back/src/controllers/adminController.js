@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
 const { getRolePermissions } = require('../middleware/auth');
+const { adminMemberId, ownerFields, ownerOrLegacyMemberQuery, ownerQuery } = require('../utils/ownership');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfamilykey';
 
@@ -83,10 +84,11 @@ const login = async (req, res) => {
 // Aggregated Dashboard stats
 const getStats = async (req, res) => {
   try {
+    const scopedOwner = ownerQuery(req);
     const [userCount, businessCount, postCount, committeeCount] = await Promise.all([
       User.countDocuments(),
-      Business.countDocuments(),
-      Post.countDocuments(),
+      Business.countDocuments(scopedOwner),
+      Post.countDocuments(scopedOwner),
       User.countDocuments({ is_committee: true })
     ]);
 
@@ -133,7 +135,12 @@ const getUsers = async (req, res) => {
       ];
     }
 
-    const users = await User.find(query).select('-password').populate('role_id').sort({ createdAt: -1 });
+    const users = await User.find({
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        query
+      ]
+    }).select('-password').populate('role_id').sort({ createdAt: -1 });
     
     // Map backend user to the fields expected by standard layout or user forms
     const formatted = users.map(u => ({
@@ -208,6 +215,7 @@ const createUser = async (req, res) => {
 
     const assignedRoleId = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
 
+    const owner = ownerFields(req);
     const newUser = new User({
       member_id: nextMemberId,
       first_name,
@@ -226,7 +234,14 @@ const createUser = async (req, res) => {
       address: address || '',
       designation: designation || '',
       status: status === undefined ? 1 : Number(status),
-      image: imageFromRequest(req)
+      image: imageFromRequest(req),
+      created_by_admin_id: owner.created_by_admin_id,
+      admin_id: owner.admin_id,
+      tenant_id: owner.tenant_id,
+      created_by_user_id: owner.created_by_user_id,
+      created_by_member_id: owner.created_by_member_id,
+      created_by_name: owner.created_by_name,
+      created_by_role: owner.created_by_role
     });
 
     await newUser.save();
@@ -271,7 +286,12 @@ const updateUser = async (req, res) => {
     const middle_name = req.body.middle_name ?? nameParts.middle_name;
     const last_name = req.body.last_name ?? nameParts.last_name;
 
-    const user = await User.findOne({ member_id: id });
+    const user = await User.findOne({
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        { member_id: id }
+      ]
+    });
     if (!user) {
       return apiResponse(res, 404, 'User not found');
     }
@@ -318,7 +338,12 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await User.deleteOne({ member_id: id });
+    const result = await User.deleteOne({
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        { member_id: id }
+      ]
+    });
     if (result.deletedCount === 0) {
       return apiResponse(res, 404, 'User not found');
     }
@@ -331,7 +356,7 @@ const deleteUser = async (req, res) => {
 // --- Businesses Management ---
 const getBusinesses = async (req, res) => {
   try {
-    const businesses = await Business.find().sort({ _id: -1 }).lean();
+    const businesses = await Business.find(ownerQuery(req)).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'Businesses retrieved successfully', businesses.map(b => ({
       id: b.id || String(b._id),
       business_name: b.business_name || '',
@@ -348,27 +373,71 @@ const getBusinesses = async (req, res) => {
   }
 };
 
-const updateBusiness = async (req, res) => {
+const businessPayload = (req, existing = {}) => ({
+  ...req.body,
+  business_name: req.body.business_name || existing.business_name || '',
+  number: req.body.number || existing.number || '',
+  address: req.body.address || existing.address || '',
+  about_us: req.body.about_us || existing.about_us || '',
+  website: req.body.website || existing.website || '',
+  facebook: req.body.facebook || existing.facebook || '',
+  instagram: req.body.instagram || existing.instagram || '',
+  status: req.body.status === undefined ? Number(existing.status ?? 1) : Number(req.body.status),
+  business_category_id: req.body.business_category_id || existing.business_category_id || 'ADMIN',
+  country_id: req.body.country_id || existing.country_id || 'ADMIN',
+  state_id: req.body.state_id || existing.state_id || 'ADMIN',
+  city_id: req.body.city_id || existing.city_id || 'ADMIN'
+});
+
+const saveBusiness = async (req, res) => {
   try {
     const { id } = req.params;
-    const business = await Business.findOne({ $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }] });
-    if (!business) {
+    const existing = id ? await Business.findOne({
+      ...ownerQuery(req),
+      $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
+    }) : null;
+
+    if (id && !existing) {
       return apiResponse(res, 404, 'Business not found');
     }
 
-    Object.assign(business, req.body);
+    const payload = businessPayload(req, existing || {});
+    if (!payload.business_name || !payload.number || !payload.address) {
+      return apiResponse(res, 400, 'Business name, phone number, and address are required');
+    }
+
+    const business = existing || new Business({
+      id: `BUS${Date.now()}`,
+      member_id: adminMemberId(req),
+      cdate: new Date().toISOString().slice(0, 10)
+    });
+
+    Object.assign(business, payload, ownerFields(req));
     await business.save();
 
-    return apiResponse(res, 200, 'Business updated successfully', business);
+    return apiResponse(res, existing ? 200 : 201, 'Business saved successfully', {
+      id: business.id || String(business._id),
+      business_name: business.business_name || '',
+      number: business.number || '',
+      address: business.address || '',
+      about_us: business.about_us || '',
+      facebook: business.facebook || '',
+      instagram: business.instagram || '',
+      website: business.website || '',
+      status: Number(business.status ?? 1)
+    });
   } catch (error) {
-    return apiResponse(res, 500, 'Error updating business', { error: error.message });
+    return apiResponse(res, 500, 'Error saving business', { error: error.message });
   }
 };
 
 const deleteBusiness = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await Business.deleteOne({ $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }] });
+    const result = await Business.deleteOne({
+      ...ownerQuery(req),
+      $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
+    });
     if (result.deletedCount === 0) {
       return apiResponse(res, 404, 'Business not found');
     }
@@ -381,7 +450,7 @@ const deleteBusiness = async (req, res) => {
 // --- Feed/Posts Management ---
 const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find().sort({ createdAt: -1 }).lean();
+    const posts = await Post.find(ownerQuery(req)).sort({ createdAt: -1 }).lean();
     return apiResponse(res, 200, 'Posts retrieved successfully', posts.map(p => ({
       id: p.id || String(p._id),
       title: p.title || '',
@@ -400,7 +469,10 @@ const savePost = async (req, res) => {
     const { id } = req.params;
     const { title, description, status } = req.body;
     const existing = id
-      ? await Post.findOne({ $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }] })
+      ? await Post.findOne({
+        ...ownerQuery(req),
+        $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
+      })
       : null;
 
     if (id && !existing) {
@@ -413,11 +485,13 @@ const savePost = async (req, res) => {
 
     const post = existing || new Post({
       id: `POST${Date.now()}`,
+      member_id: adminMemberId(req),
       cdate: new Date().toISOString().slice(0, 10)
     });
 
     post.title = title;
     post.description = description;
+    Object.assign(post, ownerFields(req));
     post.status = status === undefined ? Number(post.status ?? 1) : Number(status);
     if (req.file || req.body.image) post.image = imageFromRequest(req, post.image);
 
@@ -439,7 +513,10 @@ const savePost = async (req, res) => {
 const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await Post.deleteOne({ $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }] });
+    const result = await Post.deleteOne({
+      ...ownerQuery(req),
+      $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
+    });
     if (result.deletedCount === 0) {
       return apiResponse(res, 404, 'Post not found');
     }
@@ -452,9 +529,9 @@ const deletePost = async (req, res) => {
 // --- Config/Theme Management ---
 const getConfig = async (req, res) => {
   try {
-    let config = await Config.findOne();
+    let config = await Config.findOne(ownerQuery(req));
     if (!config) {
-      config = await Config.create({});
+      config = await Config.create(ownerFields(req));
     }
     return apiResponse(res, 200, 'Config retrieved successfully', config);
   } catch (error) {
@@ -464,11 +541,11 @@ const getConfig = async (req, res) => {
 
 const updateConfig = async (req, res) => {
   try {
-    let config = await Config.findOne();
+    let config = await Config.findOne(ownerQuery(req));
     if (!config) {
-      config = new Config(req.body);
+      config = new Config({ ...req.body, ...ownerFields(req) });
     } else {
-      Object.assign(config, req.body);
+      Object.assign(config, req.body, ownerFields(req));
     }
     await config.save();
     return apiResponse(res, 200, 'Configuration updated successfully', config);
@@ -485,7 +562,7 @@ module.exports = {
   updateUser,
   deleteUser,
   getBusinesses,
-  updateBusiness,
+  saveBusiness,
   deleteBusiness,
   getPosts,
   savePost,

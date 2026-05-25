@@ -5,6 +5,7 @@ const Country = require('../models/countryModel');
 const State = require('../models/stateModel');
 const City = require('../models/cityModel');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
+const { ownedByActorQuery, ownerFields, ownerOrLegacyMemberQuery } = require('../utils/ownership');
 
 const requestData = (req) => ({
   ...req.query,
@@ -13,18 +14,31 @@ const requestData = (req) => ({
 
 const currentMemberId = (req) => memberPublicId(req.user || {});
 
-const findBusinessByRequestId = (id) => {
+const tenantStatusQuery = () => ({
+  $or: [
+    { status: 2 },
+    { status: 1 },
+    { status: { $exists: false } }
+  ]
+});
+
+const findBusinessByRequestId = (req, id) => {
   return Business.findOne({
-    $or: [
-      { id: String(id) },
-      { _id: String(id).match(/^[a-f\d]{24}$/i) ? id : undefined }
-    ].filter((condition) => Object.values(condition)[0] !== undefined)
+    $and: [
+      ownedByActorQuery(req),
+      {
+        $or: [
+          { id: String(id) },
+          { _id: String(id).match(/^[a-f\d]{24}$/i) ? id : undefined }
+        ].filter((condition) => Object.values(condition)[0] !== undefined)
+      }
+    ]
   });
 };
 
 const getBusinessCategoryList = async (req, res) => {
   try {
-    const categories = await BusinessCategory.find().sort({ _id: -1 }).lean();
+    const categories = await BusinessCategory.find(ownerOrLegacyMemberQuery(req)).sort({ _id: -1 }).lean();
     const data = categories.map((category) => ({
       id: category.id || String(category._id),
       business: category.business || category.name || ''
@@ -83,7 +97,8 @@ const addBusinessDetails = async (req, res) => {
       pinterest: pinterest || '',
       youtube: youtube || '',
       website: website || '',
-      status: 1
+      status: 1,
+      ...ownerFields(req)
     };
 
     ['image', 'gallery_image_1', 'gallery_image_2', 'gallery_image_3', 'gallery_image_4', 'gallery_image_5'].forEach((field) => {
@@ -94,7 +109,7 @@ const addBusinessDetails = async (req, res) => {
     });
 
     if (id) {
-      const existing = await findBusinessByRequestId(id);
+      const existing = await findBusinessByRequestId(req, id);
 
       if (!existing) {
         return apiResponse(res, 401, 'Invalid edit');
@@ -117,9 +132,9 @@ const addBusinessDetails = async (req, res) => {
 const getBusinessDetailsList = async (req, res) => {
   try {
     const businesses = await Business.find({
-      $or: [
-        { status: 2 },
-        { status: { $exists: false } }
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        tenantStatusQuery()
       ]
     }).sort({ _id: -1 }).lean();
     const memberIds = [...new Set(businesses.map((item) => String(item.member_id || '')).filter(Boolean))];
@@ -129,11 +144,11 @@ const getBusinessDetailsList = async (req, res) => {
     const cityIds = [...new Set(businesses.map((item) => String(item.city_id || '')).filter(Boolean))];
 
     const [members, categories, countries, states, cities] = await Promise.all([
-      User.find({ member_id: { $in: memberIds } }).select('-password').lean(),
-      BusinessCategory.find({ id: { $in: categoryIds } }).lean(),
-      Country.find({ id: { $in: countryIds } }).lean(),
-      State.find({ id: { $in: stateIds } }).lean(),
-      City.find({ id: { $in: cityIds } }).lean()
+      User.find({ $and: [ownerOrLegacyMemberQuery(req), { member_id: { $in: memberIds } }] }).select('-password').lean(),
+      BusinessCategory.find({ $and: [ownerOrLegacyMemberQuery(req), { id: { $in: categoryIds } }] }).lean(),
+      Country.find({ $and: [ownerOrLegacyMemberQuery(req), { id: { $in: countryIds } }] }).lean(),
+      State.find({ $and: [ownerOrLegacyMemberQuery(req), { id: { $in: stateIds } }] }).lean(),
+      City.find({ $and: [ownerOrLegacyMemberQuery(req), { id: { $in: cityIds } }] }).lean()
     ]);
 
     const memberMap = new Map(members.map((item) => [String(item.member_id), item]));

@@ -11,6 +11,7 @@ const State = require('../models/stateModel');
 const City = require('../models/cityModel');
 const Master = require('../models/masterModel');
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
+const { ownerFields, ownerQuery } = require('../utils/ownership');
 
 const isObjectId = (id) => mongoose.isValidObjectId(id);
 
@@ -19,7 +20,8 @@ const nextPublicId = async (Model, prefix = '') => {
   return `${prefix}${Date.now()}${count}`;
 };
 
-const findById = (Model, id) => Model.findOne({
+const findById = (Model, id, extraQuery = {}) => Model.findOne({
+  ...extraQuery,
   $or: [
     { id: String(id) },
     ...(isObjectId(id) ? [{ _id: id }] : [])
@@ -34,7 +36,7 @@ const imageFromRequest = (req, fallback = '') => {
 
 const listContent = (Model, formatter, label) => async (req, res) => {
   try {
-    const rows = await Model.find().sort({ _id: -1 }).lean();
+    const rows = await Model.find(ownerQuery(req)).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, `${label} retrieved successfully`, rows.map((row) => formatter(req, row)));
   } catch (error) {
     return apiResponse(res, 500, `Error retrieving ${label.toLowerCase()}`, { error: error.message });
@@ -43,7 +45,7 @@ const listContent = (Model, formatter, label) => async (req, res) => {
 
 const deleteContent = (Model, label) => async (req, res) => {
   try {
-    const existing = await findById(Model, req.params.id);
+    const existing = await findById(Model, req.params.id, ownerQuery(req));
     if (!existing) return apiResponse(res, 404, `${label} not found`);
     await existing.deleteOne();
     return apiResponse(res, 200, `${label} deleted successfully`);
@@ -102,7 +104,7 @@ const bannerPayload = (req, existing = {}) => ({
 
 const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (req, res) => {
   try {
-    const existing = req.params.id ? await findById(Model, req.params.id) : null;
+    const existing = req.params.id ? await findById(Model, req.params.id, ownerQuery(req)) : null;
     const payload = payloadBuilder(req, existing || {});
 
     if (!payload.title && ['Event', 'Festival', 'Gallery'].includes(label)) {
@@ -122,7 +124,7 @@ const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (
     if (label === 'Gallery' && !existing && hasGalleryImages) {
       const docs = await Promise.all(req.body.images.map(async (image, index) => {
         const doc = new Model({ id: await nextPublicId(Model, `${prefix}${index}_`) });
-        const galleryDocPayload = { ...payload, image };
+        const galleryDocPayload = { ...payload, ...ownerFields(req), image };
         delete galleryDocPayload.images;
         Object.assign(doc, galleryDocPayload);
         await doc.save();
@@ -134,7 +136,7 @@ const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (
 
     const doc = existing || new Model({ id: await nextPublicId(Model, prefix) });
     delete payload.images;
-    Object.assign(doc, payload);
+    Object.assign(doc, payload, ownerFields(req));
     await doc.save();
 
     return apiResponse(res, existing ? 200 : 201, `${label} saved successfully`, formatter(req, doc.toObject()));
@@ -203,9 +205,9 @@ const formatInquiry = (req, item) => ({
 
 const saveInquiry = async (req, res) => {
   try {
-    const existing = req.params.id ? await findById(ContactInquiry, req.params.id) : null;
+    const existing = req.params.id ? await findById(ContactInquiry, req.params.id, ownerQuery(req)) : null;
     const doc = existing || new ContactInquiry({ id: await nextPublicId(ContactInquiry, 'INQ') });
-    Object.assign(doc, req.body);
+    Object.assign(doc, req.body, ownerFields(req));
     await doc.save();
     return apiResponse(res, existing ? 200 : 201, 'Contact inquiry saved successfully', formatInquiry(req, doc.toObject()));
   } catch (error) {
@@ -243,7 +245,7 @@ const getMasters = async (req, res) => {
     const config = masterConfig[type];
     if (!config) return apiResponse(res, 404, 'Master type not found');
 
-    const query = config.type ? { type: config.type } : {};
+    const query = { ...(config.type ? { type: config.type } : {}), ...ownerQuery(req) };
     if (req.query.parent_id && config.parentKey) query[config.parentKey] = String(req.query.parent_id);
     if (req.query.parent_id && config.type) query.parent_id = String(req.query.parent_id);
 
@@ -263,7 +265,7 @@ const saveMaster = async (req, res) => {
     const name = req.body.name || req.body[type] || req.body.business || req.body.country || req.body.state || req.body.city;
     if (!name) return apiResponse(res, 400, 'Name is required');
 
-    const existing = req.params.id ? await findById(config.Model, req.params.id) : null;
+    const existing = req.params.id ? await findById(config.Model, req.params.id, ownerQuery(req)) : null;
     const doc = existing || new config.Model({ id: await nextPublicId(config.Model, `${type.toUpperCase()}_`) });
 
     if (config.type) {
@@ -278,6 +280,7 @@ const saveMaster = async (req, res) => {
     }
 
     if (req.body.status !== undefined) doc.status = Number(req.body.status);
+    Object.assign(doc, ownerFields(req));
     await doc.save();
 
     return apiResponse(res, existing ? 200 : 201, 'Master data saved successfully', formatMaster(type, doc.toObject(), config));
@@ -292,7 +295,7 @@ const deleteMaster = async (req, res) => {
     const config = masterConfig[type];
     if (!config) return apiResponse(res, 404, 'Master type not found');
 
-    const existing = await findById(config.Model, req.params.id);
+    const existing = await findById(config.Model, req.params.id, ownerQuery(req));
     if (!existing) return apiResponse(res, 404, 'Master data not found');
 
     await existing.deleteOne();

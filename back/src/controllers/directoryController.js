@@ -3,6 +3,7 @@ const Country = require('../models/countryModel');
 const State = require('../models/stateModel');
 const City = require('../models/cityModel');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
+const { ownerOrLegacyMemberQuery } = require('../utils/ownership');
 
 const requestData = (req) => ({
   ...req.query,
@@ -11,11 +12,11 @@ const requestData = (req) => ({
 
 const asName = (doc, key) => doc?.[key] || doc?.name || '';
 
-const locationMaps = async () => {
+const locationMaps = async (req) => {
   const [countries, states, cities] = await Promise.all([
-    Country.find().lean(),
-    State.find().lean(),
-    City.find().lean()
+    Country.find(ownerOrLegacyMemberQuery(req)).lean(),
+    State.find(ownerOrLegacyMemberQuery(req)).lean(),
+    City.find(ownerOrLegacyMemberQuery(req)).lean()
   ]);
 
   return {
@@ -56,17 +57,22 @@ const memberRow = (req, member, maps = {}) => {
 const getMembers = async (req, res) => {
   try {
     const query = {
-      $or: [
-        { parent_id: null },
-        { parent_id: '' },
-        { parent_member_id: null },
-        { parent_member_id: '' },
-        { relation: 'Self' }
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        {
+          $or: [
+            { parent_id: null },
+            { parent_id: '' },
+            { parent_member_id: null },
+            { parent_member_id: '' },
+            { relation: 'Self' }
+          ]
+        }
       ]
     };
 
     const members = await User.find(query).select('-password').sort({ _id: -1 }).lean();
-    const maps = await locationMaps();
+    const maps = await locationMaps(req);
 
     return apiResponse(res, 200, 'Memebers Data fetch successful', members.map((member) => memberRow(req, member, maps)));
   } catch (error) {
@@ -82,19 +88,29 @@ const getFamilyMembers = async (req, res) => {
       return apiResponse(res, 401, 'Invalid member');
     }
 
-    const parent = await User.findOne({ member_id: String(member_id) }).select('-password').lean();
+    const parent = await User.findOne({
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        { member_id: String(member_id) }
+      ]
+    }).select('-password').lean();
 
     if (!parent) {
       return apiResponse(res, 401, 'Invalid member');
     }
 
     const family = await User.find({
-      $or: [
-        { parent_id: String(member_id) },
-        { parent_member_id: String(member_id) }
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        {
+          $or: [
+            { parent_id: String(member_id) },
+            { parent_member_id: String(member_id) }
+          ]
+        }
       ]
     }).select('-password').sort({ _id: -1 }).lean();
-    const maps = await locationMaps();
+    const maps = await locationMaps(req);
 
     return apiResponse(res, 200, 'Family Memeber Data fetch successful', family.map((member) => {
       const merged = {
@@ -119,9 +135,14 @@ const getFamilyMembers = async (req, res) => {
 const getcommitteeMembers = async (req, res) => {
   try {
     const committee = await User.find({
-      $or: [
-        { is_committee: true },
-        { user_role_id: { $ne: 1 }, status: 1 }
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        {
+          $or: [
+            { is_committee: true },
+            { user_role_id: { $ne: 1 }, status: 1 }
+          ]
+        }
       ]
     }).select('-password').sort({ _id: -1 }).lean();
 
@@ -142,7 +163,7 @@ const getcommitteeMembers = async (req, res) => {
 
 const getCountryList = async (req, res) => {
   try {
-    const countries = await Country.find().sort({ _id: -1 }).lean();
+    const countries = await Country.find(ownerOrLegacyMemberQuery(req)).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'Country data fetch successfully', countries.map((country) => ({
       id: country.id || String(country._id),
       country: country.country || country.name || ''
@@ -160,7 +181,10 @@ const getStateList = async (req, res) => {
       return apiResponse(res, 401, 'Country id is required');
     }
 
-    const states = await State.find({ country_id: String(country_id) }).sort({ _id: -1 }).lean();
+    const states = await State.find({
+      ...ownerOrLegacyMemberQuery(req),
+      country_id: String(country_id)
+    }).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'State data fetch successfully', states.map((state) => ({
       id: state.id || String(state._id),
       state: state.state || state.name || ''
@@ -178,7 +202,10 @@ const getCityList = async (req, res) => {
       return apiResponse(res, 401, 'State id is required');
     }
 
-    const cities = await City.find({ state_id: String(state_id) }).sort({ _id: -1 }).lean();
+    const cities = await City.find({
+      ...ownerOrLegacyMemberQuery(req),
+      state_id: String(state_id)
+    }).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'City data fetch successfully', cities.map((city) => ({
       id: city.id || String(city._id),
       city: city.city || city.name || ''

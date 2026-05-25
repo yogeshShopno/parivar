@@ -5,8 +5,7 @@ const roleSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Role name is required'],
-    trim: true,
-    unique: true
+    trim: true
   },
   description: {
     type: String,
@@ -28,5 +27,7 @@ const roleSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+roleSchema.index({ name: 1, created_by_admin_id: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('Role', roleSchema);

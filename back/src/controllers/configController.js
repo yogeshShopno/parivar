@@ -1,11 +1,12 @@
 const Config = require('../models/configModel');
+const { ownerFields, ownerQuery } = require('../utils/ownership');
 
 // Get configuration, create default if none exists
 const getConfig = async (req, res) => {
   try {
-    let config = await Config.findOne();
+    let config = await Config.findOne(ownerQuery(req));
     if (!config) {
-      config = await Config.create({});
+      config = await Config.create(ownerFields(req));
     }
     res.status(200).json({
       message: 'Configuration retrieved successfully',
@@ -19,11 +20,11 @@ const getConfig = async (req, res) => {
 // Update configuration (or create new if none exists)
 const updateConfig = async (req, res) => {
   try {
-    let config = await Config.findOne();
+    let config = await Config.findOne(ownerQuery(req));
     if (!config) {
-      config = new Config(req.body);
+      config = new Config({ ...req.body, ...ownerFields(req) });
     } else {
-      Object.assign(config, req.body);
+      Object.assign(config, req.body, ownerFields(req));
     }
     await config.save();
     res.status(200).json({

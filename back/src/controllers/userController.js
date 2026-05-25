@@ -1,5 +1,6 @@
 const User = require('../models/userModels');
 const jwt = require('jsonwebtoken');
+const { ownedByActorQuery, ownerFields, ownerOrLegacyMemberQuery } = require('../utils/ownership');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfamilykey';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '365d';
@@ -50,6 +51,7 @@ const register = async (req, res) => {
       }
     }
 
+    const owner = req.user ? ownerFields(req) : {};
     const newUser = new User({
       member_id: member_id || await buildMemberId(),
       parent_member_id,
@@ -69,7 +71,14 @@ const register = async (req, res) => {
       country_id,
       state_id,
       city_id,
-      address
+      address,
+      created_by_admin_id: owner.created_by_admin_id || '',
+      admin_id: owner.admin_id || '',
+      tenant_id: owner.tenant_id || '',
+      created_by_user_id: owner.created_by_user_id || '',
+      created_by_member_id: owner.created_by_member_id || '',
+      created_by_name: owner.created_by_name || '',
+      created_by_role: owner.created_by_role || ''
     });
 
     await newUser.save();
@@ -138,7 +147,12 @@ const getUsers = async (req, res) => {
 
     if (id || member_id) {
       const query = id ? mongooseQueryForUser(id) : { member_id };
-      const user = await User.findOne(query).select('-password');
+      const user = await User.findOne({
+        $and: [
+          ownerOrLegacyMemberQuery(req),
+          query
+        ]
+      }).select('-password');
 
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
@@ -167,7 +181,12 @@ const getUsers = async (req, res) => {
       ];
     }
 
-    const users = await User.find(query).select('-password').sort({ createdAt: -1 });
+    const users = await User.find({
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        query
+      ]
+    }).select('-password').sort({ createdAt: -1 });
 
     res.status(200).json({
       message: 'Users retrieved successfully',
@@ -187,7 +206,12 @@ const updateUser = async (req, res) => {
       return res.status(400).json({ message: 'User ID or member ID is required' });
     }
 
-    const user = await User.findOne(mongooseQueryForUser(id));
+    const user = await User.findOne({
+      $and: [
+        ownedByActorQuery(req),
+        mongooseQueryForUser(id)
+      ]
+    });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });

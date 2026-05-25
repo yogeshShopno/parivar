@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Briefcase, MapPin, Phone, Globe, Trash2, Search, Edit2, RefreshCw } from 'lucide-react'
+import { Briefcase, MapPin, Phone, Globe, Trash2, Search, Edit2, RefreshCw, Plus } from 'lucide-react'
 import api from '../lib/api'
 import Modal from '../components/Modal'
 import BusinessForm from '../components/BusinessForm'
@@ -50,19 +50,27 @@ export default function Businesses() {
     setIsModalOpen(true)
   }
 
+  const handleCreate = () => {
+    setSelectedBusiness(null)
+    setIsModalOpen(true)
+  }
+
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setSelectedBusiness(null)
   }
 
   const handleSubmit = async (formData) => {
-    if (!selectedBusiness) return
     setFormLoading(true)
     setError('')
     try {
-      await api.put(`/businesses/${selectedBusiness.id}`, formData)
+      if (selectedBusiness) {
+        await api.put(`/businesses/${selectedBusiness.id}`, formData)
+      } else {
+        await api.post('/businesses', formData)
+      }
       await fetchBusinesses()
-      setSuccess('Business listing updated successfully')
+      setSuccess(`Business listing ${selectedBusiness ? 'updated' : 'created'} successfully`)
       setIsModalOpen(false)
       setSelectedBusiness(null)
       setTimeout(() => setSuccess(''), 3000)
@@ -93,6 +101,12 @@ export default function Businesses() {
             title="Refresh listings"
           >
             <RefreshCw className="w-4 h-4" />
+          </button>
+          <button
+            onClick={handleCreate}
+            className="flex items-center gap-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all"
+          >
+            <Plus className="w-4 h-4" /> Add
           </button>
           <div className="relative group flex-1 sm:w-64">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
@@ -214,7 +228,7 @@ export default function Businesses() {
 
       <Modal
         isOpen={isModalOpen}
-        title="Edit Business Listing"
+        title={selectedBusiness ? 'Edit Business Listing' : 'Add Business Listing'}
         onClose={handleCloseModal}
       >
         <BusinessForm business={selectedBusiness} onSubmit={handleSubmit} isLoading={formLoading} />

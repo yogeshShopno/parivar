@@ -3,6 +3,7 @@ const Role = require('../models/roleModel');
 const User = require('../models/userModels');
 const { ACTIONS, ALL_PERMISSION_KEYS, PERMISSION_MODULES, PERMISSIONS } = require('../config/permissions');
 const { apiResponse } = require('../utils/apiResponse');
+const { ownerFields, ownerOrLegacyMemberQuery, ownerQuery } = require('../utils/ownership');
 
 const sanitizePermissions = (permissions = []) => {
   const input = Array.isArray(permissions) ? permissions : String(permissions).split(',');
@@ -35,7 +36,7 @@ const getPermissionOptions = async (req, res) => {
 
 const getRoles = async (req, res) => {
   try {
-    const roles = await Role.find().sort({ name: 1 }).lean();
+    const roles = await Role.find(ownerQuery(req)).sort({ name: 1 }).lean();
     return apiResponse(res, 200, 'Roles retrieved successfully', roles.map(formatRole));
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving roles', { error: error.message });
@@ -55,7 +56,8 @@ const saveRole = async (req, res) => {
       name: String(name).trim(),
       description: description || '',
       permissions: sanitizePermissions(permissions),
-      status: status === undefined ? 1 : Number(status)
+      status: status === undefined ? 1 : Number(status),
+      ...ownerFields(req)
     };
 
     let role;
@@ -63,7 +65,7 @@ const saveRole = async (req, res) => {
       if (!mongoose.isValidObjectId(id)) {
         return apiResponse(res, 400, 'Invalid role id');
       }
-      role = await Role.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
+      role = await Role.findOneAndUpdate({ _id: id, ...ownerQuery(req) }, payload, { new: true, runValidators: true });
       if (!role) {
         return apiResponse(res, 404, 'Role not found');
       }
@@ -87,12 +89,17 @@ const deleteRole = async (req, res) => {
       return apiResponse(res, 400, 'Invalid role id');
     }
 
-    const assignedUsers = await User.countDocuments({ role_id: id });
+    const assignedUsers = await User.countDocuments({
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        { role_id: id }
+      ]
+    });
     if (assignedUsers > 0) {
       return apiResponse(res, 409, 'Role is assigned to users and cannot be deleted');
     }
 
-    const deleted = await Role.findByIdAndDelete(id);
+    const deleted = await Role.findOneAndDelete({ _id: id, ...ownerQuery(req) });
     if (!deleted) {
       return apiResponse(res, 404, 'Role not found');
     }
