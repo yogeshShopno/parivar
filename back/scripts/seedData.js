@@ -1,5 +1,19 @@
 const { ALL_PERMISSION_KEYS } = require('../src/config/permissions');
 
+const buildAdminOwner = (memberId, name) => ({
+	member_id: String(memberId),
+	created_by_admin_id: String(memberId),
+	admin_id: String(memberId),
+	tenant_id: String(memberId),
+	created_by_user_id: String(memberId),
+	created_by_member_id: String(memberId),
+	created_by_name: name,
+	created_by_role: 'admin'
+});
+
+const bhavikAdmin = buildAdminOwner('101', 'Bhavik wala');
+const yogeshAdmin = buildAdminOwner('1021', 'yogesh wala');
+
 const countries = [
 	{ id: '1', name: 'India', country: 'India' },
 	{ id: '2', name: 'United States', country: 'United States' }
@@ -79,8 +93,8 @@ const businesses = [
 
 const posts = [
 	{
+		...bhavikAdmin,
 		id: 'POST001',
-		member_id: '101',
 		title: 'Summer Festival Planning',
 		description: 'Join our community planning meeting for the upcoming summer festival. Everyone is invited to share ideas and volunteer.',
 		image: '/uploads/5.jpg',
@@ -88,8 +102,8 @@ const posts = [
 		cdate: '2026-05-20'
 	},
 	{
+		...yogeshAdmin,
 		id: 'POST002',
-		member_id: '102',
 		title: 'Family Reunion Highlights',
 		description: 'A recap of the last family reunion with special moments, stories, and photographs from all age groups.',
 		image: '/uploads/6.jpg',
@@ -97,8 +111,8 @@ const posts = [
 		cdate: '2026-04-12'
 	},
 	{
+		...bhavikAdmin,
 		id: 'POST003',
-		member_id: '103',
 		title: 'Health Awareness Camp Announcement',
 		description: 'We are organizing a free health checkup camp next weekend. Please register early to book your slot.',
 		image: '/uploads/7.jpg',
@@ -109,6 +123,7 @@ const posts = [
 
 const galleries = [
 	{
+		...bhavikAdmin,
 		title: 'Family Reunion 2025',
 		description: 'Photos from the annual family reunion held in Ahmedabad.',
 		image: '/uploads/7.jpg',
@@ -118,6 +133,7 @@ const galleries = [
 		event_category: 'Family Gathering'
 	},
 	{
+		...yogeshAdmin,
 		title: 'Community Diwali Celebration 2024',
 		description: 'Lights, rangoli, and sweets from the Diwali celebration event.',
 		image: '/uploads/8.jpg',
@@ -127,6 +143,7 @@ const galleries = [
 		event_category: 'Festival'
 	},
 	{
+		...bhavikAdmin,
 		title: 'Navratri Garba Night 2023',
 		description: 'Vibrant colors and energetic dances from our Navratri event.',
 		image: '/uploads/9.jpg',
@@ -139,6 +156,7 @@ const galleries = [
 
 const festivals = [
 	{
+		...bhavikAdmin,
 		title: 'Diwali Celebration',
 		description: 'Annual Diwali celebration with lights, music, and family pujas.',
 		image: '/uploads/9.jpg',
@@ -150,6 +168,7 @@ const festivals = [
 		festival_description: 'Prepare your lamps, sweets, and special gifts to celebrate together.'
 	},
 	{
+		...yogeshAdmin,
 		title: 'Navratri Garba Night',
 		description: 'A nine-night Navratri celebration with dance, music, and community food stalls.',
 		image: '/uploads/10.jpg',
@@ -161,6 +180,7 @@ const festivals = [
 		festival_description: 'Enjoy traditional folk music and colorful attire in our annual Garba celebration.'
 	},
 	{
+		...bhavikAdmin,
 		title: 'Holi Festival of Colors',
 		description: 'Celebrate the arrival of spring with organic colors and music.',
 		image: '/uploads/1.jpg',
@@ -175,6 +195,7 @@ const festivals = [
 
 const events = [
 	{
+		...bhavikAdmin,
 		title: 'Community Health Camp',
 		description: 'Free health screening camp for members, with doctors and wellness sessions.',
 		image: '/uploads/9.jpg',
@@ -191,6 +212,7 @@ const events = [
 		event_description: 'Open to all registered members and their families.'
 	},
 	{
+		...yogeshAdmin,
 		title: 'Ganesh Chaturthi Puja',
 		description: 'Traditional Ganesh Chaturthi celebration with family prayers and prasad distribution.',
 		image: '/uploads/10.jpg',
@@ -229,6 +251,27 @@ const users = [
 		city_id: '1',
 		address: '101 Sardar parikh Society, Ahmedabad',
 		family_code: 'FAM001'
+	},
+	{
+		member_id: '1021',
+		first_name: 'yogesh',
+		middle_name: '',
+		last_name: 'wala',
+		email: 'yogesh.shopno@gmail.com',
+		password: 'Admin@123',
+		number: '9909097033', // Login number
+		gender: 'Male',
+		dob: new Date('1977-04-12'),
+		blood_group: 'B',
+		relation: 'Self',
+		is_committee: true,
+		committee_role: 'President',
+		profile_image: '/uploads/1.jpg',
+		country_id: '1',
+		state_id: '1',
+		city_id: '1',
+		address: '101 Sardar parikh Society, Ahmedabad',
+		family_code: 'FAM002'
 	},
 	{
 		member_id: '102',
@@ -344,6 +387,7 @@ const roles = [
 
 const news = [
 	{
+		...bhavikAdmin,
 		news_id: 'NEWS001',
 		title: "Honorable Prime Minister to Attend parikh Family Wedding",
 		description: "Prime Minister Narendra Modi will grace the auspicious wedding ceremony of Chirag  & Mansi  on May 25, 2026, in Ahmedabad.",
@@ -355,6 +399,7 @@ const news = [
 		location: 'Ahmedabad, Gujarat'
 	},
 	{
+		...yogeshAdmin,
 		news_id: 'NEWS002',
 		title: "Parivar Sweets & Family Dining Wins Best Restaurant Award",
 		description: "Parivar Sweets & Family Dining has been recognized for its exceptional service and culinary excellence.",

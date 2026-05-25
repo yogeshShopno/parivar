@@ -4,7 +4,7 @@ const userObjectId = (user = {}) => String(user?._id || user?.id || '');
 
 const adminMemberId = (req = {}) => memberPublicId(req.user);
 
-const isAdminUser = (user = {}) => Boolean(user?.is_committee || user?.relation === 'Self' || user?.role_id);
+const isAdminUser = (user = {}) => Boolean(user?.committee_role === 'President' || user?.role_id);
 
 const adminOwnerId = (req = {}) => {
   const user = req.user || {};

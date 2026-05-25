@@ -130,7 +130,7 @@ const protect = async (req, res, next) => {
 };
 
 const getRolePermissions = (user = {}) => {
-  if (user.is_committee || user.relation === 'Self') {
+  if (user.committee_role === 'President' || user.role_id) {
     return ALL_PERMISSION_KEYS;
   }
 
