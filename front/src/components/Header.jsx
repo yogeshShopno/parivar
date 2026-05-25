@@ -20,13 +20,26 @@ export default function Header() {
         return 'System Overview'
       case '/users':
         return 'Member Directory'
+      case '/committee':
+        return 'Kamiti Members'
+      case '/festivals':
+        return 'Festivals'
+      case '/events':
+        return 'Events'
+      case '/gallery':
+        return 'Gallery'
+      case '/banners':
+        return 'Banner Manager'
       case '/businesses':
         return 'Business Index'
       case '/posts':
         return 'Feed Moderator'
+      case '/contact-inquiries':
+        return 'Contact Inquiry'
       case '/settings':
         return 'Theme Customizer'
       default:
+        if (location.pathname.startsWith('/masters/')) return 'Masters'
         return 'Admin Panel'
     }
   }

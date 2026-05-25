@@ -1,5 +1,5 @@
 import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
@@ -9,6 +9,9 @@ import Users from './pages/Users'
 import Businesses from './pages/Businesses'
 import Feed from './pages/Feed'
 import Settings from './pages/Settings'
+import CommitteeMembers from './pages/CommitteeMembers'
+import ContentPage from './pages/ContentPage'
+import MasterPage from './pages/MasterPage'
 
 export default function App() {
   return (
@@ -24,13 +27,25 @@ export default function App() {
           }
         >
           <Route index element={<Dashboard />} />
+          <Route path="committee" element={<CommitteeMembers />} />
           <Route path="users" element={<Users />} />
+          <Route path="festivals" element={<ContentPage type="festivals" />} />
+          <Route path="events" element={<ContentPage type="events" />} />
+          <Route path="gallery" element={<ContentPage type="gallery" />} />
+          <Route path="banners" element={<ContentPage type="banners" />} />
           <Route path="businesses" element={<Businesses />} />
           <Route path="posts" element={<Feed />} />
+          <Route path="contact-inquiries" element={<ContentPage type="inquiries" />} />
+          <Route path="masters/:type" element={<MasterRoute />} />
           <Route path="settings" element={<Settings />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>
   )
+}
+
+function MasterRoute() {
+  const { type } = useParams()
+  return <MasterPage type={type} />
 }
