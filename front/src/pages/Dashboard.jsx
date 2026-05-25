@@ -4,21 +4,58 @@ import api from '../lib/api'
 
 export default function Dashboard() {
   const [stats, setStats] = useState({ users: 0, businesses: 0, posts: 0, committee: 0 })
+  const [recentActivities, setRecentActivities] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let mounted = true
-    api.get('/stats')
-      .then(res => {
-        const data = res.data?.data || res.data || { users: 0, businesses: 0, posts: 0, committee: 0 }
-        if (mounted) {
-          setStats(data)
-          setLoading(false)
-        }
-      })
-      .catch(() => {
+
+    const fetchDashboard = async () => {
+      try {
+        const [statsRes, usersRes, businessesRes, postsRes] = await Promise.all([
+          api.get('/stats'),
+          api.get('/users'),
+          api.get('/businesses'),
+          api.get('/posts')
+        ])
+
+        if (!mounted) return
+
+        const statsData = statsRes.data?.data || statsRes.data || { users: 0, businesses: 0, posts: 0, committee: 0 }
+        const users = usersRes.data?.data || usersRes.data || []
+        const businesses = businessesRes.data?.data || businessesRes.data || []
+        const posts = postsRes.data?.data || postsRes.data || []
+
+        setStats(statsData)
+        setRecentActivities([
+          ...users.slice(0, 2).map(user => ({
+            id: `member-${user.id}`,
+            text: `${user.name || 'A member'} is registered in the family directory`,
+            time: 'Recent',
+            date: user.phone || user.email || 'Member registry'
+          })),
+          ...businesses.slice(0, 1).map(business => ({
+            id: `business-${business.id}`,
+            text: `${business.business_name || 'A business'} is listed in the business directory`,
+            time: Number(business.status) === 1 ? 'Active' : 'Inactive',
+            date: business.number || 'Business directory'
+          })),
+          ...posts.slice(0, 1).map(post => ({
+            id: `post-${post.id}`,
+            text: `${post.title || 'A post'} is visible on the community feed`,
+            time: 'Published',
+            date: post.cdate || 'Feed post'
+          }))
+        ])
+      } catch (error) {
+        if (mounted) setRecentActivities([])
+      } finally {
         if (mounted) setLoading(false)
-      })
+      }
+    }
+
+    fetchDashboard()
+
     return () => {
       mounted = false
     }
@@ -65,13 +102,6 @@ export default function Dashboard() {
       sparkline: 'M0 15 Q15 15 30 15 T60 15 T90 15 T120 15',
       sparkColor: '#f59e0b'
     }
-  ]
-
-  const recentActivities = [
-    { id: 1, type: 'member', text: 'Rahul Sharma updated member details', time: '10 mins ago', date: 'May 23, 2026' },
-    { id: 2, type: 'business', text: 'New family business listing "Parivar Sweets" approved', time: '1 hour ago', date: 'May 23, 2026' },
-    { id: 3, type: 'post', text: 'Health Awareness Camp post published by sunita.parikh@example.com', time: '4 hours ago', date: 'May 23, 2026' },
-    { id: 4, type: 'system', text: 'Admin configuration settings updated successfully', time: '1 day ago', date: 'May 22, 2026' }
   ]
 
   if (loading) {
@@ -227,7 +257,11 @@ export default function Dashboard() {
           </div>
 
           <div className="flex-1 space-y-5">
-            {recentActivities.map((act) => (
+            {recentActivities.length === 0 ? (
+              <div className="h-full min-h-40 flex items-center justify-center text-center text-xs text-slate-500 border border-dashed border-white/[0.08] rounded-2xl">
+                No recent records available yet
+              </div>
+            ) : recentActivities.map((act) => (
               <div key={act.id} className="flex gap-3 text-xs leading-relaxed group">
                 {/* Visual line bullet */}
                 <div className="flex flex-col items-center">

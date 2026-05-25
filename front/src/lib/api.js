@@ -1,7 +1,15 @@
 import axios from 'axios'
 
+export const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+
+export const assetUrl = (path) => {
+  if (!path) return ''
+  if (/^https?:\/\//i.test(path)) return path
+  return `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`
+}
+
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_BASE || 'http://localhost:5000'}/api/admin`,
+  baseURL: `${API_BASE}/api/admin`,
   headers: { 'Content-Type': 'application/json' }
 })
 

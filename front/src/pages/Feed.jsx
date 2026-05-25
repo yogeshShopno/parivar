@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { FileText, Calendar, Trash2, ShieldAlert, Clock, Search, Eye } from 'lucide-react'
-import api from '../lib/api'
+import { FileText, Calendar, Trash2, Clock, Search, RefreshCw } from 'lucide-react'
+import api, { assetUrl } from '../lib/api'
 
 export default function Feed() {
   const [posts, setPosts] = useState([])
@@ -19,6 +19,7 @@ export default function Feed() {
       const res = await api.get('/posts')
       const data = res.data?.data || res.data || []
       setPosts(data)
+      setError('')
     } catch (err) {
       setError('Failed to load feed announcements')
       console.error(err)
@@ -52,17 +53,26 @@ export default function Feed() {
           <h2 className="text-xl font-bold text-white">Feed Moderator</h2>
           <p className="text-slate-400 text-xs mt-0.5">Moderate community posts, announcements, and timeline activities</p>
         </div>
-        <div className="relative group w-full sm:w-64">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
-            <Search className="w-4 h-4" />
-          </span>
-          <input
-            type="search"
-            placeholder="Search feed..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-950/40 text-slate-200 placeholder-slate-500 border border-white/[0.08] hover:border-white/[0.15] focus:border-brand-500/50 rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:ring-2 focus:ring-brand-500/10 transition-all duration-300"
-          />
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <button
+            onClick={fetchPosts}
+            className="flex items-center justify-center p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-white/[0.06] text-slate-300 hover:text-white transition-all"
+            title="Refresh posts"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
+          <div className="relative group flex-1 sm:w-64">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+              <Search className="w-4 h-4" />
+            </span>
+            <input
+              type="search"
+              placeholder="Search feed..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-slate-950/40 text-slate-200 placeholder-slate-500 border border-white/[0.08] hover:border-white/[0.15] focus:border-brand-500/50 rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:ring-2 focus:ring-brand-500/10 transition-all duration-300"
+            />
+          </div>
         </div>
       </div>
 
@@ -103,7 +113,7 @@ export default function Feed() {
               {post.image ? (
                 <div className="w-full h-40 bg-slate-950 overflow-hidden relative border-b border-white/[0.06]">
                   <img
-                    src={`http://localhost:5000${post.image}`}
+                    src={assetUrl(post.image)}
                     alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
                     onError={(e) => { e.target.style.display = 'none' }}

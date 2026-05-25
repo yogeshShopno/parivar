@@ -9,6 +9,7 @@ export default function SettingsPage() {
     backgroundColor: '#FFF8F0',
     textColor: '#4E342E',
     buttonColor: '#E65100',
+    fontColor: '#FFFFFF',
     borderColor: '#E8D9C8',
     gradientStart: '#E65100',
     gradientEnd: '#7B0D1C'
@@ -34,6 +35,7 @@ export default function SettingsPage() {
         backgroundColor: data.backgroundColor || '#FFF8F0',
         textColor: data.textColor || '#4E342E',
         buttonColor: data.buttonColor || '#E65100',
+        fontColor: data.fontColor || '#FFFFFF',
         borderColor: data.borderColor || '#E8D9C8',
         gradientStart: data.gradientStart || '#E65100',
         gradientEnd: data.gradientEnd || '#7B0D1C'
@@ -71,6 +73,7 @@ export default function SettingsPage() {
       backgroundColor: '#FFF8F0',
       textColor: '#4E342E',
       buttonColor: '#E65100',
+      fontColor: '#FFFFFF',
       borderColor: '#E8D9C8',
       gradientStart: '#E65100',
       gradientEnd: '#7B0D1C'
@@ -185,6 +188,24 @@ export default function SettingsPage() {
               keyName="textColor"
             />
             <ColorInput
+              label="Primary Button Color"
+              desc="Controls the main filled action button used across the client application."
+              value={config.buttonColor}
+              keyName="buttonColor"
+            />
+            <ColorInput
+              label="Button Label Color"
+              desc="Text color rendered on filled buttons and high-emphasis mobile controls."
+              value={config.fontColor}
+              keyName="fontColor"
+            />
+            <ColorInput
+              label="Card Border Color"
+              desc="Border color for mobile cards, directory tiles, and content outlines."
+              value={config.borderColor}
+              keyName="borderColor"
+            />
+            <ColorInput
               label="Gradient Start Token"
               desc="Starting color hex applied to banner gradient backgrounds and mobile dashboard headers."
               value={config.gradientStart}
@@ -244,7 +265,7 @@ export default function SettingsPage() {
                   <span className="text-[7px]" style={{ color: config.textColor }}>→</span>
                 </div>
 
-                <button className="w-full text-center py-1.5 rounded-lg text-[9px] font-bold text-white uppercase tracking-wider" style={{ backgroundColor: config.buttonColor }}>
+                <button className="w-full text-center py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider" style={{ backgroundColor: config.buttonColor, color: config.fontColor }}>
                   Add Member
                 </button>
               </div>
