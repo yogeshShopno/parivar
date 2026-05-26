@@ -50,14 +50,14 @@ const getPosts = async (req, res) => {
         { member_id: { $in: memberIds } }
       ]
     }).select('-password').lean();
-    
+
     const memberMap = new Map(members.map((member) => [String(member.member_id), member]));
 
     const data = posts.map((post) => {
       const member = memberMap.get(String(post.member_id)) || {};
-      
+
       return {
-        id: post.id || String(post._id),
+        id: post._id || String(post._id),
         member_id: post.member_id || '',
         title: post.title || '',
         description: post.description || '',
@@ -97,7 +97,7 @@ const getPostById = async (req, res) => {
     }
 
     return apiResponse(res, 200, 'Post retrieved successfully', {
-      id: post.id || String(post._id),
+      _id: post._id || '',  // ← Add this line
       title: post.title || '',
       description: post.description || '',
       image: publicUrl(req, post.image || ''),
@@ -129,13 +129,13 @@ const savePost = async (req, res) => {
     if (id && !existing) {
       return apiResponse(res, 404, 'Post not found or unauthorized');
     }
-    
+
     const isCommitteeOrAdmin = req.user && (req.user.is_committee || req.user.role === 'admin' || req.user.relation === 'Self');
     const ownId = currentMemberId(req);
-    
+
     // Only allow editing if admin or if the user owns the post
     if (existing && !isCommitteeOrAdmin && String(existing.member_id) !== String(ownId)) {
-        return apiResponse(res, 403, 'Unauthorized to edit this post');
+      return apiResponse(res, 403, 'Unauthorized to edit this post');
     }
 
     const post = existing || new Post({
@@ -151,7 +151,7 @@ const savePost = async (req, res) => {
     if (!existing) {
       post.set(ownerFields(req));
     }
-    
+
     // Admin approval logic
     if (isCommitteeOrAdmin) {
       // Admins can set status, default to approved
@@ -185,23 +185,23 @@ const deletePost = async (req, res) => {
     const { id } = req.params;
     const isCommitteeOrAdmin = req.user && (req.user.is_committee || req.user.role === 'admin' || req.user.relation === 'Self');
     const ownId = currentMemberId(req);
-    
+
     const query = {
       ...ownerOrLegacyMemberQuery(req),
       $or: [{ id: String(id) }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
     };
-    
+
     // If not admin, can only delete own post
     if (!isCommitteeOrAdmin) {
       query.member_id = ownId;
     }
 
     const result = await Post.deleteOne(query);
-    
+
     if (result.deletedCount === 0) {
       return apiResponse(res, 404, 'Post not found or unauthorized');
     }
-    
+
     return apiResponse(res, 200, 'Post deleted successfully');
   } catch (error) {
     return apiResponse(res, 500, 'Error deleting post', { error: error.message });

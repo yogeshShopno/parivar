@@ -63,7 +63,6 @@ const newsPayload = (req, existing = {}) => {
 };
 
 const getNewsList = async (req, res) => {
-    console.log('Received request to fetch news list');
   try {
 		const news = await News.find(newsFilter(req)).sort({ _id: -1 }).lean();
 		return apiResponse(res, 200, 'News retrieved successfully', news.map((item) => formatNews(req, item)));

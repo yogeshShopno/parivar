@@ -38,7 +38,7 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
     const url = URL.createObjectURL(file)
     image.onload = () => {
       URL.revokeObjectURL(url)
-      resolve(image.width === 300 && image.height === 300 ? '' : 'Image must be exactly 300 x 300 px')
+    resolve(image.width <= 300 && image.height <= 300 ? '' : 'Image must be 300 x 300 px or smaller')
     }
     image.onerror = () => {
       URL.revokeObjectURL(url)
@@ -80,6 +80,7 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
     payload.append('status', formData.status)
     payload.append('is_committee', 'true')
     payload.append('relation', 'Self')
+    
     if (formData.password) payload.append('password', formData.password)
     if (formData.image) payload.append('image', formData.image)
 

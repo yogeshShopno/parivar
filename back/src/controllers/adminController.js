@@ -191,8 +191,12 @@ const createUser = async (req, res) => {
       role_id,
       address,
       designation,
-      status
+      status,
+      image
     } = req.body;
+
+    console.log('Create user request body:', req.body);
+    
     const nameParts = splitFullName(full_name);
     const first_name = req.body.first_name || nameParts.first_name;
     const middle_name = req.body.middle_name ?? nameParts.middle_name;
