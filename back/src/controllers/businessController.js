@@ -120,7 +120,7 @@ const addBusinessDetails = async (req, res) => {
         return apiResponse(res, 401, 'Invalid edit');
       }
 
-      Object.assign(existing, businessData);
+      existing.set(businessData);
       await existing.save();
       return apiResponse(res, 200, 'Business data update successfully', []);
     }

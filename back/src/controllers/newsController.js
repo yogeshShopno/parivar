@@ -108,8 +108,8 @@ const updateNews = async (req, res) => {
             return apiResponse(res, 404, 'News not found');
         }
 
-        Object.assign(news, newsPayload(req, news));
-        Object.assign(news, ownerFields(req));
+        news.set(newsPayload(req, news));
+        news.set(ownerFields(req));
         await news.save();
 
         return apiResponse(res, 200, 'News saved successfully', formatNews(req, news.toObject()));

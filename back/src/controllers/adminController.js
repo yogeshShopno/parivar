@@ -85,11 +85,12 @@ const login = async (req, res) => {
 const getStats = async (req, res) => {
   try {
     const scopedOwner = ownerQuery(req);
+    const legacyOwner = ownerOrLegacyMemberQuery(req);
     const [userCount, businessCount, postCount, committeeCount] = await Promise.all([
-      User.countDocuments(),
+      User.countDocuments(legacyOwner),
       Business.countDocuments(scopedOwner),
       Post.countDocuments(scopedOwner),
-      User.countDocuments({ is_committee: true })
+      User.countDocuments({ ...legacyOwner, is_committee: true })
     ]);
 
     // Generate some interesting data patterns for mock charts over the last few months
@@ -412,7 +413,7 @@ const saveBusiness = async (req, res) => {
       cdate: new Date().toISOString().slice(0, 10)
     });
 
-    Object.assign(business, payload, ownerFields(req));
+    business.set({ ...payload, ...ownerFields(req) });
     await business.save();
 
     return apiResponse(res, existing ? 200 : 201, 'Business saved successfully', {
@@ -466,7 +467,7 @@ const updateConfig = async (req, res) => {
     if (!config) {
       config = new Config({ ...req.body, ...ownerFields(req) });
     } else {
-      Object.assign(config, req.body, ownerFields(req));
+      config.set({ ...req.body, ...ownerFields(req) });
     }
     await config.save();
     return apiResponse(res, 200, 'Configuration updated successfully', config);

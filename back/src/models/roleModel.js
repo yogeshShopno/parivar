@@ -25,7 +25,8 @@ const roleSchema = new mongoose.Schema({
     default: 1
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  strict: false
 });
 
 roleSchema.index({ name: 1, created_by_admin_id: 1 }, { unique: true, sparse: true });

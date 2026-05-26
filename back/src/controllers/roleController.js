@@ -36,7 +36,7 @@ const getPermissionOptions = async (req, res) => {
 
 const getRoles = async (req, res) => {
   try {
-    const roles = await Role.find(ownerQuery(req)).sort({ name: 1 }).lean();
+    const roles = await Role.find(ownerOrLegacyMemberQuery(req)).sort({ name: 1 }).lean();
     return apiResponse(res, 200, 'Roles retrieved successfully', roles.map(formatRole));
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving roles', { error: error.message });

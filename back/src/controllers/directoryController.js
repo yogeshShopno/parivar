@@ -140,7 +140,7 @@ const getcommitteeMembers = async (req, res) => {
         {
           $or: [
             { is_committee: true },
-            { user_role_id: { $ne: 1 }, status: 1 }
+            { role_id: { $ne: null }, status: 1 }
           ]
         }
       ]

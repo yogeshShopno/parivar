@@ -58,7 +58,12 @@ const parseForm = (req, res, next) => {
 
   return upload.fields([
     { name: 'image', maxCount: 1 },
-    { name: 'images', maxCount: 20 }
+    { name: 'images', maxCount: 20 },
+    { name: 'gallery_image_1', maxCount: 1 },
+    { name: 'gallery_image_2', maxCount: 1 },
+    { name: 'gallery_image_3', maxCount: 1 },
+    { name: 'gallery_image_4', maxCount: 1 },
+    { name: 'gallery_image_5', maxCount: 1 }
   ])(req, res, (error) => {
     if (error) return next(error);
     if (req.files?.image?.[0]) {
@@ -69,6 +74,12 @@ const parseForm = (req, res, next) => {
     }
     if (req.files?.images?.length) {
       req.body.images = req.files.images.map((file) => `/uploads/${file.filename}`);
+    }
+    for (let i = 1; i <= 5; i++) {
+      const key = `gallery_image_${i}`;
+      if (req.files?.[key]?.[0]) {
+        req.body[key] = `/uploads/${req.files[key][0].filename}`;
+      }
     }
     return next();
   });

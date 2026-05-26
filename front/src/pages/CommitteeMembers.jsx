@@ -65,9 +65,9 @@ export default function CommitteeMembers() {
     setSaving(true)
     try {
       if (selected) {
-        await api.put(`/users/${selected.id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        await api.put(`/users/${selected.id}`, formData)
       } else {
-        await api.post('/users', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+        await api.post('/users', formData)
       }
       await fetchUsers()
       setSelected(null)

@@ -149,7 +149,7 @@ const savePost = async (req, res) => {
 
     // Apply tenancy/ownership
     if (!existing) {
-      Object.assign(post, ownerFields(req));
+      post.set(ownerFields(req));
     }
     
     // Admin approval logic

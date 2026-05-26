@@ -24,7 +24,7 @@ const updateConfig = async (req, res) => {
     if (!config) {
       config = new Config({ ...req.body, ...ownerFields(req) });
     } else {
-      Object.assign(config, req.body, ownerFields(req));
+      config.set({ ...req.body, ...ownerFields(req) });
     }
     await config.save();
     res.status(200).json({

@@ -125,7 +125,7 @@ const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (
         const doc = new Model({ id: await nextPublicId(Model, `${prefix}${index}_`) });
         const galleryDocPayload = { ...payload, ...ownerFields(req), image };
         delete galleryDocPayload.images;
-        Object.assign(doc, galleryDocPayload);
+        doc.set(galleryDocPayload);
         doc.status = initialStatus(req);
         await doc.save();
         return formatter(req, doc.toObject());
@@ -136,7 +136,7 @@ const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (
 
     const doc = existing || new Model({ id: await nextPublicId(Model, prefix) });
     delete payload.images;
-    Object.assign(doc, payload, ownerFields(req));
+    doc.set({ ...payload, ...ownerFields(req) });
     
     if (!existing) {
       doc.status = req.body.status !== undefined ? Number(req.body.status) : initialStatus(req);
@@ -217,7 +217,7 @@ const saveInquiry = async (req, res) => {
   try {
     const existing = req.params.id ? await findById(ContactInquiry, req.params.id, ownerQuery(req)) : null;
     const doc = existing || new ContactInquiry({ id: await nextPublicId(ContactInquiry, 'INQ') });
-    Object.assign(doc, req.body, ownerFields(req));
+    doc.set({ ...req.body, ...ownerFields(req) });
     
     if (!existing) {
       doc.status = req.body.status !== undefined ? Number(req.body.status) : initialStatus(req);
@@ -302,7 +302,7 @@ const saveMaster = async (req, res) => {
       doc.status = Number(req.body.status);
     }
     
-    Object.assign(doc, ownerFields(req));
+    doc.set(ownerFields(req));
     await doc.save();
 
     return apiResponse(res, existing ? 200 : 201, 'Master data saved successfully', formatMaster(type, doc.toObject(), config));
