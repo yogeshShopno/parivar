@@ -7,11 +7,6 @@ const postSchema = new mongoose.Schema({
     sparse: true,
     index: true
   },
-  member_id: {
-    type: String,
-    required: true,
-    index: true
-  },
   title: {
     type: String,
     required: true,

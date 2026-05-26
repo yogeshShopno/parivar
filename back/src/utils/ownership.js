@@ -16,6 +16,8 @@ const adminOwnerId = (req = {}) => {
   return String(user.created_by_admin_id || user.admin_id || user.tenant_id || userObjectId(user) || memberPublicId(user) || '');
 };
 
+const initialStatus = (req = {}) => isAdminUser(req.user) ? 1 : 0;
+
 const ownerFields = (req = {}) => {
   const createdByAdminId = adminOwnerId(req);
   const createdByMemberId = adminMemberId(req);
@@ -70,6 +72,7 @@ const requireMemberOrAdmin = (req, res, next) => {
 module.exports = {
   adminMemberId,
   adminOwnerId,
+  initialStatus,
   isAdminRequest,
   isAdminUser,
   ownedByActorQuery,

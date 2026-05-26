@@ -5,10 +5,14 @@ const {
   getHome,
   getGallery,
   getEvents,
-  getFestivals,
-  addPost,
-  getAllPostList
+  getFestivals
 } = require('../controllers/feedController');
+
+const {
+  savePost,
+  getPosts,
+  getPostById
+} = require('../controllers/postController');
 
 const router = express.Router();
 
@@ -20,18 +24,12 @@ router.post('/events', protect, parseForm, getEvents);
 router.get('/events', protect, getEvents);
 router.post('/festivals', protect, parseForm, getFestivals);
 router.get('/festivals', protect, getFestivals);
-router.post('/add_post', protect, postUpload, addPost);
-router.put('/add_post', protect, postUpload, addPost);
-router.post('/all_post_list', protect, parseForm, getAllPostList);
-router.get('/all_post_list', protect, getAllPostList);
-router.get('/posts', protect, getAllPostList);
-router.get('/posts/:id', protect, (req, res, next) => {
-  req.query.id = req.params.id;
-  return getAllPostList(req, res, next);
-});
-router.put('/posts/:id', protect, postUpload, (req, res, next) => {
-  req.body.id = req.params.id;
-  return addPost(req, res, next);
-});
+router.post('/add_post', protect, postUpload, savePost);
+router.put('/add_post', protect, postUpload, savePost);
+router.post('/all_post_list', protect, parseForm, getPosts);
+router.get('/all_post_list', protect, getPosts);
+router.get('/posts', protect, getPosts);
+router.get('/posts/:id', protect, getPostById);
+router.put('/posts/:id', protect, postUpload, savePost);
 
 module.exports = router;

@@ -5,7 +5,7 @@ const Country = require('../models/countryModel');
 const State = require('../models/stateModel');
 const City = require('../models/cityModel');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
-const { ownedByActorQuery, ownerFields, ownerOrLegacyMemberQuery } = require('../utils/ownership');
+const { ownedByActorQuery, ownerFields, ownerOrLegacyMemberQuery, initialStatus } = require('../utils/ownership');
 
 const requestData = (req) => ({
   ...req.query,
@@ -97,9 +97,14 @@ const addBusinessDetails = async (req, res) => {
       pinterest: pinterest || '',
       youtube: youtube || '',
       website: website || '',
-      status: 1,
       ...ownerFields(req)
     };
+    
+    if (!id) {
+      businessData.status = req.body.status !== undefined ? Number(req.body.status) : initialStatus(req);
+    } else if (req.body.status !== undefined) {
+      businessData.status = Number(req.body.status);
+    }
 
     ['image', 'gallery_image_1', 'gallery_image_2', 'gallery_image_3', 'gallery_image_4', 'gallery_image_5'].forEach((field) => {
       const path = uploadedPath(req, field);

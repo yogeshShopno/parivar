@@ -447,85 +447,6 @@ const deleteBusiness = async (req, res) => {
   }
 };
 
-// --- Feed/Posts Management ---
-const getPosts = async (req, res) => {
-  try {
-    const posts = await Post.find(ownerQuery(req)).sort({ createdAt: -1 }).lean();
-    return apiResponse(res, 200, 'Posts retrieved successfully', posts.map(p => ({
-      id: p.id || String(p._id),
-      title: p.title || '',
-      description: p.description || '',
-      image: publicUrl(req, p.image || ''),
-      cdate: p.cdate || '',
-      status: p.status || 1
-    })));
-  } catch (error) {
-    return apiResponse(res, 500, 'Error retrieving posts', { error: error.message });
-  }
-};
-
-const savePost = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { title, description, status } = req.body;
-    const existing = id
-      ? await Post.findOne({
-        ...ownerQuery(req),
-        $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
-      })
-      : null;
-
-    if (id && !existing) {
-      return apiResponse(res, 404, 'Post not found');
-    }
-
-    if (!title || !description) {
-      return apiResponse(res, 400, 'Post title and description are required');
-    }
-
-    const post = existing || new Post({
-      id: `POST${Date.now()}`,
-      member_id: adminMemberId(req),
-      cdate: new Date().toISOString().slice(0, 10)
-    });
-
-    post.title = title;
-    post.description = description;
-    Object.assign(post, ownerFields(req));
-    post.status = status === undefined ? Number(post.status ?? 1) : Number(status);
-    if (req.file || req.body.image) post.image = imageFromRequest(req, post.image);
-
-    await post.save();
-
-    return apiResponse(res, existing ? 200 : 201, 'Post saved successfully', {
-      id: post.id || String(post._id),
-      title: post.title || '',
-      description: post.description || '',
-      image: publicUrl(req, post.image || ''),
-      cdate: post.cdate || '',
-      status: Number(post.status ?? 1)
-    });
-  } catch (error) {
-    return apiResponse(res, 500, 'Error saving post', { error: error.message });
-  }
-};
-
-const deletePost = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await Post.deleteOne({
-      ...ownerQuery(req),
-      $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
-    });
-    if (result.deletedCount === 0) {
-      return apiResponse(res, 404, 'Post not found');
-    }
-    return apiResponse(res, 200, 'Post deleted successfully');
-  } catch (error) {
-    return apiResponse(res, 500, 'Error deleting post', { error: error.message });
-  }
-};
-
 // --- Config/Theme Management ---
 const getConfig = async (req, res) => {
   try {
@@ -564,9 +485,6 @@ module.exports = {
   getBusinesses,
   saveBusiness,
   deleteBusiness,
-  getPosts,
-  savePost,
-  deletePost,
   getConfig,
   updateConfig
 };

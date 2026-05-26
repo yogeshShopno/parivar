@@ -208,9 +208,11 @@ export default function News() {
                 </div>
 
                 <div className="mt-5 pt-3.5 border-t border-white/[0.04] flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase">
-                    <Clock className="w-3.5 h-3.5 text-slate-600" />
-                    <span>Active News</span>
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase">
+                    <Clock className={`w-3.5 h-3.5 ${News.status === 0 ? 'text-amber-500' : 'text-slate-600'}`} />
+                    <span className={News.status === 0 ? 'text-amber-500' : 'text-slate-500'}>
+                      {News.status === 0 ? 'Pending Approval' : 'Active News'}
+                    </span>
                   </div>
 
                   <button
@@ -248,7 +250,7 @@ export default function News() {
             <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Status</label>
             <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className={fieldClass} disabled={saving}>
               <option value={1} className="bg-[#0c1020]">Active</option>
-              <option value={0} className="bg-[#0c1020]">Inactive</option>
+              <option value={0} className="bg-[#0c1020]">Pending (Inactive)</option>
             </select>
           </div>
           <div>

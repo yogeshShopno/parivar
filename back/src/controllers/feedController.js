@@ -104,114 +104,11 @@ const getFestivals = async (req, res) => {
   }
 };
 
-const tenantStatusQuery = () => ({
-  $or: [
-    { status: 2 },
-    { status: 1 },
-    { status: { $exists: false } }
-  ]
-});
 
-const findPostByRequestId = (req, id) => {
-  return Post.findOne({
-    $and: [
-      ownedByActorQuery(req),
-      {
-        $or: [
-          { id: String(id) },
-          { _id: String(id).match(/^[a-f\d]{24}$/i) ? id : undefined }
-        ].filter((condition) => Object.values(condition)[0] !== undefined)
-      }
-    ]
-  });
-};
-
-const addPost = async (req, res) => {
-  try {
-    const { id, title, description } = requestData(req);
-
-    if (!title || !description) {
-      return apiResponse(res, 401, 'All data required');
-    }
-
-    const postData = {
-      member_id: currentMemberId(req),
-      title,
-      description,
-      status: 1,
-      ...ownerFields(req)
-    };
-
-    if (req.file) {
-      postData.image = `/uploads/${req.file.filename}`;
-    }
-
-    if (id) {
-      const existing = await findPostByRequestId(req, id);
-
-      if (!existing) {
-        return apiResponse(res, 401, 'Invalid edit');
-      }
-
-      Object.assign(existing, postData);
-      await existing.save();
-      return apiResponse(res, 200, 'Post update successfully', []);
-    }
-
-    postData.cdate = new Date().toISOString().slice(0, 10);
-    await Post.create(postData);
-
-    return apiResponse(res, 200, 'Post add successfully', []);
-  } catch (error) {
-    return apiResponse(res, 500, 'Error creating post', { error: error.message });
-  }
-};
-
-const getAllPostList = async (req, res) => {
-  try {
-    const posts = await Post.find({
-      $and: [
-        ownerOrLegacyMemberQuery(req),
-        tenantStatusQuery()
-      ]
-    }).sort({ _id: -1 }).lean();
-    const memberIds = [...new Set(posts.map((post) => String(post.member_id || '')).filter(Boolean))];
-    const members = await User.find({
-      $and: [
-        ownerOrLegacyMemberQuery(req),
-        { member_id: { $in: memberIds } }
-      ]
-    }).select('-password').lean();
-    const memberMap = new Map(members.map((member) => [String(member.member_id), member]));
-    const ownId = currentMemberId(req);
-
-    const data = posts.map((post) => {
-      const member = memberMap.get(String(post.member_id)) || {};
-
-      return {
-        id: post.id || String(post._id),
-        member_id: post.member_id || '',
-        title: post.title || '',
-        description: post.description || '',
-        image: publicUrl(req, post.image || ''),
-        date: post.cdate || (post.createdAt ? new Date(post.createdAt).toISOString().slice(0, 10) : ''),
-        member_name: fullName(member),
-        member_number: member.number || '',
-        is_own: String(ownId) === String(post.member_id)
-      };
-    });
-
-    return apiResponse(res, 200, 'Posts fetch successful', data);
-  } catch (error) {
-    return apiResponse(res, 500, 'Error retrieving posts', { error: error.message });
-  }
-};
 
 module.exports = {
   getHome,
   getGallery,
   getEvents,
-  getFestivals,
-  addPost,
-  getAllPostList
+  getFestivals
 };

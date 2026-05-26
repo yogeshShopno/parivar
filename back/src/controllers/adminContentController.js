@@ -11,7 +11,7 @@ const State = require('../models/stateModel');
 const City = require('../models/cityModel');
 const Master = require('../models/masterModel');
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
-const { ownerFields, ownerQuery } = require('../utils/ownership');
+const { ownerFields, ownerQuery, initialStatus } = require('../utils/ownership');
 
 const isObjectId = (id) => mongoose.isValidObjectId(id);
 
@@ -98,8 +98,7 @@ const bannerPayload = (req, existing = {}) => ({
   title: req.body.title || existing.title || '',
   subtitle: req.body.subtitle || existing.subtitle || '',
   image: imageFromRequest(req, existing.image),
-  link: req.body.link || existing.link || '',
-  status: req.body.status !== undefined ? Number(req.body.status) : Number(existing.status ?? 1)
+  link: req.body.link || existing.link || ''
 });
 
 const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (req, res) => {
@@ -127,6 +126,7 @@ const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (
         const galleryDocPayload = { ...payload, ...ownerFields(req), image };
         delete galleryDocPayload.images;
         Object.assign(doc, galleryDocPayload);
+        doc.status = initialStatus(req);
         await doc.save();
         return formatter(req, doc.toObject());
       }));
@@ -137,6 +137,13 @@ const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (
     const doc = existing || new Model({ id: await nextPublicId(Model, prefix) });
     delete payload.images;
     Object.assign(doc, payload, ownerFields(req));
+    
+    if (!existing) {
+      doc.status = req.body.status !== undefined ? Number(req.body.status) : initialStatus(req);
+    } else if (req.body.status !== undefined) {
+      doc.status = Number(req.body.status);
+    }
+    
     await doc.save();
 
     return apiResponse(res, existing ? 200 : 201, `${label} saved successfully`, formatter(req, doc.toObject()));
@@ -158,6 +165,7 @@ const formatEvent = (req, item) => ({
   start_time: item.start_time || '',
   end_time: item.end_time || '',
   entry_type: item.entry_type || '',
+  status: Number(item.status ?? 1),
   image: publicUrl(req, item.image || '')
 });
 
@@ -169,6 +177,7 @@ const formatFestival = (req, item) => ({
   festival_date: item.festival_date || item.date || '',
   button_name: item.button_name || '',
   button_link: item.button_link || '',
+  status: Number(item.status ?? 1),
   image: publicUrl(req, item.image || '')
 });
 
@@ -180,6 +189,7 @@ const formatGallery = (req, item) => ({
   year: item.year || '',
   gallery_category_id: item.gallery_category_id || '',
   event_category: item.event_category || item.category || 'General',
+  status: Number(item.status ?? 1),
   image: publicUrl(req, item.image || '')
 });
 
@@ -199,7 +209,7 @@ const formatInquiry = (req, item) => ({
   phone: item.phone || '',
   subject: item.subject || '',
   message: item.message || '',
-  status: item.status || 'new',
+  status: Number(item.status ?? 1),
   createdAt: item.createdAt || ''
 });
 
@@ -208,6 +218,13 @@ const saveInquiry = async (req, res) => {
     const existing = req.params.id ? await findById(ContactInquiry, req.params.id, ownerQuery(req)) : null;
     const doc = existing || new ContactInquiry({ id: await nextPublicId(ContactInquiry, 'INQ') });
     Object.assign(doc, req.body, ownerFields(req));
+    
+    if (!existing) {
+      doc.status = req.body.status !== undefined ? Number(req.body.status) : initialStatus(req);
+    } else if (req.body.status !== undefined) {
+      doc.status = Number(req.body.status);
+    }
+    
     await doc.save();
     return apiResponse(res, existing ? 200 : 201, 'Contact inquiry saved successfully', formatInquiry(req, doc.toObject()));
   } catch (error) {
@@ -279,7 +296,12 @@ const saveMaster = async (req, res) => {
       if (config.parentKey) doc[config.parentKey] = req.body.parent_id || req.body[config.parentKey] || doc[config.parentKey] || '';
     }
 
-    if (req.body.status !== undefined) doc.status = Number(req.body.status);
+    if (!existing) {
+      doc.status = req.body.status !== undefined ? Number(req.body.status) : initialStatus(req);
+    } else if (req.body.status !== undefined) {
+      doc.status = Number(req.body.status);
+    }
+    
     Object.assign(doc, ownerFields(req));
     await doc.save();
 
@@ -305,82 +327,6 @@ const deleteMaster = async (req, res) => {
   }
 };
 
-
-
-const getNewsList = async (req, res) => {
-    console.log('Received request to fetch news list');
-  try {
-    const news = await News.find();
-    res.status(200).json(news);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-const getNewsById = async (req, res) => {
-    try {
-        const news = await newsModel.findById(req.params.id);
-        if (!news) {
-            return res.status(404).json({ message: 'News not found' });
-        }
-        res.status(200).json(news);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-const addNews = async (req, res) => {
-    console.log('Received request to add news with data:', req.body, 'and file:', req.file);
-    try {
-        const data = { ...req.body };
-        if (req.file) {
-            data.image = {
-                data: req.file.buffer,
-                contentType: req.file.mimetype
-            };
-        }
-
-        const news = new News(data);
-        await news.save();
-        res.status(201).json(news);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
-
-const updateNews = async (req, res) => {
-    try {
-        const updateData = { ...req.body };
-        if (req.file) {
-            updateData.image = {
-                data: req.file.buffer,
-                contentType: req.file.mimetype
-            };
-        }
-
-        const news = await News.findByIdAndUpdate(req.params.id, updateData, { new: true });
-        if (!news) {
-            return res.status(404).json({ message: 'News not found' });
-        }
-        res.status(200).json(news);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
-
-const deleteNews = async (req, res) => {
-    try {
-        const news = await News.findByIdAndDelete(req.params.id);
-        if (!news) {
-            return res.status(404).json({ message: 'News not found' });
-        }
-        res.status(200).json({ message: 'News deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-
 module.exports = {
   getEvents: listContent(Event, formatEvent, 'Events'),
   saveEvent: saveContent(Event, eventPayload, formatEvent, 'Event', 'EVT'),
@@ -399,6 +345,5 @@ module.exports = {
   deleteInquiry: deleteContent(ContactInquiry, 'Contact inquiry'),
   getMasters,
   saveMaster,
-  deleteMaster,
-
+  deleteMaster
 };

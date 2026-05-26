@@ -3,7 +3,7 @@ const {
   getPosts,
   savePost,
   deletePost
-} = require('../../controllers/adminController');
+} = require('../../controllers/postController');
 const { protect, requirePermission } = require('../../middleware/auth');
 const { parseForm } = require('../../middleware/upload');
 
