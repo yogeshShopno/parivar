@@ -64,7 +64,6 @@ const formatGallery = (req, item) => ({
 
 const getGallery = async (req, res) => {
 
-  console.log('Fetching gallery with query:', ownerQuery(req));
   try {
     const rows = await Gallery.find(ownerQuery(req)).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'Gallery retrieved successfully', rows.map((row) => formatGallery(req, row)));
@@ -74,7 +73,6 @@ const getGallery = async (req, res) => {
 };
 
 const saveGallery = async (req, res) => {
-  console.log('Saving gallery with payload:', req.body);
   try {
     const existing = req.params.id ? await findById(Gallery, req.params.id, ownerQuery(req)) : null;
     const payload = galleryPayload(req, existing || {});
