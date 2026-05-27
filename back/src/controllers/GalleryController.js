@@ -79,24 +79,25 @@ const getGallery = async (req, res) => {
 };
 
 const saveGallery = async (req, res) => {
+  console.log('Saving gallery with payload:', req.body);
   try {
     const existing = req.params.id ? await findById(Gallery, req.params.id, ownerQuery(req)) : null;
     const payload = galleryPayload(req, existing || {});
-    
+
     const hasImages = Array.isArray(payload.images) && payload.images.length > 0;
     if (!hasImages && !existing) {
       return apiResponse(res, 400, 'Gallery images are required');
     }
 
-    const doc = existing || new Gallery({ id: await nextPublicId(Gallery, 'GAL') });
+    const doc = existing || new Gallery({});
     doc.set({ ...payload, ...ownerFields(req) });
-    
+
     if (!existing) {
       doc.status = req.body.status !== undefined ? Number(req.body.status) : initialStatus(req);
     } else if (req.body.status !== undefined) {
       doc.status = Number(req.body.status);
     }
-    
+
     await doc.save();
     return apiResponse(res, existing ? 200 : 201, 'Gallery saved successfully', formatGallery(req, doc.toObject()));
   } catch (error) {
