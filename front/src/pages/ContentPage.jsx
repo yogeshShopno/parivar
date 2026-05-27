@@ -45,7 +45,7 @@ const definitions = {
   gallery: {
     title: 'Gallery',
     subtitle: 'Maintain gallery images and categories',
-    endpoint: '/content/gallery',
+    endpoint: '/gallery',
     fields: [
       { name: 'category', label: 'Category' },
       { name: 'year', label: 'Year' },
