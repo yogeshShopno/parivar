@@ -6,6 +6,9 @@ router.use(require('../authRoutes'));
 router.use(require('../businessRoutes'));
 router.use(require('../directoryRoutes'));
 router.use(require('../postRoutes'));
+router.use(require('../newsRoutes'));
+
+
 
 router.use('/auth', require('../authRoutes'));
 router.use('/business', require('../businessRoutes'));

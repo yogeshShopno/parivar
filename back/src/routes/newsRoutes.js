@@ -9,12 +9,20 @@ const {
   deleteNews
 } = require('../controllers/newsController');
 
+
 const router = express.Router();
 
-router.get('/', protect, getNewsList);
-router.get('/:id', protect, getNewsById);
-router.post('/', protect, postUpload, addNews);
-router.put('/:id', protect, postUpload, updateNews);
-router.delete('/:id', protect, deleteNews);
+// Logging middleware
+router.use((req, res, next) => {
+  console.log(`[NEWS] ${req.method} ${req.path} - User: ${req.user?.id || 'anonymous'}`);
+  next();
+});
+// Member/mobile style routes (match pattern used by posts):
+// Define full paths so they can be mounted both at root and under `/news`.
+router.get('/news', protect, getNewsList);
+router.get('/news/:id', protect, getNewsById);
+router.post('/news', protect, postUpload, addNews);
+router.put('/news/:id', protect, postUpload, updateNews);
+router.delete('/news/:id', protect, deleteNews);
 
 module.exports = router;
