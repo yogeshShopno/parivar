@@ -47,13 +47,30 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
     setIsModalOpen(true)
   }
 
-  const openEdit = (row) => {
+  const openEdit = async (row) => {
     setSelected(row)
+    setIsModalOpen(true)
+    
+    // Set initial values from the row list data immediately
     setFormData(fields.reduce((acc, field) => ({
       ...acc,
       [field.name]: field.type === 'file' ? '' : row[field.name] ?? row[field.fallback] ?? field.defaultValue ?? ''
     }), {}))
-    setIsModalOpen(true)
+
+    try {
+      // Fetch fresh, absolute latest data from the backend by ID
+      const res = await api.get(`${endpoint}/${row.id}`)
+      const freshData = res.data?.data || res.data
+      if (freshData) {
+        setFormData(fields.reduce((acc, field) => ({
+          ...acc,
+          [field.name]: field.type === 'file' ? '' : freshData[field.name] ?? freshData[field.fallback] ?? field.defaultValue ?? ''
+        }), {}))
+      }
+    } catch (err) {
+      console.error("Failed to fetch fresh row data:", err)
+      // Fallback: keep the initial local row data in the form
+    }
   }
 
   const handleSave = async (event) => {

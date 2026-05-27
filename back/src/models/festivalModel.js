@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const festivalSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    unique: true,
+    sparse: true,
+    index: true
+  },
   title: {
     type: String,
     required: true,
