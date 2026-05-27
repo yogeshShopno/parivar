@@ -7,7 +7,6 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Users from './pages/Users'
 import Businesses from './pages/Businesses'
-import Posts from './pages/posts'
 import Settings from './pages/Settings'
 import CommitteeMembers from './pages/CommitteeMembers'
 import Roles from './pages/Roles'
@@ -15,6 +14,7 @@ import ContentPage from './pages/ContentPage'
 import MasterPage from './pages/MasterPage'
 import News from './pages/News'
 import { hasPermission } from './lib/permissions'
+import Posts from './pages/Post'
 
 export default function App() {
   return (

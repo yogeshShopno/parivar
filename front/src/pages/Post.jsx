@@ -5,7 +5,7 @@ import Modal from '../components/Modal'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-slate-950/40 text-slate-200 border border-white/[0.08] focus:border-brand-500/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-brand-500/10'
 
-export default function Posts() {
+export default function Post() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
