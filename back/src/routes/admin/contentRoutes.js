@@ -17,11 +17,6 @@ router.post('/events', protect, requirePermission('events.add'), parseForm, admi
 router.put('/events/:id', protect, requirePermission('events.edit'), parseForm, adminContent.saveEvent);
 router.delete('/events/:id', protect, requirePermission('events.delete'), adminContent.deleteEvent);
 
-// Gallery routes
-router.get('/gallery', protect, requirePermission('gallery.list'), adminContent.getGallery);
-router.post('/gallery', protect, requirePermission('gallery.add'), parseForm, adminContent.saveGallery);
-router.put('/gallery/:id', protect, requirePermission('gallery.edit'), parseForm, adminContent.saveGallery);
-router.delete('/gallery/:id', protect, requirePermission('gallery.delete'), adminContent.deleteGallery);
 
 // Banner routes
 router.get('/banners', protect, requirePermission('banners.list'), adminContent.getBanners);

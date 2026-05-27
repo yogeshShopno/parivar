@@ -183,15 +183,12 @@ const formatFestival = (req, item) => ({
 
 const formatGallery = (req, item) => ({
   id: item.id || String(item._id),
-  title: item.title || '',
-  description: item.description || '',
   category: item.category || item.event_category || 'General',
   year: item.year || '',
   gallery_category_id: item.gallery_category_id || '',
-  event_category: item.event_category || item.category || 'General',
-  status: Number(item.status ?? 1),
   image: publicUrl(req, item.image || '')
 });
+
 
 const formatBanner = (req, item) => ({
   id: item.id || String(item._id),

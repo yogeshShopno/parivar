@@ -21,6 +21,7 @@ router.use('/config', require('./configRoutes'));
 router.use('/get_app_theme', require('./configRoutes'));
 router.use('/update_app_theme', require('./configRoutes'));
 router.use('/content', require('./contentRoutes'));
+router.use('./gallery', require('./contentRoutes')); // Gallery routes are now under /content, but this line is kept for backward compatibility.
 router.use('/masters', require('./masterRoutes'));
 router.use('/news', require('./newsRoutes'));
 

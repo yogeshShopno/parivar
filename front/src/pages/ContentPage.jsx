@@ -41,24 +41,24 @@ const definitions = {
       { key: 'event_location', label: 'Location' }
     ]
   },
+  
   gallery: {
     title: 'Gallery',
     subtitle: 'Maintain gallery images and categories',
     endpoint: '/content/gallery',
     fields: [
-      { name: 'title', label: 'Title' },
-      { name: 'description', label: 'Description', type: 'textarea' },
       { name: 'category', label: 'Category' },
       { name: 'year', label: 'Year' },
       { name: 'images', label: 'Images', type: 'file', multiple: true }
     ],
     columns: [
-      { key: 'image', label: 'Image', type: 'image' },
+      { key: 'images', label: 'Images', type: 'image' },
       { key: 'title', label: 'Title' },
       { key: 'category', label: 'Category' },
       { key: 'year', label: 'Year' }
     ]
   },
+
   banners: {
     title: 'Banner',
     subtitle: 'Control app banner slides and links',

@@ -1,20 +1,11 @@
 const mongoose = require('mongoose');
 
 const gallerySchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  description: {
-    type: String,
-    trim: true,
-    default: ''
-  },
-  image: {
-    type: String,
-    required: true
-  },
+ 
+images: {
+  type: [String],  // This allows multiple image URLs
+  required: true
+},
   category: {
     type: String,
     default: 'General',
@@ -28,10 +19,7 @@ const gallerySchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  event_category: {
-    type: String,
-    default: ''
-  }
+
 }, {
   timestamps: true,
   strict: false
