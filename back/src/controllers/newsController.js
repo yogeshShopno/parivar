@@ -20,7 +20,7 @@ const newsFilter = (req, extra = {}) => {
 
 const findNews = (req, id) => News.findOne(newsFilter(req, {
   $or: [
-    { news_id: String(id) },
+    {_id: String(id) },
     ...(isObjectId(id) ? [{ _id: id }] : [])
   ]
 }));
@@ -29,8 +29,7 @@ const formatNews = (req, item = {}) => {
   const image = item.image_url || (typeof item.image === 'string' ? item.image : '');
 
   return {
-    id: item.news_id || String(item._id),
-    news_id: item.news_id || String(item._id),
+    _id: String(item._id),
     title: item.title || '',
     description: item.description || item.content || '',
     content: item.content || item.description || '',
@@ -50,6 +49,7 @@ const newsPayload = (req, existing = {}) => {
 
   return {
     ...req.body,
+    id: existing.id || String(existing._id),
     title,
     description,
     content: req.body.content || description,
@@ -90,7 +90,6 @@ const addNews = async (req, res) => {
         Object.assign(data, ownerFields(req), { member_id: adminMemberId(req) });
 
         const news = new News({
-            news_id: `NEWS${Date.now()}`,
             ...data
         });
         await news.save();
