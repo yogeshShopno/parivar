@@ -1,13 +1,13 @@
 const express = require('express');
 const { protect, requirePermission } = require('../../middleware/auth');
 const { parseForm } = require('../../middleware/upload');
-const adminContent = require('../../controllers/adminContentController');
+const { getGallery ,saveGallery ,deleteGallery} = require('../../controllers/GalleryController');
 
 const router = express.Router();
 
-router.get('/gallery', protect, requirePermission('gallery.list'), adminContent.getGallery);
-router.post('/gallery', protect, requirePermission('gallery.add'), parseForm, adminContent.saveGallery);
-router.put('/gallery/:id', protect, requirePermission('gallery.edit'), parseForm, adminContent.saveGallery);
-router.delete('/gallery/:id', protect, requirePermission('gallery.delete'), adminContent.deleteGallery);
+router.get('/', protect, requirePermission('gallery.list'), getGallery);
+router.post('/', protect, requirePermission('gallery.add'), parseForm,saveGallery);
+router.put('/:id', protect, requirePermission('gallery.edit'), parseForm,saveGallery);
+router.delete('/:id', protect, requirePermission('gallery.delete'),deleteGallery);
 
 module.exports = router;

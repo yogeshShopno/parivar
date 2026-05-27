@@ -83,13 +83,12 @@ const festivalPayload = (req, existing = {}) => {
 };
 
 const galleryPayload = (req, existing = {}) => {
-  const title = req.body.title || req.body.category || existing.title || existing.category || 'Gallery Image';
   return {
     ...req.body,
-    title,
+   
     image: imageFromRequest(req, existing.image),
     category: req.body.category || req.body.event_category || existing.category || 'General',
-    event_category: req.body.event_category || req.body.category || existing.event_category || 'General'
+    year: req.body.year || existing.year || ''
   };
 };
 
@@ -180,15 +179,6 @@ const formatFestival = (req, item) => ({
   status: Number(item.status ?? 1),
   image: publicUrl(req, item.image || '')
 });
-
-const formatGallery = (req, item) => ({
-  id: item.id || String(item._id),
-  category: item.category || item.event_category || 'General',
-  year: item.year || '',
-  gallery_category_id: item.gallery_category_id || '',
-  image: publicUrl(req, item.image || '')
-});
-
 
 const formatBanner = (req, item) => ({
   id: item.id || String(item._id),
@@ -331,9 +321,7 @@ module.exports = {
   getFestivals: listContent(Festival, formatFestival, 'Festivals'),
   saveFestival: saveContent(Festival, festivalPayload, formatFestival, 'Festival', 'FST'),
   deleteFestival: deleteContent(Festival, 'Festival'),
-  getGallery: listContent(Gallery, formatGallery, 'Gallery'),
-  saveGallery: saveContent(Gallery, galleryPayload, formatGallery, 'Gallery', 'GAL'),
-  deleteGallery: deleteContent(Gallery, 'Gallery item'),
+
   getBanners: listContent(Banner, formatBanner, 'Banners'),
   saveBanner: saveContent(Banner, bannerPayload, formatBanner, 'Banner', 'BAN'),
   deleteBanner: deleteContent(Banner, 'Banner'),
