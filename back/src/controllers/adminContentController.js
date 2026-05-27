@@ -327,39 +327,9 @@ const getFestivalById = async (req, res) => {
   }
 };
 
-const getEventById = async (req, res) => {
-  try {
-    const doc = await findById(Event, req.params.id, ownerQuery(req));
-    if (!doc) return apiResponse(res, 404, 'Event not found');
-    return apiResponse(res, 200, 'Event retrieved successfully', formatEvent(req, doc.toObject()));
-  } catch (error) {
-    return apiResponse(res, 500, 'Error retrieving event', { error: error.message });
-  }
-};
-
-const getBannerById = async (req, res) => {
-  try {
-    const doc = await findById(Banner, req.params.id, ownerQuery(req));
-    if (!doc) return apiResponse(res, 404, 'Banner not found');
-    return apiResponse(res, 200, 'Banner retrieved successfully', formatBanner(req, doc.toObject()));
-  } catch (error) {
-    return apiResponse(res, 500, 'Error retrieving banner', { error: error.message });
-  }
-};
-
-const getInquiryById = async (req, res) => {
-  try {
-    const doc = await findById(ContactInquiry, req.params.id, ownerQuery(req));
-    if (!doc) return apiResponse(res, 404, 'Contact inquiry not found');
-    return apiResponse(res, 200, 'Contact inquiry retrieved successfully', formatInquiry(req, doc.toObject()));
-  } catch (error) {
-    return apiResponse(res, 500, 'Error retrieving contact inquiry', { error: error.message });
-  }
-};
 
 module.exports = {
   getEvents: listContent(Event, formatEvent, 'Events'),
-  getEventById,
   saveEvent: saveContent(Event, eventPayload, formatEvent, 'Event', 'EVT'),
   deleteEvent: deleteContent(Event, 'Event'),
   getFestivals: listContent(Festival, formatFestival, 'Festivals'),
@@ -368,11 +338,9 @@ module.exports = {
   deleteFestival: deleteContent(Festival, 'Festival'),
 
   getBanners: listContent(Banner, formatBanner, 'Banners'),
-  getBannerById,
   saveBanner: saveContent(Banner, bannerPayload, formatBanner, 'Banner', 'BAN'),
   deleteBanner: deleteContent(Banner, 'Banner'),
   getInquiries: listContent(ContactInquiry, formatInquiry, 'Contact inquiries'),
-  getInquiryById,
   saveInquiry,
   deleteInquiry: deleteContent(ContactInquiry, 'Contact inquiry'),
   getMasters,
