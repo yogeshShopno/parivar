@@ -317,11 +317,23 @@ const deleteMaster = async (req, res) => {
   }
 };
 
+const getFestivalById = async (req, res) => {
+  try {
+    const doc = await findById(Festival, req.params.id, ownerQuery(req));
+    if (!doc) return apiResponse(res, 404, 'Festival not found');
+    return apiResponse(res, 200, 'Festival retrieved successfully', formatFestival(req, doc.toObject()));
+  } catch (error) {
+    return apiResponse(res, 500, 'Error retrieving festival', { error: error.message });
+  }
+};
+
+
 module.exports = {
   getEvents: listContent(Event, formatEvent, 'Events'),
   saveEvent: saveContent(Event, eventPayload, formatEvent, 'Event', 'EVT'),
   deleteEvent: deleteContent(Event, 'Event'),
   getFestivals: listContent(Festival, formatFestival, 'Festivals'),
+  getFestivalById,
   saveFestival: saveContent(Festival, festivalPayload, formatFestival, 'Festival', 'FST'),
   deleteFestival: deleteContent(Festival, 'Festival'),
 

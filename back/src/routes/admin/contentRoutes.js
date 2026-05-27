@@ -7,6 +7,7 @@ const router = express.Router();
 
 // Festival routes
 router.get('/festivals', protect, requirePermission('festivals.list'), adminContent.getFestivals);
+router.get('/festivals/:id', protect, requirePermission('festivals.list'), adminContent.getFestivalById);
 router.post('/festivals', protect, requirePermission('festivals.add'), parseForm, adminContent.saveFestival);
 router.put('/festivals/:id', protect, requirePermission('festivals.edit'), parseForm, adminContent.saveFestival);
 router.delete('/festivals/:id', protect, requirePermission('festivals.delete'), adminContent.deleteFestival);
