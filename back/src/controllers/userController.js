@@ -34,6 +34,7 @@ const sanitizeUser = (user) => {
 // Register a new user
 const register = async (req, res) => {
   console.log('Register request body:', req.body);
+  
   try {
     const {
       member_id, parent_member_id, first_name, middle_name, last_name, email, password,

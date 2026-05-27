@@ -7,7 +7,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
     middle_name: '',
     last_name: '',
     email: '',
-    phone: '',
+    number: '',
     gender: '',
     dob: '',
     blood_group: '',
@@ -36,7 +36,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
         middle_name: user.middle_name || '',
         last_name: user.last_name || '',
         email: user.email || '',
-        phone: user.phone || '',
+        number: user.number || '',
         gender: user.gender || '',
         dob: formattedDob,
         blood_group: user.blood_group || '',
@@ -53,7 +53,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
         middle_name: '',
         last_name: '',
         email: '',
-        phone: '',
+        number: '',
         gender: '',
         dob: '',
         blood_group: '',
@@ -72,7 +72,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
   const validate = () => {
     const newErrors = {}
     if (!formData.first_name.trim()) newErrors.first_name = 'First name is required'
-    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required'
+    if (!formData.number.trim()) newErrors.number = 'number is required'
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email format is invalid'
     }
@@ -152,15 +152,15 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Phone Number *</label>
+            <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Mobile Number *</label>
             <input
               type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              value={formData.number}
+              onChange={(e) => setFormData({ ...formData, number: e.target.value })}
               className="w-full px-3 py-2.5 bg-slate-950/40 text-slate-200 border border-white/[0.08] focus:border-brand-500/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-brand-500/10 transition-all"
               disabled={isLoading}
             />
-            {errors.phone && <p className="text-rose-500 text-[10px] mt-1 font-semibold">{errors.phone}</p>}
+            {errors.number && <p className="text-rose-500 text-[10px] mt-1 font-semibold">{errors.number}</p>}
           </div>
 
           <div>

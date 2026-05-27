@@ -53,7 +53,7 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
     if (!formData.phone.trim()) nextErrors.phone = 'Phone number is required'
     if (!member && !formData.password.trim()) nextErrors.password = 'Strong password is required'
     if (formData.password && formData.password.length < 8) nextErrors.password = 'Use at least 8 characters'
-    if (!formData.role_id) nextErrors.role_id = 'Role is required'
+    // if (!formData.role_id) nextErrors.role_id = 'Role is required'
     if (!formData.designation.trim()) nextErrors.designation = 'Designation is required'
     if (formData.status === '') nextErrors.status = 'Status is required'
 
@@ -110,7 +110,7 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Role *</label>
+          <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Role </label>
           <select value={formData.role_id} onChange={(e) => setFormData({ ...formData, role_id: e.target.value })} className={fieldClass} disabled={isLoading}>
             <option value="" className="bg-[#0c1020]">Select Role</option>
             {activeRoles.map((role) => <option key={role.id} value={role.id} className="bg-[#0c1020]">{role.name}</option>)}

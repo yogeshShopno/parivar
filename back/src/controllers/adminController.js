@@ -49,7 +49,7 @@ const login = async (req, res) => {
     const permissions = getRolePermissions(user);
 
     // Restrict access to committee members, legacy self admins, or users with an assigned role.
-    if (!user.is_committee && user.relation !== 'Self' && permissions.length === 0) {
+    if (!user.is_committee && user.committee_role !== 'Self'  && permissions.length === 0) {
       return apiResponse(res, 403, 'Access denied: Insufficient permissions');
     }
 
@@ -178,9 +178,11 @@ const getUsers = async (req, res) => {
 const createUser = async (req, res) => {
   try {
     const {
-      full_name,
+      first_name,
+      middle_name,
+      last_name,
       email,
-      phone,
+      number,
       password,
       gender,
       dob,
@@ -194,16 +196,19 @@ const createUser = async (req, res) => {
       status,
       image
     } = req.body;
+  
+    console.log('Creating user with data:', first_name, number);
 
-    console.log('Create user request body:', req.body);
-    
-    const nameParts = splitFullName(full_name);
-    const first_name = req.body.first_name || nameParts.first_name;
-    const middle_name = req.body.middle_name ?? nameParts.middle_name;
-    const last_name = req.body.last_name ?? nameParts.last_name;
 
-    if (!first_name || !phone) {
-      return apiResponse(res, 400, 'First name and phone number are required');
+    if (!first_name || !number) {
+      return apiResponse(res, 400, 'First name and number are required');
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return apiResponse(res, 400, 'Invalid email format');
+    }
+
+    if(await User.findOne({ email: email ? email.toLowerCase() : undefined })) {
+      return apiResponse(res, 400, 'Email already exists');
     }
 
     if ((is_committee === true || is_committee === 'true') && req.file?.size > 1024 * 1024) {
@@ -228,7 +233,7 @@ const createUser = async (req, res) => {
       last_name: last_name || '',
       email: email ? email.toLowerCase() : '',
       password: password || '12345',
-      number: phone,
+      number: number,
       gender: gender || '',
       dob: dob || null,
       blood_group: blood_group || '',
@@ -252,14 +257,18 @@ const createUser = async (req, res) => {
     await newUser.save();
     
     return apiResponse(res, 201, 'User created successfully', {
-      id: newUser.member_id,
+      _id: newUser._id,
       name: fullName(newUser),
       email: newUser.email,
-      phone: newUser.number,
+      number: newUser.number,
       designation: newUser.designation || '',
       status: Number(newUser.status ?? 1),
       image: publicUrl(req, newUser.image || ''),
-      role: newUser.is_committee ? 'admin' : 'user'
+      role: newUser.is_committee ? 'admin' : 'user',
+      is_committee: newUser.is_committee,
+      committee_role: newUser.committee_role,
+      
+
     });
   } catch (error) {
     return apiResponse(res, 500, 'Error creating user', { error: error.message });
@@ -270,9 +279,11 @@ const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const {
-      full_name,
+      first_name,
+      middle_name,
+      last_name,
       email,
-      phone,
+      number,
       gender,
       dob,
       blood_group,
@@ -285,11 +296,7 @@ const updateUser = async (req, res) => {
       designation,
       status
     } = req.body;
-    const hasFullName = full_name !== undefined;
-    const nameParts = hasFullName ? splitFullName(full_name) : {};
-    const first_name = req.body.first_name ?? nameParts.first_name;
-    const middle_name = req.body.middle_name ?? nameParts.middle_name;
-    const last_name = req.body.last_name ?? nameParts.last_name;
+
 
     const user = await User.findOne({
       $and: [

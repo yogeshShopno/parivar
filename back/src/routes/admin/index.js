@@ -1,14 +1,18 @@
 const express = require('express');
 const roleController = require('../../controllers/roleController');
 const { protect, requirePermission } = require('../../middleware/auth');
+const { createUser } = require('../../controllers/adminController');
+const { parseForm } = require('../../middleware/upload');
 
 const router = express.Router();
 
-router.use('/auth', require('./authRoutes'));
+router.post('/register', parseForm, createUser);
+
 router.use('/login', require('./authRoutes'));
+
+router.use('/users', require('./userRoutes'));
 router.use('/stats', require('./dashboardRoutes'));
 router.use('/dashboard', require('./dashboardRoutes'));
-router.use('/users', require('./userRoutes'));
 router.get('/permissions', protect, requirePermission('roles.list'), roleController.getPermissionOptions);
 router.use('/roles', require('./roleRoutes'));
 router.use('/businesses', require('./businessRoutes'));

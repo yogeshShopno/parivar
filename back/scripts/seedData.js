@@ -12,7 +12,7 @@ const buildAdminOwner = (memberId, name) => ({
 });
 
 const bhavikAdmin = buildAdminOwner('101', 'Bhavik wala');
-const yogeshAdmin = buildAdminOwner('1021', 'yogesh wala');
+const yogeshAdmin = buildAdminOwner('1021', 'yogesh parmar');
 
 const countries = [
 	{ id: '1', name: 'India', country: 'India' },

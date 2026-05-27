@@ -46,7 +46,7 @@ app.post('/test', (req, res) => {
 });
 
 // Admin/software APIs.
-app.use('/api/admin/users', adminUserRoutes);
+
 app.use('/api/admin', adminRoutes);
 
 // Member/mobile APIs.
