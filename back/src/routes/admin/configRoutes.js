@@ -11,5 +11,7 @@ const router = express.Router();
 router.get('/', protect, requirePermission('settings.edit'), getConfig);
 
 router.put('/', protect, requirePermission('settings.edit'), parseForm, updateConfig);
+router.post('/', protect, requirePermission('settings.edit'), parseForm, updateConfig);
+
 
 module.exports = router;

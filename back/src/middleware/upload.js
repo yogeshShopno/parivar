@@ -39,6 +39,18 @@ const upload = multer({
   fileFilter: fileFilter
 });
 
+const fileFields = [
+  { name: 'image', maxCount: 1 },
+  { name: 'images', maxCount: 20 },
+  { name: 'gallery_image_1', maxCount: 1 },
+  { name: 'gallery_image_2', maxCount: 1 },
+  { name: 'gallery_image_3', maxCount: 1 },
+  { name: 'gallery_image_4', maxCount: 1 },
+  { name: 'gallery_image_5', maxCount: 1 },
+  { name: 'appImage', maxCount: 1 },
+  { name: 'webImage', maxCount: 1 }
+];
+
 // Multer fields mapping for business details (Logo + up to 5 gallery images)
 const businessUpload = upload.fields([
   { name: 'image', maxCount: 1 },
@@ -46,7 +58,8 @@ const businessUpload = upload.fields([
   { name: 'gallery_image_2', maxCount: 1 },
   { name: 'gallery_image_3', maxCount: 1 },
   { name: 'gallery_image_4', maxCount: 1 },
-  { name: 'gallery_image_5', maxCount: 1 }
+  { name: 'gallery_image_5', maxCount: 1 },
+
 ]);
 
 // Multer single image upload for posts
@@ -56,31 +69,40 @@ const parseForm = (req, res, next) => {
     return next();
   }
 
-  return upload.fields([
-    { name: 'image', maxCount: 1 },
-    { name: 'images', maxCount: 20 },
-    { name: 'gallery_image_1', maxCount: 1 },
-    { name: 'gallery_image_2', maxCount: 1 },
-    { name: 'gallery_image_3', maxCount: 1 },
-    { name: 'gallery_image_4', maxCount: 1 },
-    { name: 'gallery_image_5', maxCount: 1 }
-  ])(req, res, (error) => {
+  return upload.any()(req, res, (error) => {
     if (error) return next(error);
-    if (req.files?.image?.[0]) {
-      req.file = req.files.image[0];
+
+    if (Array.isArray(req.files)) {
+      req.files.forEach((file) => {
+        const fieldName = file.fieldname;
+        const imagePath = `/uploads/${file.filename}`;
+
+        if (fieldName === 'image' && !req.file) {
+          req.file = file;
+        }
+
+        if (fieldName === 'images') {
+          if (!Array.isArray(req.body.images)) {
+            req.body.images = [];
+          }
+          req.body.images.push(imagePath);
+          return;
+        }
+
+        if (req.body[fieldName] === undefined) {
+          req.body[fieldName] = imagePath;
+        } else if (Array.isArray(req.body[fieldName])) {
+          req.body[fieldName].push(imagePath);
+        } else {
+          req.body[fieldName] = [req.body[fieldName], imagePath];
+        }
+      });
     }
+
     if (req.file && !req.body.image) {
       req.body.image = `/uploads/${req.file.filename}`;
     }
-    if (req.files?.images?.length) {
-      req.body.images = req.files.images.map((file) => `/uploads/${file.filename}`);
-    }
-    for (let i = 1; i <= 5; i++) {
-      const key = `gallery_image_${i}`;
-      if (req.files?.[key]?.[0]) {
-        req.body[key] = `/uploads/${req.files[key][0].filename}`;
-      }
-    }
+
     return next();
   });
 };

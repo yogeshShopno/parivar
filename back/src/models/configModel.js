@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const configSchema = new mongoose.Schema({
-  
+
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -42,9 +42,20 @@ const configSchema = new mongoose.Schema({
   gradientEnd: {
     type: String,
     default: "#7B0D1C"
-  }
-}, {
-  timestamps: true
+  },
+  appImage: {
+    type: String,
+    default: ""
+  },
+  webImage: {
+    type: String,
+    default: ""
+  },
+
+}
+, {
+  timestamps: true,
+  strict: false
 });
 
 module.exports = mongoose.model('Config', configSchema);

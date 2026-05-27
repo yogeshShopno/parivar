@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Settings, Save, Sparkles, RefreshCw, Info } from 'lucide-react'
-import api from '../lib/api'
+import api, { assetUrl } from '../lib/api'
 
 export default function SettingsPage() {
   const [config, setConfig] = useState({
@@ -12,12 +12,18 @@ export default function SettingsPage() {
     fontColor: '#FFFFFF',
     borderColor: '#E8D9C8',
     gradientStart: '#E65100',
-    gradientEnd: '#7B0D1C'
+    gradientEnd: '#7B0D1C',
+    appImage: '',
+    webImage: ''
   })
   const [loading, setLoading] = useState(false)
   const [saveLoading, setSaveLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [appImageFile, setAppImageFile] = useState(null)
+  const [webImageFile, setWebImageFile] = useState(null)
+  const [appImagePreview, setAppImagePreview] = useState('')
+  const [webImagePreview, setWebImagePreview] = useState('')
 
   useEffect(() => {
     fetchConfig()
@@ -38,9 +44,13 @@ export default function SettingsPage() {
         fontColor: data.fontColor || '#FFFFFF',
         borderColor: data.borderColor || '#E8D9C8',
         gradientStart: data.gradientStart || '#E65100',
-        gradientEnd: data.gradientEnd || '#7B0D1C'
+        gradientEnd: data.gradientEnd || '#7B0D1C',
+        appImage: data.appImage || '',
+        webImage: data.webImage || ''
       }
       setConfig(cleaned)
+      setAppImagePreview(data.appImage ? assetUrl(data.appImage) : '')
+      setWebImagePreview(data.webImage ? assetUrl(data.webImage) : '')
     } catch (err) {
       setError('Failed to fetch platform configurations')
       console.error(err)
@@ -55,7 +65,15 @@ export default function SettingsPage() {
     setError('')
     setSuccess('')
     try {
-      const res = await api.put('/update_app_theme', config)
+      const payload = new FormData()
+      Object.entries(config).forEach(([key, value]) => {
+        if (key === 'appImage' || key === 'webImage') return
+        payload.append(key, value ?? '')
+      })
+      if (appImageFile) payload.append('appImage', appImageFile)
+      if (webImageFile) payload.append('webImage', webImageFile)
+
+      await api.put('/update_app_theme', payload)
       setSuccess('Platform theme branding updated successfully! Changes will reflect across mobile & web environments.')
       setTimeout(() => setSuccess(''), 4000)
     } catch (err) {
@@ -76,8 +94,14 @@ export default function SettingsPage() {
       fontColor: '#FFFFFF',
       borderColor: '#E8D9C8',
       gradientStart: '#E65100',
-      gradientEnd: '#7B0D1C'
+      gradientEnd: '#7B0D1C',
+      appImage: '',
+      webImage: ''
     })
+    setAppImageFile(null)
+    setWebImageFile(null)
+    setAppImagePreview('')
+    setWebImagePreview('')
   }
 
   const ColorInput = ({ label, value, keyName, desc }) => (
@@ -217,6 +241,54 @@ export default function SettingsPage() {
               value={config.gradientEnd}
               keyName="gradientEnd"
             />
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="rounded-xl border border-white/[0.06] bg-slate-950/30 p-4">
+                <label className="block text-[10px] uppercase font-bold text-slate-400 mb-2">App Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null
+                    setAppImageFile(file)
+                    if (file) {
+                      setAppImagePreview(URL.createObjectURL(file))
+                    }
+                  }}
+                  className="w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-500/15 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-brand-200 hover:file:bg-brand-500/25"
+                />
+                {appImagePreview ? (
+                  <img src={appImagePreview} alt="App Image Preview" className="mt-3 h-32 w-full rounded-xl object-cover border border-white/[0.08]" />
+                ) : config.appImage ? (
+                  <img src={assetUrl(config.appImage)} alt="App Image" className="mt-3 h-32 w-full rounded-xl object-cover border border-white/[0.08]" />
+                ) : (
+                  <div className="mt-3 h-32 rounded-xl border border-dashed border-white/[0.08] bg-white/5 flex items-center justify-center text-[10px] text-slate-500">No app image uploaded</div>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-white/[0.06] bg-slate-950/30 p-4">
+                <label className="block text-[10px] uppercase font-bold text-slate-400 mb-2">Web Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null
+                    setWebImageFile(file)
+                    if (file) {
+                      setWebImagePreview(URL.createObjectURL(file))
+                    }
+                  }}
+                  className="w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-500/15 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-brand-200 hover:file:bg-brand-500/25"
+                />
+                {webImagePreview ? (
+                  <img src={webImagePreview} alt="Web Image Preview" className="mt-3 h-32 w-full rounded-xl object-cover border border-white/[0.08]" />
+                ) : config.webImage ? (
+                  <img src={assetUrl(config.webImage)} alt="Web Image" className="mt-3 h-32 w-full rounded-xl object-cover border border-white/[0.08]" />
+                ) : (
+                  <div className="mt-3 h-32 rounded-xl border border-dashed border-white/[0.08] bg-white/5 flex items-center justify-center text-[10px] text-slate-500">No web image uploaded</div>
+                )}
+              </div>
+            </div>
           </div>
         </form>
 
