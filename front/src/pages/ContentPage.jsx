@@ -1,5 +1,6 @@
 import React from 'react'
 import AdminCrudPage from './AdminCrudPage'
+import GalleryPage from './GalleryPage'
 
 const definitions = {
   festivals: {
@@ -98,6 +99,10 @@ const definitions = {
 }
 
 export default function ContentPage({ type }) {
+  if (type === 'gallery') {
+    return <GalleryPage />
+  }
+
   if (!definitions[type]) {
     return (
       <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-6 text-sm text-rose-300">

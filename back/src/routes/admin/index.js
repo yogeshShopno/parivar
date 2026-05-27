@@ -5,6 +5,7 @@ const { createUser } = require('../../controllers/adminController');
 const { parseForm } = require('../../middleware/upload');
 
 const router = express.Router();
+router.get('/', (req, res) => res.json({ message: 'Admin API is working!' }));
 
 router.post('/register', parseForm, createUser);
 
@@ -21,7 +22,8 @@ router.use('/config', require('./configRoutes'));
 router.use('/get_app_theme', require('./configRoutes'));
 router.use('/update_app_theme', require('./configRoutes'));
 router.use('/content', require('./contentRoutes'));
-router.use('./gallery', require('./galleryRoutes')); // Gallery routes are now under /content, but this line is kept for backward compatibility.
+router.use('/gallery', require('./galleryRoutes'));
+router.use('/gallery-categories', require('./galleryCategoryRoutes'));
 router.use('/masters', require('./masterRoutes'));
 router.use('/news', require('./newsRoutes'));
 

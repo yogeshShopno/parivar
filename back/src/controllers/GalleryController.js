@@ -20,18 +20,19 @@ const findById = (Model, id, extraQuery = {}) => Model.findOne({
   ]
 });
 
-const imageFromRequest = (req, fallback = '') => {
-  if (req.file) return `/uploads/${req.file.filename}`;
-  if (Array.isArray(req.body.images) && req.body.images[0]) return req.body.images[0];
-  return req.body.image || req.body.image_url || fallback || '';
+const normalizeArrayField = (value) => {
+  if (Array.isArray(value)) return value.filter((item) => item !== undefined && item !== null && item !== '')
+  return value ? [value] : []
 };
 
 const galleryPayload = (req, existing = {}) => {
   const title = req.body.title || req.body.category || existing.title || existing.category || 'Gallery Image';
+  const existingImages = normalizeArrayField(req.body.existing_images)
+  const uploadedImages = normalizeArrayField(req.body.images)
   return {
     ...req.body,
     title,
-    images: Array.isArray(req.body.images) ? req.body.images : (existing.images || []),
+    images: [...existingImages, ...uploadedImages],
     category: req.body.category || existing.category || 'General',
     year: req.body.year || existing.year || '',
     gallery_category_id: req.body.gallery_category_id || existing.gallery_category_id || ''
@@ -47,6 +48,8 @@ const formatGallery = (req, item) => ({
 });
 
 const getGallery = async (req, res) => {
+
+  console.log('Fetching gallery with query:', ownerQuery(req));
   try {
     const rows = await Gallery.find(ownerQuery(req)).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'Gallery retrieved successfully', rows.map((row) => formatGallery(req, row)));
