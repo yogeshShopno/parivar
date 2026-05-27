@@ -5,7 +5,7 @@ const { parseForm } = require('../middleware/upload');
 
 const router = express.Router();
 
-router.get('/', protect, getConfig);
+router.get('/',  getConfig);
 router.post('/', protect, parseForm, updateConfig);
 router.put('/', protect, parseForm, updateConfig);
 

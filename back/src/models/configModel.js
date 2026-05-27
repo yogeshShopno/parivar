@@ -1,12 +1,6 @@
 const mongoose = require('mongoose');
 
 const configSchema = new mongoose.Schema({
-
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
   primaryColor: {
     type: String,
     default: "#E65100"
@@ -43,14 +37,7 @@ const configSchema = new mongoose.Schema({
     type: String,
     default: "#7B0D1C"
   },
-  appImage: {
-    type: String,
-    default: ""
-  },
-  webImage: {
-    type: String,
-    default: ""
-  },
+
 
 }
 , {

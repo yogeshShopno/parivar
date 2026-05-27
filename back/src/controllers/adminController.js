@@ -458,30 +458,31 @@ const deleteBusiness = async (req, res) => {
     return apiResponse(res, 500, 'Error deleting business', { error: error.message });
   }
 };
-
 const getConfig = async (req, res) => {
-  console.log('Fetching config for user:', req.user.id);
   try {
-    let config = await Config.findOne({ userId: req.user.id });
+    let config = await Config.findOne();
     if (!config) {
-      config = await Config.create({ userId: req.user.id });
+      config = await Config.create({});
     }
-    return apiResponse(res, 200, 'Config retrieved successfully', config);
+    return apiResponse(res, 200, 'Config retrieved successfully', {
+      _id: String(config._id),
+      ...config.toObject()
+    });
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving configuration', { error: error.message });
   }
 };
-
 const updateConfig = async (req, res) => {
-  console.log('Fetching config for user:', req.user.id);
-
   try {
     const config = await Config.findOneAndUpdate(
-      { userId: req.user.id },
-      { ...req.body, userId: req.user.id },
+      {},
+      req.body,
       { new: true, upsert: true, runValidators: true }
     );
-    return apiResponse(res, 200, 'Configuration updated successfully', config);
+    return apiResponse(res, 200, 'Configuration updated successfully', {
+      _id: String(config._id),
+      ...config.toObject()
+    });
   } catch (error) {
     return apiResponse(res, 500, 'Error updating configuration', { error: error.message });
   }

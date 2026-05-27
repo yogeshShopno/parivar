@@ -47,8 +47,7 @@ const fileFields = [
   { name: 'gallery_image_3', maxCount: 1 },
   { name: 'gallery_image_4', maxCount: 1 },
   { name: 'gallery_image_5', maxCount: 1 },
-  { name: 'appImage', maxCount: 1 },
-  { name: 'webImage', maxCount: 1 }
+
 ];
 
 // Multer fields mapping for business details (Logo + up to 5 gallery images)
