@@ -38,7 +38,8 @@ export const masterNavigation = [
   { type: 'village', label: 'Village', permission: 'village.list' },
   { type: 'area', label: 'Area', permission: 'area.list' },
   { type: 'blood-group', label: 'Blood Group', permission: 'blood-group.list' },
-  { type: 'event-category', label: 'Event Category', permission: 'event-category.list' }
+  { type: 'event-category', label: 'Event Category', permission: 'event-category.list' },
+  { type: 'gallery-category', label: 'Gallery Category', permission: 'gallery-category.list' }
 ]
 
 export const configurationNavigation = [

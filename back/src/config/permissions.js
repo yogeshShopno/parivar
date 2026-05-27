@@ -22,6 +22,7 @@ const PERMISSION_MODULES = [
   { key: 'area', label: 'Area', masterType: 'area' },
   { key: 'blood-group', label: 'Blood Group', masterType: 'blood-group' },
   { key: 'event-category', label: 'Event Category', masterType: 'event-category' },
+  { key: 'gallery-category', label: 'Gallery Category', masterType: 'gallery-category' },
   { key: 'gallery', label: 'Gallery' },
   { key: 'banners', label: 'Banner' }
 ];

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Festival = require('../models/festivalModel');
 const Event = require('../models/eventModel');
 const Gallery = require('../models/galleryModel');
+const GalleryCategory = require('../models/galleryCategoryModel');
 const Banner = require('../models/bannerModel');
 const ContactInquiry = require('../models/contactInquiryModel');
 const BusinessCategory = require('../models/businessCategoryModel');
@@ -230,6 +231,8 @@ const masterConfig = {
   area: { Model: Master, type: 'area' },
   'blood-group': { Model: Master, type: 'blood-group' },
   'event-category': { Model: Master, type: 'event-category' }
+  ,
+  'gallery-category': { Model: GalleryCategory, nameKeys: ['category'] }
 };
 
 const formatMaster = (type, item, config) => {
