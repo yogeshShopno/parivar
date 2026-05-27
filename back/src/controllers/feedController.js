@@ -45,9 +45,15 @@ const getGallery = async (req, res) => {
         });
       }
 
-      yearGroup.categories.get(categoryId).images.push({
-        id: item.id || String(item._id),
-        image: publicUrl(req, item.image || '')
+      const galleryImages = Array.isArray(item.images) && item.images.length
+        ? item.images
+        : [item.image].filter(Boolean);
+
+      galleryImages.forEach((image, index) => {
+        yearGroup.categories.get(categoryId).images.push({
+          id: `${item.id || String(item._id)}-${index}`,
+          image: publicUrl(req, image || '')
+        });
       });
     });
 

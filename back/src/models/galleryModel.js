@@ -15,11 +15,11 @@ const gallerySchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-gallery_category_id: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: 'GalleryCategory',
-  default: null
-},
+  gallery_category_id: {
+    type: String,
+    default: '',
+    trim: true
+  },
 
 }, {
   timestamps: true,

@@ -25,26 +25,46 @@ const normalizeArrayField = (value) => {
   return value ? [value] : []
 };
 
+const storedImagePath = (value = '') => {
+  if (!value) return '';
+  const text = String(value);
+  const uploadIndex = text.indexOf('/uploads/');
+  if (uploadIndex >= 0) return text.slice(uploadIndex);
+  return text;
+};
+
 const galleryPayload = (req, existing = {}) => {
   const title = req.body.title || req.body.category || existing.title || existing.category || 'Gallery Image';
-  const existingImages = normalizeArrayField(req.body.existing_images)
-  const uploadedImages = normalizeArrayField(req.body.images)
+  const hasImageFields = Object.prototype.hasOwnProperty.call(req.body, 'existing_images')
+    || Object.prototype.hasOwnProperty.call(req.body, 'images')
+    || Object.prototype.hasOwnProperty.call(req.body, 'image');
+  const existingImages = normalizeArrayField(req.body.existing_images).map(storedImagePath)
+  const uploadedImages = [
+    ...normalizeArrayField(req.body.images),
+    ...normalizeArrayField(req.body.image)
+  ].map(storedImagePath)
+  const images = hasImageFields
+    ? [...existingImages, ...uploadedImages]
+    : normalizeArrayField(existing.images).map(storedImagePath);
+
   return {
     ...req.body,
     title,
-    images: [...existingImages, ...uploadedImages],
+    images,
     category: req.body.category || existing.category || 'General',
     year: req.body.year || existing.year || '',
-    gallery_category_id: req.body.gallery_category_id || existing.gallery_category_id || ''
+    gallery_category_id: String(req.body.gallery_category_id || existing.gallery_category_id || '')
   };
 };
 
 const formatGallery = (req, item) => ({
   id: item.id || String(item._id),
+  title: item.title || item.category || 'Gallery Image',
   images: Array.isArray(item.images) ? item.images.map(img => publicUrl(req, img)) : [],
+  image: publicUrl(req, Array.isArray(item.images) ? item.images[0] : item.image || ''),
   category: item.category || 'General',
   year: item.year || '',
-  gallery_category_id: item.gallery_category_id || ''
+  gallery_category_id: String(item.gallery_category_id || '')
 });
 
 const getGallery = async (req, res) => {
