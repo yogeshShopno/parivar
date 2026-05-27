@@ -459,12 +459,12 @@ const deleteBusiness = async (req, res) => {
   }
 };
 
-// --- Config/Theme Management ---
 const getConfig = async (req, res) => {
+  console.log('Fetching config for user:', req.user.id);
   try {
-    let config = await Config.findOne(ownerQuery(req));
+    let config = await Config.findOne({ userId: req.user.id });
     if (!config) {
-      config = await Config.create(ownerFields(req));
+      config = await Config.create({ userId: req.user.id });
     }
     return apiResponse(res, 200, 'Config retrieved successfully', config);
   } catch (error) {
@@ -473,14 +473,14 @@ const getConfig = async (req, res) => {
 };
 
 const updateConfig = async (req, res) => {
+  console.log('Fetching config for user:', req.user.id);
+
   try {
-    let config = await Config.findOne(ownerQuery(req));
-    if (!config) {
-      config = new Config({ ...req.body, ...ownerFields(req) });
-    } else {
-      config.set({ ...req.body, ...ownerFields(req) });
-    }
-    await config.save();
+    const config = await Config.findOneAndUpdate(
+      { userId: req.user.id },
+      { ...req.body, userId: req.user.id },
+      { new: true, upsert: true, runValidators: true }
+    );
     return apiResponse(res, 200, 'Configuration updated successfully', config);
   } catch (error) {
     return apiResponse(res, 500, 'Error updating configuration', { error: error.message });

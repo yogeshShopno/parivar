@@ -18,7 +18,6 @@ router.get('/permissions', protect, requirePermission('roles.list'), roleControl
 router.use('/roles', require('./roleRoutes'));
 router.use('/businesses', require('./businessRoutes'));
 router.use('/posts', require('./postRoutes'));
-router.use('/config', require('./configRoutes'));
 router.use('/get_app_theme', require('./configRoutes'));
 router.use('/update_app_theme', require('./configRoutes'));
 router.use('/content', require('./contentRoutes'));
