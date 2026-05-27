@@ -34,7 +34,7 @@ const storedImagePath = (value = '') => {
 };
 
 const galleryPayload = (req, existing = {}) => {
-  const title = req.body.title || req.body.category || existing.title || existing.category || 'Gallery Image';
+
   const hasImageFields = Object.prototype.hasOwnProperty.call(req.body, 'existing_images')
     || Object.prototype.hasOwnProperty.call(req.body, 'images')
     || Object.prototype.hasOwnProperty.call(req.body, 'image');
@@ -49,9 +49,7 @@ const galleryPayload = (req, existing = {}) => {
 
   return {
     ...req.body,
-    title,
     images,
-    category: req.body.category || existing.category || 'General',
     year: req.body.year || existing.year || '',
     gallery_category_id: String(req.body.gallery_category_id || existing.gallery_category_id || '')
   };
@@ -59,10 +57,7 @@ const galleryPayload = (req, existing = {}) => {
 
 const formatGallery = (req, item) => ({
   id: item.id || String(item._id),
-  title: item.title || item.category || 'Gallery Image',
   images: Array.isArray(item.images) ? item.images.map(img => publicUrl(req, img)) : [],
-  image: publicUrl(req, Array.isArray(item.images) ? item.images[0] : item.image || ''),
-  category: item.category || 'General',
   year: item.year || '',
   gallery_category_id: String(item.gallery_category_id || '')
 });
