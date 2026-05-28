@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Festival = require('../models/festivalModel');
-const Event = require('../models/eventModel');
 const Gallery = require('../models/galleryModel');
 const GalleryCategory = require('../models/galleryCategoryModel');
 const Banner = require('../models/bannerModel');
@@ -55,20 +54,7 @@ const deleteContent = (Model, label) => async (req, res) => {
   }
 };
 
-const eventPayload = (req, existing = {}) => {
-  const title = req.body.title || req.body.event_name || existing.title || existing.event_name || '';
-  const description = req.body.description || req.body.event_description || existing.description || existing.event_description || '';
-  return {
-    ...req.body,
-    title,
-    description,
-    event_name: req.body.event_name || title,
-    event_description: req.body.event_description || description,
-    venue: req.body.venue || req.body.event_location || existing.venue || '',
-    event_location: req.body.event_location || req.body.venue || existing.event_location || '',
-    image: imageFromRequest(req, existing.image)
-  };
-};
+
 
 const festivalPayload = (req, existing = {}) => {
   const title = req.body.title || req.body.festival_name || existing.title || existing.festival_name || '';
@@ -313,9 +299,7 @@ const getFestivalById = async (req, res) => {
 
 
 module.exports = {
-  getEvents: listContent(Event, formatEvent, 'Events'),
-  saveEvent: saveContent(Event, eventPayload, formatEvent, 'Event', 'EVT'),
-  deleteEvent: deleteContent(Event, 'Event'),
+
   getFestivals: listContent(Festival, formatFestival, 'Festivals'),
   getFestivalById,
   saveFestival: saveContent(Festival, festivalPayload, formatFestival, 'Festival', 'FST'),
