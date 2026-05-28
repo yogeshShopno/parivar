@@ -6,7 +6,7 @@ const definitions = {
   festivals: {
     title: 'Festivals',
     subtitle: 'Create and maintain festival announcements',
-    endpoint: '/festivals',
+    endpoint: '/content/festivals',
     fields: [
       { name: 'title', label: 'Title' },
       { name: 'description', label: 'Description', type: 'textarea' },
