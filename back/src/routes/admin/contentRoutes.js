@@ -1,11 +1,23 @@
 const express = require('express');
 const adminContent = require('../../controllers/adminContentController');
+const adminController = require('../../controllers/adminController');
 const { protect, requirePermission } = require('../../middleware/auth');
 const { parseForm } = require('../../middleware/upload');
 
 const router = express.Router();
 
 // Festival routes are now moved directly to routes/admin/festivalRoutes.js
+// Alias content routes for festivals and students so they can also be accessed under /admin/content
+router.get('/festivals', protect, requirePermission('festivals.list'), adminContent.getFestivals);
+router.get('/festivals/:id', protect, requirePermission('festivals.list'), adminContent.getFestivalById);
+router.post('/festivals', protect, requirePermission('festivals.add'), parseForm, adminContent.saveFestival);
+router.put('/festivals/:id', protect, requirePermission('festivals.edit'), parseForm, adminContent.saveFestival);
+router.delete('/festivals/:id', protect, requirePermission('festivals.delete'), adminContent.deleteFestival);
+
+router.get('/students', protect, requirePermission('students.list'), adminController.getStudents);
+router.post('/students', protect, requirePermission('students.add'), parseForm, adminController.saveStudent);
+router.put('/students/:id', protect, requirePermission('students.edit'), parseForm, adminController.saveStudent);
+router.delete('/students/:id', protect, requirePermission('students.delete'), adminController.deleteStudent);
 
 
 // Banner routes

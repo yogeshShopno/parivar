@@ -28,7 +28,7 @@ export default function Students() {
       if (filters.student_name) params.append('student_name', filters.student_name)
       if (filters.school_name) params.append('school_name', filters.school_name)
       if (filters.standard) params.append('standard', filters.standard)
-      const res = await api.get('/students', { params })
+      const res = await api.get('/content/students', { params })
       const data = res.data?.data || res.data || []
       setStudents(data)
       setError('')
@@ -43,7 +43,7 @@ export default function Students() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this student?')) return
     try {
-      await api.delete(`/students/${id}`)
+      await api.delete(`/content/students/${id}`)
       setStudents(students.filter(s => s.id !== id))
       setSuccess('Student deleted successfully')
       setTimeout(() => setSuccess(''), 3000)
@@ -74,9 +74,9 @@ export default function Students() {
     const formData = new FormData(e.target)
     try {
       if (selectedStudent) {
-        await api.put(`/students/${selectedStudent.id}`, formData)
+        await api.put(`/content/students/${selectedStudent.id}`, formData)
       } else {
-        await api.post('/students', formData)
+        await api.post('/content/students', formData)
       }
       await fetchStudents()
       setSuccess(`Student ${selectedStudent ? 'updated' : 'created'} successfully`)
