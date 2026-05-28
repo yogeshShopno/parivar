@@ -24,6 +24,8 @@ router.use('/students', require('./studentRoutes'));
 router.use('/matrimonies', require('./matrimonyRoutes'));
 router.use('/festivals', require('./festivalRoutes'));
 router.use('/donations', require('./donationRoutes'));
+router.use('/events', require('../eventRoutes'));
+
 
 
 module.exports = router;
