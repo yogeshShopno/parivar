@@ -19,11 +19,6 @@ const eventSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  venue: {
-    type: String,
-    default: '',
-    trim: true
-  },
   event_category_id: {
     type: String,
     default: ''
@@ -54,10 +49,7 @@ const eventSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  event_description: {
-    type: String,
-    default: ''
-  }
+
 }, {
   timestamps: true,
   strict: false

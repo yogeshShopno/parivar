@@ -25,14 +25,18 @@ const definitions = {
   events: {
     title: 'Events',
     subtitle: 'Manage event listings and calendar details',
-    endpoint: '/content/events',
+    endpoint: '/events',
     fields: [
       { name: 'title', label: 'Title' },
       { name: 'description', label: 'Description', type: 'textarea' },
       { name: 'event_date', label: 'Event Date', type: 'date' },
       { name: 'event_location', label: 'Location', fallback: 'venue' },
-      { name: 'event_category_name', label: 'Category' },
-      { name: 'entry_type', label: 'Entry Type' },
+      { name: 'location_link', label: 'Location Link' },
+      { name: 'event_category_id', label: 'Category', type: 'select-remote', source: '/masters/event-category', valueKey: 'id', labelKey: 'name' },
+      { name: 'event_category_name', label: 'Category Name', defaultValue: '' },
+      { name: 'entry_type', label: 'Entry Type', type: 'select', options: [ { value: 'free', label: 'Free' }, { value: 'paid', label: 'Paid' } ] },
+      { name: 'start_time', label: 'Start Time', type: 'datetime-local' },
+      { name: 'end_time', label: 'End Time', type: 'datetime-local' },
       { name: 'image', label: 'Image', type: 'file' }
     ],
     columns: [

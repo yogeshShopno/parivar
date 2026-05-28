@@ -19,6 +19,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
   const [selected, setSelected] = useState(null)
   const [formData, setFormData] = useState(emptyForm)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [remoteOptions, setRemoteOptions] = useState({})
 
   useEffect(() => {
     setFormData(emptyForm)
@@ -44,6 +45,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
   const openCreate = () => {
     setSelected(null)
     setFormData(emptyForm)
+    loadRemoteOptions(fields)
     setIsModalOpen(true)
   }
 
@@ -71,6 +73,22 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
       console.error("Failed to fetch fresh row data:", err)
       // Fallback: keep the initial local row data in the form
     }
+    loadRemoteOptions(fields)
+  }
+
+  const loadRemoteOptions = async (fieldsList) => {
+    const remoteFields = (fieldsList || []).filter((f) => f.type === 'select-remote')
+    if (!remoteFields.length) return
+    const results = {}
+    await Promise.all(remoteFields.map(async (f) => {
+      try {
+        const res = await api.get(f.source)
+        results[f.name] = res.data?.data || res.data || []
+      } catch (e) {
+        results[f.name] = []
+      }
+    }))
+    setRemoteOptions((prev) => ({ ...prev, ...results }))
   }
 
   const handleSave = async (event) => {
@@ -222,6 +240,34 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                 <select value={formData[field.name] ?? ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving}>
                   {field.options.map((option) => <option key={option.value} value={option.value} className="bg-[#0c1020]">{option.label}</option>)}
                 </select>
+              ) : field.type === 'select-remote' ? (
+                (() => {
+                  const options = remoteOptions[field.name] || []
+                  const valueKey = field.valueKey || 'id'
+                  const labelKey = field.labelKey || 'name'
+                  return (
+                    <select
+                      value={formData[field.name] ?? ''}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        const selectedOption = options.find((o) => String(o[valueKey]) === String(val)) || {}
+                        const next = { ...formData, [field.name]: val }
+                        if (field.name.endsWith('_id')) {
+                          const nameField = field.name.replace(/_id$/, '_name')
+                          next[nameField] = selectedOption[labelKey] || ''
+                        }
+                        setFormData(next)
+                      }}
+                      className={fieldClass}
+                      disabled={saving}
+                    >
+                      <option value="">Select...</option>
+                      {options.map((option) => (
+                        <option key={option[valueKey] || option.id} value={option[valueKey] || option.id} className="bg-[#0c1020]">{option[labelKey] || option.name}</option>
+                      ))}
+                    </select>
+                  )
+                })()
               ) : field.type === 'file' ? (
                 <div className="space-y-2">
                   <input

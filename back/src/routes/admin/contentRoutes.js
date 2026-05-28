@@ -7,12 +7,6 @@ const router = express.Router();
 
 // Festival routes are now moved directly to routes/admin/festivalRoutes.js
 
-// Event routes
-router.get('/events', protect, requirePermission('events.list'), adminContent.getEvents);
-router.post('/events', protect, requirePermission('events.add'), parseForm, adminContent.saveEvent);
-router.put('/events/:id', protect, requirePermission('events.edit'), parseForm, adminContent.saveEvent);
-router.delete('/events/:id', protect, requirePermission('events.delete'), adminContent.deleteEvent);
-
 
 // Banner routes
 router.get('/banners', protect, requirePermission('banners.list'), adminContent.getBanners);
