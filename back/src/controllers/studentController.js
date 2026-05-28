@@ -1,0 +1,237 @@
+const mongoose = require('mongoose');
+const Student = require('../models/studentModel');
+const { apiResponse, publicUrl } = require('../utils/apiResponse');
+const { ownerFields, ownerOrLegacyMemberQuery } = require('../utils/ownership');
+
+const requestData = (req) => ({
+  ...req.query,
+  ...req.body
+});
+
+const getStudents = async (req, res) => {
+  try {
+    const { standard, student_name, school_name } = requestData(req);
+    const query = {};
+    if (standard) query.standard = new RegExp(standard, 'i');
+    if (student_name) query.student_name = new RegExp(student_name, 'i');
+    if (school_name) query.school_name = new RegExp(school_name, 'i');
+    
+    const students = await Student.find({
+      $and: [ownerOrLegacyMemberQuery(req), query]
+    }).sort({ _id: -1 }).lean();
+    
+    return res.status(200).json({
+      status: 200,
+      message: 'Students retrieved successfully',
+      data: students.map(s => ({
+        id: s.id || String(s._id),
+        surname: s.surname || '',
+        student_name: s.student_name || '',
+        father_name: s.father_name || '',
+        school_name: s.school_name || '',
+        standard: s.standard || '',
+        percentage: s.percentage || '',
+        mobile_number: s.mobile_number || '',
+        mobile_number_2: s.mobile_number_2 || '',
+        result_image: publicUrl(req, s.result_image || ''),
+        status: Number(s.status ?? 1)
+      }))
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: 'Error retrieving students',
+      data: [],
+      error: error.message
+    });
+  }
+};
+
+const addStudent = async (req, res) => {
+  try {
+    const {
+      surname,
+      student_name,
+      father_name,
+      school_name,
+      standard,
+      percentage,
+      mobile_number,
+      mobile_number_2,
+      result_image,
+      status
+    } = requestData(req);
+
+    if (!surname || !student_name || !father_name || !school_name || !standard || !percentage || !mobile_number) {
+      return res.status(400).json({
+        status: 400,
+        message: 'All required fields are mandatory',
+        data: []
+      });
+    }
+
+    const studentData = {
+      id: `STD${Date.now()}`,
+      surname,
+      student_name,
+      father_name,
+      school_name,
+      standard,
+      percentage,
+      mobile_number,
+      mobile_number_2: mobile_number_2 || '',
+      result_image: result_image || '',
+      status: status === undefined ? 1 : Number(status),
+      cdate: new Date().toISOString().slice(0, 10),
+      ...ownerFields(req)
+    };
+
+    const student = await Student.create(studentData);
+    return res.status(201).json({
+      status: 201,
+      message: 'Student added successfully',
+      data: {
+        id: student.id || String(student._id),
+        surname: student.surname || '',
+        student_name: student.student_name || '',
+        father_name: student.father_name || '',
+        school_name: student.school_name || '',
+        standard: student.standard || '',
+        percentage: student.percentage || '',
+        mobile_number: student.mobile_number || '',
+        mobile_number_2: student.mobile_number_2 || '',
+        result_image: publicUrl(req, student.result_image || ''),
+        status: Number(student.status ?? 1)
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: 'Error adding student',
+      data: [],
+      error: error.message
+    });
+  }
+};
+
+const updateStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const orConditions = [];
+    orConditions.push({ id });
+    if (mongoose.isValidObjectId(id)) {
+      orConditions.push({ _id: id });
+    }
+    
+    const student = await Student.findOne({
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        { $or: orConditions }
+      ]
+    });
+
+    if (!student) {
+      return res.status(404).json({
+        status: 404,
+        message: 'Student not found',
+        data: []
+      });
+    }
+
+    const {
+      surname,
+      student_name,
+      father_name,
+      school_name,
+      standard,
+      percentage,
+      mobile_number,
+      mobile_number_2,
+      result_image,
+      status
+    } = requestData(req);
+
+    if (surname) student.surname = surname;
+    if (student_name) student.student_name = student_name;
+    if (father_name) student.father_name = father_name;
+    if (school_name) student.school_name = school_name;
+    if (standard) student.standard = standard;
+    if (percentage) student.percentage = percentage;
+    if (mobile_number) student.mobile_number = mobile_number;
+    if (mobile_number_2 !== undefined) student.mobile_number_2 = mobile_number_2;
+    if (result_image) student.result_image = result_image;
+    if (status !== undefined) student.status = Number(status);
+
+    await student.save();
+    return res.status(200).json({
+      status: 200,
+      message: 'Student updated successfully',
+      data: {
+        id: student.id || String(student._id),
+        surname: student.surname || '',
+        student_name: student.student_name || '',
+        father_name: student.father_name || '',
+        school_name: student.school_name || '',
+        standard: student.standard || '',
+        percentage: student.percentage || '',
+        mobile_number: student.mobile_number || '',
+        mobile_number_2: student.mobile_number_2 || '',
+        result_image: publicUrl(req, student.result_image || ''),
+        status: Number(student.status ?? 1)
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: 'Error updating student',
+      data: [],
+      error: error.message
+    });
+  }
+};
+
+const deleteStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const orConditions = [];
+    orConditions.push({ id });
+    if (mongoose.isValidObjectId(id)) {
+      orConditions.push({ _id: id });
+    }
+    
+    const result = await Student.deleteOne({
+      $and: [
+        ownerOrLegacyMemberQuery(req),
+        { $or: orConditions }
+      ]
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        status: 404,
+        message: 'Student not found',
+        data: []
+      });
+    }
+
+    return res.status(200).json({
+      status: 200,
+      message: 'Student deleted successfully',
+      data: []
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: 'Error deleting student',
+      data: [],
+      error: error.message
+    });
+  }
+};
+
+module.exports = {
+  getStudents,
+  addStudent,
+  updateStudent,
+  deleteStudent
+};

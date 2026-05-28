@@ -20,6 +20,9 @@ router.use('/news', require('../newsRoutes'));
 router.use('/users', require('./userRoutes'));
 router.use('/gallery', require('../galleryRoutes'));
 router.use('/gallery-categories', require('../galleryCategoryRoutes'));
+router.use('/students', require('./studentRoutes'));
+router.use('/festivals', require('./festivalRoutes'));
+router.use('/donations', require('./donationRoutes'));
 
 
 module.exports = router;

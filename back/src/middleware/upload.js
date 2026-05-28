@@ -68,7 +68,16 @@ const parseForm = (req, res, next) => {
     return next();
   }
 
-  return upload.any()(req, res, (error) => {
+  return upload.fields([
+    { name: 'image', maxCount: 1 },
+    { name: 'images', maxCount: 20 },
+    { name: 'gallery_image_1', maxCount: 1 },
+    { name: 'gallery_image_2', maxCount: 1 },
+    { name: 'gallery_image_3', maxCount: 1 },
+    { name: 'gallery_image_4', maxCount: 1 },
+    { name: 'gallery_image_5', maxCount: 1 },
+    { name: 'result_image', maxCount: 1 }
+  ])(req, res, (error) => {
     if (error) return next(error);
 
     if (Array.isArray(req.files)) {
@@ -101,7 +110,18 @@ const parseForm = (req, res, next) => {
     if (req.file && !req.body.image) {
       req.body.image = `/uploads/${req.file.filename}`;
     }
-
+    if (req.files?.images?.length) {
+      req.body.images = req.files.images.map((file) => `/uploads/${file.filename}`);
+    }
+    for (let i = 1; i <= 5; i++) {
+      const key = `gallery_image_${i}`;
+      if (req.files?.[key]?.[0]) {
+        req.body[key] = `/uploads/${req.files[key][0].filename}`;
+      }
+    }
+    if (req.files?.result_image?.[0]) {
+      req.body.result_image = `/uploads/${req.files.result_image[0].filename}`;
+    }
     return next();
   });
 };

@@ -7,6 +7,9 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Users from './pages/Users'
 import Businesses from './pages/Businesses'
+import Students from './pages/Students'
+import Donations from './pages/Donations'
+import Posts from './pages/posts'
 import Settings from './pages/Settings'
 import CommitteeMembers from './pages/CommitteeMembers'
 import Roles from './pages/Roles'
@@ -38,6 +41,8 @@ export default function App() {
           <Route path="gallery" element={<PermissionRoute permission="gallery.list"><ContentPage type="gallery" /></PermissionRoute>} />
           <Route path="banners" element={<PermissionRoute permission="banners.list"><ContentPage type="banners" /></PermissionRoute>} />
           <Route path="businesses" element={<PermissionRoute permission="businesses.list"><Businesses /></PermissionRoute>} />
+          <Route path="students" element={<PermissionRoute permission="students.list"><Students /></PermissionRoute>} />
+          <Route path="donations" element={<PermissionRoute permission="donations.list"><Donations /></PermissionRoute>} />
           <Route path="posts" element={<PermissionRoute permission="posts.list"><Posts /></PermissionRoute>} />
           <Route path="news" element={<PermissionRoute permission="news.list"><News /></PermissionRoute>} />
 
