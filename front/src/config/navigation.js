@@ -9,7 +9,9 @@ import {
   Settings,
   ShieldCheck,
   UserCog,
-  Users
+  Users,
+  GraduationCap,
+  HeartHandshake
 } from 'lucide-react'
 
 export const coreNavigation = [
@@ -22,6 +24,8 @@ export const coreNavigation = [
   { to: '/gallery', label: 'Gallery', icon: Image, title: 'Gallery', permission: 'gallery.list' },
   { to: '/banners', label: 'Banners', icon: Megaphone, title: 'Banner Manager', permission: 'banners.list' },
   { to: '/businesses', label: 'Businesses', icon: Briefcase, title: 'Business Index', permission: 'businesses.list' },
+  { to: '/students', label: 'Students', icon: GraduationCap, title: 'Students', permission: 'students.list' },
+  { to: '/donations', label: 'Donations', icon: HeartHandshake, title: 'Donations', permission: 'donations.list' },
   { to: '/posts', label: 'Posts', icon: FileText, title: 'Post Moderator', permission: 'posts.list' },
   { to: '/news', label: 'News', icon: FileText, title: 'News Moderator', permission: 'news.list' },
 

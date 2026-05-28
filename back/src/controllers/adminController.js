@@ -2,6 +2,7 @@ const User = require('../models/userModels');
 const Business = require('../models/businessModel');
 const Post = require('../models/postModel');
 const Config = require('../models/configModel');
+const Student = require('../models/studentModel');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
@@ -458,6 +459,118 @@ const deleteBusiness = async (req, res) => {
     return apiResponse(res, 500, 'Error deleting business', { error: error.message });
   }
 };
+
+const getStudents = async (req, res) => {
+  try {
+    const { standard, student_name, school_name } = req.query;
+    const query = {};
+    if (standard) query.standard = new RegExp(standard, 'i');
+    if (student_name) query.student_name = new RegExp(student_name, 'i');
+    if (school_name) query.school_name = new RegExp(school_name, 'i');
+    
+    const students = await Student.find({
+      $and: [ownerQuery(req), query]
+    }).sort({ _id: -1 }).lean();
+    return apiResponse(res, 200, 'Students retrieved successfully', students.map(s => ({
+      id: s.id || String(s._id),
+      surname: s.surname || '',
+      student_name: s.student_name || '',
+      father_name: s.father_name || '',
+      school_name: s.school_name || '',
+      standard: s.standard || '',
+      percentage: s.percentage || '',
+      mobile_number: s.mobile_number || '',
+      mobile_number_2: s.mobile_number_2 || '',
+      result_image: publicUrl(req, s.result_image || ''),
+      status: Number(s.status ?? 1)
+    })));
+  } catch (error) {
+    return apiResponse(res, 500, 'Error retrieving students', { error: error.message });
+  }
+};
+
+const studentPayload = (req, existing = {}) => ({
+  ...req.body,
+  surname: req.body.surname || existing.surname || '',
+  student_name: req.body.student_name || existing.student_name || '',
+  father_name: req.body.father_name || existing.father_name || '',
+  school_name: req.body.school_name || existing.school_name || '',
+  standard: req.body.standard || existing.standard || '',
+  percentage: req.body.percentage || existing.percentage || '',
+  mobile_number: req.body.mobile_number || existing.mobile_number || '',
+  mobile_number_2: req.body.mobile_number_2 || existing.mobile_number_2 || '',
+  result_image: req.body.result_image || existing.result_image || '',
+  status: req.body.status === undefined ? Number(existing.status ?? 1) : Number(req.body.status)
+});
+
+const saveStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let existing = null;
+    if (id) {
+      const orConditions = [];
+      orConditions.push({ id });
+      if (mongoose.isValidObjectId(id)) {
+        orConditions.push({ _id: id });
+      }
+      existing = await Student.findOne({
+        ...ownerQuery(req),
+        $or: orConditions
+      });
+    }
+
+    if (id && !existing) {
+      return apiResponse(res, 404, 'Student not found');
+    }
+
+    const payload = studentPayload(req, existing || {});
+    if (!payload.surname || !payload.student_name || !payload.father_name || !payload.school_name || !payload.standard || !payload.percentage || !payload.mobile_number) {
+      return apiResponse(res, 400, 'All required fields are mandatory');
+    }
+
+    const student = existing || new Student({
+      id: `STD${Date.now()}`,
+      cdate: new Date().toISOString().slice(0, 10)
+    });
+
+    student.set({ ...payload, ...ownerFields(req) });
+    await student.save();
+
+    return apiResponse(res, existing ? 200 : 201, 'Student saved successfully', {
+      id: student.id || String(student._id),
+      surname: student.surname || '',
+      student_name: student.student_name || '',
+      father_name: student.father_name || '',
+      school_name: student.school_name || '',
+      standard: student.standard || '',
+      percentage: student.percentage || '',
+      mobile_number: student.mobile_number || '',
+      mobile_number_2: student.mobile_number_2 || '',
+      result_image: publicUrl(req, student.result_image || ''),
+      status: Number(student.status ?? 1)
+    });
+  } catch (error) {
+    return apiResponse(res, 500, 'Error saving student', { error: error.message });
+  }
+};
+
+const deleteStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await Student.deleteOne({
+      ...ownerQuery(req),
+      $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
+    });
+    if (result.deletedCount === 0) {
+      return apiResponse(res, 404, 'Student not found');
+    }
+    return apiResponse(res, 200, 'Student deleted successfully');
+  } catch (error) {
+    return apiResponse(res, 500, 'Error deleting student', { error: error.message });
+  }
+};
+
+// --- Config/Theme Management ---
 const getConfig = async (req, res) => {
   try {
     let config = await Config.findOne();
@@ -498,6 +611,9 @@ module.exports = {
   getBusinesses,
   saveBusiness,
   deleteBusiness,
+  getStudents,
+  saveStudent,
+  deleteStudent,
   getConfig,
   updateConfig
 };

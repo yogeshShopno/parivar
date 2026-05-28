@@ -12,6 +12,7 @@ const PERMISSION_MODULES = [
   { key: 'festivals', label: 'Festivals' },
   { key: 'events', label: 'Events' },
   { key: 'businesses', label: 'Business' },
+  { key: 'students', label: 'Students' },
   { key: 'news', label: 'News' },
   { key: 'country', label: 'Country', masterType: 'country' },
   { key: 'state', label: 'State', masterType: 'state' },
@@ -24,7 +25,8 @@ const PERMISSION_MODULES = [
   { key: 'event-category', label: 'Event Category', masterType: 'event-category' },
   { key: 'gallery-category', label: 'Gallery Category', masterType: 'gallery-category' },
   { key: 'gallery', label: 'Gallery' },
-  { key: 'banners', label: 'Banner' }
+  { key: 'banners', label: 'Banner' },
+  { key: 'donations', label: 'Donations' }
 ];
 
 const PERMISSIONS = [
@@ -61,7 +63,8 @@ const LEGACY_PERMISSION_KEYS = [
   'posts.manage',
   'contact-inquiries.manage',
   'masters.manage',
-  'settings.manage'
+  'settings.manage',
+  'donations.manage'
 ];
 
 const ALL_PERMISSION_KEYS = [
