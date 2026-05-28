@@ -13,6 +13,7 @@ const PERMISSION_MODULES = [
   { key: 'events', label: 'Events' },
   { key: 'businesses', label: 'Business' },
   { key: 'students', label: 'Students' },
+  { key: 'matrimonies', label: 'Matrimonies' },
   { key: 'news', label: 'News' },
   { key: 'country', label: 'Country', masterType: 'country' },
   { key: 'state', label: 'State', masterType: 'state' },
@@ -63,6 +64,7 @@ const LEGACY_PERMISSION_KEYS = [
   'posts.manage',
   'contact-inquiries.manage',
   'masters.manage',
+  'matrimonies.manage',
   'settings.manage',
   'donations.manage'
 ];

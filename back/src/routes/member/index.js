@@ -21,6 +21,7 @@ router.use('/users', require('./userRoutes'));
 router.use('/gallery', require('../galleryRoutes'));
 router.use('/gallery-categories', require('../galleryCategoryRoutes'));
 router.use('/students', require('./studentRoutes'));
+router.use('/matrimonies', require('./matrimonyRoutes'));
 router.use('/festivals', require('./festivalRoutes'));
 router.use('/donations', require('./donationRoutes'));
 

@@ -213,37 +213,39 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
 
       <Modal isOpen={isModalOpen} title={selected ? `Edit ${title}` : `Add ${title}`} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1">
-          {fields.map((field) => (
-            <div key={field.name}>
-              <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">{field.label}</label>
-              {field.type === 'textarea' ? (
-                <textarea rows="4" value={formData[field.name] || ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving} />
-              ) : field.type === 'select' ? (
-                <select value={formData[field.name] ?? ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving}>
-                  {field.options.map((option) => <option key={option.value} value={option.value} className="bg-[#0c1020]">{option.label}</option>)}
-                </select>
-              ) : field.type === 'file' ? (
-                <div className="space-y-2">
-                  <input
-                    type="file"
-                    accept={field.accept || 'image/*'}
-                    multiple={field.multiple}
-                    onChange={(e) => setFormData({ ...formData, [field.name]: field.multiple ? e.target.files : e.target.files?.[0] || '' })}
-                    className="w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-500/15 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-brand-200 hover:file:bg-brand-500/25"
-                    disabled={saving}
-                  />
-                  {selected?.image && !field.multiple && (
-                    <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                      <ImageIcon className="h-3.5 w-3.5" />
-                      <span>Current image will be kept unless a new file is selected.</span>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <input type={field.type || 'text'} value={formData[field.name] || ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving} />
-              )}
-            </div>
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {fields.map((field) => (
+              <div key={field.name}>
+                <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">{field.label}</label>
+                {field.type === 'textarea' ? (
+                  <textarea rows="4" value={formData[field.name] || ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving} />
+                ) : field.type === 'select' ? (
+                  <select value={formData[field.name] ?? ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving}>
+                    {field.options.map((option) => <option key={option.value} value={option.value} className="bg-[#0c1020]">{option.label}</option>)}
+                  </select>
+                ) : field.type === 'file' ? (
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      accept={field.accept || 'image/*'}
+                      multiple={field.multiple}
+                      onChange={(e) => setFormData({ ...formData, [field.name]: field.multiple ? e.target.files : e.target.files?.[0] || '' })}
+                      className="w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-500/15 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-brand-200 hover:file:bg-brand-500/25"
+                      disabled={saving}
+                    />
+                    {selected?.image && !field.multiple && (
+                      <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                        <ImageIcon className="h-3.5 w-3.5" />
+                        <span>Current image will be kept unless a new file is selected.</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <input type={field.type || 'text'} value={formData[field.name] || ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving} />
+                )}
+              </div>
+            ))}
+          </div>
           <button type="submit" disabled={saving} className="w-full bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white py-3 rounded-xl font-semibold text-xs tracking-wider uppercase disabled:opacity-50">
             {saving ? 'Saving...' : 'Save Record'}
           </button>

@@ -23,6 +23,7 @@ export const coreNavigation = [
   { to: '/events', label: 'Events', icon: CalendarDays, title: 'Events', permission: 'events.list' },
   { to: '/gallery', label: 'Gallery', icon: Image, title: 'Gallery', permission: 'gallery.list' },
   { to: '/banners', label: 'Banners', icon: Megaphone, title: 'Banner Manager', permission: 'banners.list' },
+  { to: '/matrimonies', label: 'Matrimonies', icon: Users, title: 'Matrimony Profiles', permission: 'matrimonies.list' },
   { to: '/businesses', label: 'Businesses', icon: Briefcase, title: 'Business Index', permission: 'businesses.list' },
   { to: '/students', label: 'Students', icon: GraduationCap, title: 'Students', permission: 'students.list' },
   { to: '/donations', label: 'Donations', icon: HeartHandshake, title: 'Donations', permission: 'donations.list' },
