@@ -14,9 +14,9 @@ const asName = (doc, key) => doc?.[key] || doc?.name || '';
 
 const locationMaps = async (req) => {
   const [countries, states, cities] = await Promise.all([
-    Country.find(ownerOrLegacyMemberQuery(req)).lean(),
-    State.find(ownerOrLegacyMemberQuery(req)).lean(),
-    City.find(ownerOrLegacyMemberQuery(req)).lean()
+    Country.find().lean(),
+    State.find().lean(),
+    City.find().lean()
   ]);
 
   return {
@@ -163,7 +163,7 @@ const getcommitteeMembers = async (req, res) => {
 
 const getCountryList = async (req, res) => {
   try {
-    const countries = await Country.find(ownerOrLegacyMemberQuery(req)).sort({ _id: -1 }).lean();
+    const countries = await Country.find(({})).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'Country data fetch successfully', countries.map((country) => ({
       id: country.id || String(country._id),
       country: country.country || country.name || ''
@@ -182,7 +182,7 @@ const getStateList = async (req, res) => {
     }
 
     const states = await State.find({
-      ...ownerOrLegacyMemberQuery(req),
+    
       country_id: String(country_id)
     }).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'State data fetch successfully', states.map((state) => ({
@@ -203,7 +203,7 @@ const getCityList = async (req, res) => {
     }
 
     const cities = await City.find({
-      ...ownerOrLegacyMemberQuery(req),
+
       state_id: String(state_id)
     }).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'City data fetch successfully', cities.map((city) => ({

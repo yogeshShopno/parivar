@@ -12,24 +12,34 @@ const businessSchema = new mongoose.Schema({
     required: true,
     index: true
   },
-  business_category_id: {
-    type: String,
-    required: true,
-    index: true
-  },
   business_name: {
     type: String,
     required: true,
     trim: true
+  },
+  business_category_id: {
+    type: String,
+    required: true,
+    index: true
   },
   number: {
     type: String,
     required: true,
     trim: true
   },
-  number_2: {
+  whatsapp_number: {
     type: String,
     default: '',
+    trim: true
+  },
+  GST_number: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  email: {
+    type: String,
+    required: true,
     trim: true
   },
   country_id: {
@@ -54,10 +64,7 @@ const businessSchema = new mongoose.Schema({
     default: '',
     trim: true
   },
-  image: {
-    type: String, // Path/URL to the primary business image/logo
-    default: ''
-  },
+  
   about_us: {
     type: String,
     default: '',
@@ -88,39 +95,20 @@ const businessSchema = new mongoose.Schema({
     default: '',
     trim: true
   },
+  profile_image: {
+    type: String, 
+    default: ''
+  },
   gallery_images: {
-    type: [String], // Array to store paths/URLs of gallery_image_1 to gallery_image_5
+    type: [String], 
     default: []
-  },
-  gallery_image_1: {
-    type: String,
-    default: ''
-  },
-  gallery_image_2: {
-    type: String,
-    default: ''
-  },
-  gallery_image_3: {
-    type: String,
-    default: ''
-  },
-  gallery_image_4: {
-    type: String,
-    default: ''
-  },
-  gallery_image_5: {
-    type: String,
-    default: ''
   },
   status: {
     type: Number,
     default: 1,
     index: true
   },
-  cdate: {
-    type: String,
-    default: ''
-  }
+
 }, {
   timestamps: true,
   strict: false

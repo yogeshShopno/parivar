@@ -244,7 +244,15 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                   <textarea rows="4" value={formData[field.name] || ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving} />
                 ) : field.type === 'select' ? (
                   <select value={formData[field.name] ?? ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving}>
+                    <option value="" className="bg-[#0c1020]">Select {field.label}</option>
                     {field.options.map((option) => <option key={option.value} value={option.value} className="bg-[#0c1020]">{option.label}</option>)}
+                  </select>
+                ) : field.type === 'select-remote' ? (
+                  <select value={formData[field.name] ?? ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving}>
+                    <option value="" className="bg-[#0c1020]">Select {field.label}</option>
+                    {(remoteOptions[field.name] || []).map((option) => (
+                      <option key={option.id} value={option.id} className="bg-[#0c1020]">{option.name || option.country || option.state || option.city || option.business}</option>
+                    ))}
                   </select>
                 ) : field.type === 'file' ? (
                   <div className="space-y-2">

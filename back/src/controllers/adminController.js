@@ -366,99 +366,8 @@ const deleteUser = async (req, res) => {
   }
 };
 
-// --- Businesses Management ---
-const getBusinesses = async (req, res) => {
-  try {
-    const businesses = await Business.find(ownerQuery(req)).sort({ _id: -1 }).lean();
-    return apiResponse(res, 200, 'Businesses retrieved successfully', businesses.map(b => ({
-      id: b.id || String(b._id),
-      business_name: b.business_name || '',
-      number: b.number || '',
-      address: b.address || '',
-      about_us: b.about_us || '',
-      facebook: b.facebook || '',
-      instagram: b.instagram || '',
-      website: b.website || '',
-      status: b.status || 1
-    })));
-  } catch (error) {
-    return apiResponse(res, 500, 'Error retrieving businesses', { error: error.message });
-  }
-};
 
-const businessPayload = (req, existing = {}) => ({
-  ...req.body,
-  business_name: req.body.business_name || existing.business_name || '',
-  number: req.body.number || existing.number || '',
-  address: req.body.address || existing.address || '',
-  about_us: req.body.about_us || existing.about_us || '',
-  website: req.body.website || existing.website || '',
-  facebook: req.body.facebook || existing.facebook || '',
-  instagram: req.body.instagram || existing.instagram || '',
-  status: req.body.status === undefined ? Number(existing.status ?? 1) : Number(req.body.status),
-  business_category_id: req.body.business_category_id || existing.business_category_id || 'ADMIN',
-  country_id: req.body.country_id || existing.country_id || 'ADMIN',
-  state_id: req.body.state_id || existing.state_id || 'ADMIN',
-  city_id: req.body.city_id || existing.city_id || 'ADMIN'
-});
 
-const saveBusiness = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const existing = id ? await Business.findOne({
-      ...ownerQuery(req),
-      $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
-    }) : null;
-
-    if (id && !existing) {
-      return apiResponse(res, 404, 'Business not found');
-    }
-
-    const payload = businessPayload(req, existing || {});
-    if (!payload.business_name || !payload.number || !payload.address) {
-      return apiResponse(res, 400, 'Business name, phone number, and address are required');
-    }
-
-    const business = existing || new Business({
-      id: `BUS${Date.now()}`,
-      member_id: adminMemberId(req),
-      cdate: new Date().toISOString().slice(0, 10)
-    });
-
-    business.set({ ...payload, ...ownerFields(req) });
-    await business.save();
-
-    return apiResponse(res, existing ? 200 : 201, 'Business saved successfully', {
-      id: business.id || String(business._id),
-      business_name: business.business_name || '',
-      number: business.number || '',
-      address: business.address || '',
-      about_us: business.about_us || '',
-      facebook: business.facebook || '',
-      instagram: business.instagram || '',
-      website: business.website || '',
-      status: Number(business.status ?? 1)
-    });
-  } catch (error) {
-    return apiResponse(res, 500, 'Error saving business', { error: error.message });
-  }
-};
-
-const deleteBusiness = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const result = await Business.deleteOne({
-      ...ownerQuery(req),
-      $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
-    });
-    if (result.deletedCount === 0) {
-      return apiResponse(res, 404, 'Business not found');
-    }
-    return apiResponse(res, 200, 'Business deleted successfully');
-  } catch (error) {
-    return apiResponse(res, 500, 'Error deleting business', { error: error.message });
-  }
-};
 
 const getStudents = async (req, res) => {
   try {
@@ -608,9 +517,6 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
-  getBusinesses,
-  saveBusiness,
-  deleteBusiness,
   getStudents,
   saveStudent,
   deleteStudent,
