@@ -308,15 +308,12 @@ export default function Events() {
             >
               <option value="">Select category</option>
               {categories.map((category) => (
-                <option key={category.id} value={category.id}>{category.name}</option>
+                <option key={category._id} value={category.id}>{category.name}</option>
               ))}
             </select>
           </div>
 
-          <div>
-            <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Category Name</label>
-            <input type="text" value={formData.event_category_name} disabled className={fieldClass} />
-          </div>
+        
 
           <div>
             <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Location</label>

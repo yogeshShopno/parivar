@@ -152,22 +152,6 @@ const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (
   }
 };
 
-const formatEvent = (req, item) => ({
-  id: item.id || String(item._id),
-  title: item.title || item.event_name || '',
-  description: item.description || item.event_description || '',
-  event_category_id: item.event_category_id || '',
-  event_category_name: item.event_category_name || '',
-  event_name: item.event_name || item.title || '',
-  event_location: item.event_location || item.venue || '',
-  location_link: item.location_link || '',
-  event_date: item.event_date || item.date || '',
-  start_time: item.start_time || '',
-  end_time: item.end_time || '',
-  entry_type: item.entry_type || '',
-  status: Number(item.status ?? 1),
-  image: publicUrl(req, item.image || '')
-});
 
 const formatFestival = (req, item) => ({
   id: item.id || String(item._id),
