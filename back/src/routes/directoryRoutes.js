@@ -23,10 +23,10 @@ router.get('/family_members', protect, getFamilyMembers);
 router.post('/committee_members', protect, parseForm, getcommitteeMembers);
 router.get('/committee_members', protect, getcommitteeMembers);
 router.post('/country_list', protect, parseForm, getCountryList);
-router.get('/country_list', protect, getCountryList);
+router.get('/country_list',  getCountryList);
 router.post('/state_list', protect, parseForm, getStateList);
-router.get('/state_list', protect, getStateList);
+router.get('/state_list',  getStateList);
 router.post('/city_list', protect, parseForm, getCityList);
-router.get('/city_list', protect, getCityList);
+router.get('/city_list',  getCityList);
 
 module.exports = router;
