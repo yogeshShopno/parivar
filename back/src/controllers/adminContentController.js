@@ -222,7 +222,9 @@ const getMasters = async (req, res) => {
     const config = masterConfig[type];
     if (!config) return apiResponse(res, 404, 'Master type not found');
 
-    const query = { ...(config.type ? { type: config.type } : {}), ...ownerQuery(req) };
+    // Country, state, city are global data - no multi-tenancy
+    const isGlobalData = ['country', 'state', 'city'].includes(type);
+    const query = { ...(config.type ? { type: config.type } : {}), ...(isGlobalData ? {} : ownerQuery(req)) };
     if (req.query.parent_id && config.parentKey) query[config.parentKey] = String(req.query.parent_id);
     if (req.query.parent_id && config.type) query.parent_id = String(req.query.parent_id);
 
@@ -242,7 +244,9 @@ const saveMaster = async (req, res) => {
     const name = req.body.name || req.body[type] || req.body.business || req.body.country || req.body.state || req.body.city;
     if (!name) return apiResponse(res, 400, 'Name is required');
 
-    const existing = req.params.id ? await findById(config.Model, req.params.id, ownerQuery(req)) : null;
+    // Country, state, city are global data - no multi-tenancy
+    const isGlobalData = ['country', 'state', 'city'].includes(type);
+    const existing = req.params.id ? await findById(config.Model, req.params.id, isGlobalData ? {} : ownerQuery(req)) : null;
     const doc = existing || new config.Model({ id: await nextPublicId(config.Model, `${type.toUpperCase()}_`) });
 
     if (config.type) {
@@ -262,7 +266,10 @@ const saveMaster = async (req, res) => {
       doc.status = Number(req.body.status);
     }
     
-    doc.set(ownerFields(req));
+    // Only add owner fields for tenant-specific data
+    if (!isGlobalData) {
+      doc.set(ownerFields(req));
+    }
     await doc.save();
 
     return apiResponse(res, existing ? 200 : 201, 'Master data saved successfully', formatMaster(type, doc.toObject(), config));
@@ -277,7 +284,9 @@ const deleteMaster = async (req, res) => {
     const config = masterConfig[type];
     if (!config) return apiResponse(res, 404, 'Master type not found');
 
-    const existing = await findById(config.Model, req.params.id, ownerQuery(req));
+    // Country, state, city are global data - no multi-tenancy
+    const isGlobalData = ['country', 'state', 'city'].includes(type);
+    const existing = await findById(config.Model, req.params.id, isGlobalData ? {} : ownerQuery(req));
     if (!existing) return apiResponse(res, 404, 'Master data not found');
 
     await existing.deleteOne();
