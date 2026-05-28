@@ -155,6 +155,7 @@ const legacyPermissionFor = (permission) => {
     'businesses.': 'businesses.manage',
     'news.': 'news.manage',
     'posts.': 'posts.manage',
+    'matrimonies.': 'matrimonies.manage',
     'contact-inquiries.': 'contact-inquiries.manage',
     'settings.': 'settings.manage',
     'country.': 'masters.manage',

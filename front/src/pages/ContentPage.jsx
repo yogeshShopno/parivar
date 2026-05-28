@@ -22,7 +22,66 @@ const definitions = {
       { key: 'button_name', label: 'Action' }
     ]
   },
-
+  events: {
+    title: 'Events',
+    subtitle: 'Manage event listings and calendar details',
+    endpoint: '/content/events',
+    fields: [
+      { name: 'title', label: 'Title' },
+      { name: 'description', label: 'Description', type: 'textarea' },
+      { name: 'event_date', label: 'Event Date', type: 'date' },
+      { name: 'event_location', label: 'Location', fallback: 'venue' },
+      { name: 'event_category_name', label: 'Category' },
+      { name: 'entry_type', label: 'Entry Type' },
+      { name: 'image', label: 'Image', type: 'file' }
+    ],
+    columns: [
+      { key: 'image', label: 'Image', type: 'image' },
+      { key: 'title', label: 'Event' },
+      { key: 'event_date', label: 'Date' },
+      { key: 'event_location', label: 'Location' }
+    ]
+  },
+  matrimonies: {
+    title: 'Matrimonies',
+    subtitle: 'Create and manage matrimony profiles',
+    endpoint: '/matrimonies',
+   fields: [
+  { name: 'full_name', label: 'Full Name' },
+  { name: 'gender', label: 'Gender' },
+  { name: 'birthdate', label: 'Birthdate', type: 'date' },
+  { name: 'marital_status', label: 'Marital Status' },
+  { name: 'height', label: 'Height' },
+  { name: 'weight', label: 'Weight' },
+  { name: 'complexion', label: 'Complexion' },
+  { name: 'education', label: 'Education' },
+  { name: 'occupation', label: 'Occupation' },
+  { name: 'father_name', label: 'Father Name' },
+  { name: 'mother_name', label: 'Mother Name' },
+  { name: 'gotra', label: 'Gotra' },
+  { name: 'family_type', label: 'Family Type' },
+  { name: 'mobile_number', label: 'Mobile Number' },
+  { name: 'city', label: 'City' },
+  {
+    name: 'status',
+    label: 'Status',
+    type: 'select',
+    defaultValue: 1,
+    options: [
+      { value: 1, label: 'Active' },
+      { value: 0, label: 'Inactive' }
+    ]
+  },
+  { name: 'about', label: 'About', type: 'textarea' }
+],
+    columns: [
+      { key: 'full_name', label: 'Name' },
+      { key: 'gender', label: 'Gender' },
+      { key: 'marital_status', label: 'Status' },
+      { key: 'city', label: 'City' },
+      { key: 'mobile_number', label: 'Mobile' }
+    ]
+  },
   
   gallery: {
     title: 'Gallery',
@@ -92,5 +151,5 @@ export default function ContentPage({ type }) {
     )
   }
 
-  return <AdminCrudPage {...definitions[type]} getRowTitle={(row) => row.title || row.subject || row.name} />
+  return <AdminCrudPage {...definitions[type]} getRowTitle={(row) => row.title || row.full_name || row.subject || row.name} />
 }

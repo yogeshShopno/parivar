@@ -19,6 +19,7 @@ router.use('/roles', require('./roleRoutes'));
 router.use('/businesses', require('./businessRoutes'));
 router.use('/students', require('./studentRoutes'));
 router.use('/festivals', require('./festivalRoutes'));
+router.use('/matrimonies', require('./matrimonyRoutes'));
 router.use('/donations', require('./donationRoutes'));
 router.use('/posts', require('./postRoutes'));
 router.use('/get_app_theme', require('./configRoutes'));

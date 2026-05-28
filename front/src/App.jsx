@@ -40,6 +40,7 @@ export default function App() {
           <Route path="events" element={<PermissionRoute permission="events.list"><Events /></PermissionRoute>} />
           <Route path="gallery" element={<PermissionRoute permission="gallery.list"><ContentPage type="gallery" /></PermissionRoute>} />
           <Route path="banners" element={<PermissionRoute permission="banners.list"><ContentPage type="banners" /></PermissionRoute>} />
+          <Route path="matrimonies" element={<PermissionRoute permission="matrimonies.list"><ContentPage type="matrimonies" /></PermissionRoute>} />
           <Route path="businesses" element={<PermissionRoute permission="businesses.list"><Businesses /></PermissionRoute>} />
           <Route path="students" element={<PermissionRoute permission="students.list"><Students /></PermissionRoute>} />
           <Route path="donations" element={<PermissionRoute permission="donations.list"><Donations /></PermissionRoute>} />
