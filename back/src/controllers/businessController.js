@@ -38,7 +38,8 @@ const findBusinessByRequestId = (req, id) => {
 
 const getBusinessCategoryList = async (req, res) => {
   try {
-    const categories = await BusinessCategory.find(ownerOrLegacyMemberQuery(req)).sort({ _id: -1 }).lean();
+    const query = req.user ? ownerOrLegacyMemberQuery(req) : {};
+    const categories = await BusinessCategory.find(query).sort({ _id: -1 }).lean();
     const data = categories.map((category) => ({
       id: category.id || String(category._id),
       business: category.business || category.name || ''

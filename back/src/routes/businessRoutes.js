@@ -9,8 +9,8 @@ const {
 
 const router = express.Router();
 
-router.post('/business_category_list', protect, parseForm, getBusinessCategoryList);
-router.get('/business_category_list', protect, getBusinessCategoryList);
+router.post('/business_category_list', parseForm, getBusinessCategoryList);
+router.get('/business_category_list', getBusinessCategoryList);
 router.post('/add_business_details', protect, businessUpload, addBusinessDetails);
 router.put('/add_business_details', protect, businessUpload, addBusinessDetails);
 router.post('/business_details_list', protect, parseForm, getBusinessDetailsList);

@@ -10,8 +10,8 @@ const { parseForm } = require('../../middleware/upload');
 
 const router = express.Router();
 
-router.get('/', protect, getMatrimonies);
-router.post('/', protect, parseForm, addMatrimony);
+router.get('/',  getMatrimonies);
+router.post('/', parseForm, addMatrimony);
 router.put('/:id', protect, parseForm, updateMatrimony);
 router.delete('/:id', protect, deleteMatrimony);
 
