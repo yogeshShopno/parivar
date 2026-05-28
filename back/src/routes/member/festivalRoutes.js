@@ -6,7 +6,7 @@ const { parseForm } = require('../../middleware/upload');
 
 const router = express.Router();
 
-router.get('/', protect, getFestivals);
+router.get('/', getFestivals);
 router.post('/', parseForm, adminContent.saveFestival);
 
 module.exports = router;
