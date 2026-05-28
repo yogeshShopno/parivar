@@ -19,6 +19,7 @@ const formatEvent = (req, item = {}) => {
   const image = item.image || '';
 
   return {
+    id: item.id || String(item._id),
     _id: String(item._id),
     title: item.title || '',
     description: item.description || '',
@@ -103,8 +104,21 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+const getEventById = async (req, res) => {
+  try {
+    const event = await findEvent(req, req.params.id);
+    if (!event) {
+      return apiResponse(res, 404, 'Event not found');
+    }
+    return apiResponse(res, 200, 'Event retrieved successfully', formatEvent(req, event.toObject()));
+  } catch (error) {
+    return apiResponse(res, 500, 'Error retrieving event', { error: error.message });
+  }
+};
+
 module.exports = {
   getEventsList,
+  getEventById,
   addEvent,
   updateEvent,
   deleteEvent

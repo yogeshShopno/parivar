@@ -29,6 +29,11 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
     fetchRows()
   }, [endpoint])
 
+  
+  useEffect(() => {
+    fetchRows()
+  }, [endpoint])
+
   const fetchRows = async () => {
     setLoading(true)
     try {

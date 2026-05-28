@@ -1,7 +1,8 @@
 const express = require('express');
 const {
   getEventsList,
-  createEvent,
+  getEventById,
+  addEvent,
   updateEvent,
   deleteEvent
 } = require('../../controllers/eventController');
@@ -11,7 +12,8 @@ const { postUpload } = require('../../middleware/upload');
 const router = express.Router();
 
 router.get('/', protect, requirePermission('events.list'), getEventsList);
-router.post('/', protect, requirePermission('events.add'), postUpload, createEvent);
+router.get('/:id', protect, requirePermission('events.list'), getEventById);
+router.post('/', protect, requirePermission('events.add'), postUpload, addEvent);
 router.put('/:id', protect, requirePermission('events.edit'), postUpload, updateEvent);
 router.delete('/:id', protect, requirePermission('events.delete'), deleteEvent);
 
