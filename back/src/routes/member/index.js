@@ -27,6 +27,7 @@ router.use('/festivals', require('./festivalRoutes'));
 router.use('/donations', require('./donationRoutes'));
 router.use('/events', require('../eventRoutes'));
 router.use('/businesses', require('../businessRoutes'))
+router.use('/feedback', require('../feedbackRoutes'));
 
 
 

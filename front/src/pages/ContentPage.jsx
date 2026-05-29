@@ -135,6 +135,21 @@ const definitions = {
       { key: 'subject', label: 'Subject' },
       { key: 'status', label: 'Status' }
     ]
+  },
+  feedback: {
+    title: 'Feedback',
+    subtitle: 'Manage user feedback and suggestions',
+    endpoint: '/feedback',
+    fields: [
+      { name: 'name', label: 'Name' },
+      { name: 'email', label: 'Email', type: 'email' },
+      { name: 'message', label: 'Message', type: 'textarea' }
+    ],
+    columns: [
+      { key: 'name', label: 'Name' },
+      { key: 'email', label: 'Email' },
+      { key: 'message', label: 'Message' }
+    ]
   }
 }
 

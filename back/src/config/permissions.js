@@ -48,7 +48,12 @@ const PERMISSIONS = [
   { key: 'contact-inquiries.list', label: 'Contact Inquiries List', module: 'contact-inquiries', module_label: 'Contact Inquiries', action: 'list', action_label: 'List' },
   { key: 'contact-inquiries.edit', label: 'Contact Inquiries Edit', module: 'contact-inquiries', module_label: 'Contact Inquiries', action: 'edit', action_label: 'Edit' },
   { key: 'contact-inquiries.delete', label: 'Contact Inquiries Delete', module: 'contact-inquiries', module_label: 'Contact Inquiries', action: 'delete', action_label: 'Delete' },
-  { key: 'settings.edit', label: 'Theme Config Edit', module: 'settings', module_label: 'Theme Config', action: 'edit', action_label: 'Edit' }
+  { key: 'settings.edit', label: 'Theme Config Edit', module: 'settings', module_label: 'Theme Config', action: 'edit', action_label: 'Edit' },
+  { key: 'feedback.view', label: 'Feedback View', module: 'feedback', module_label: 'Feedback', action: 'view', action_label: 'View' },
+  { key: 'feedback.add', label: 'Feedback Add', module: 'feedback', module_label: 'Feedback', action: 'add', action_label: 'Add' },
+  { key: 'feedback.edit', label: 'Feedback Edit', module: 'feedback', module_label: 'Feedback', action: 'edit', action_label: 'Edit' },
+  { key: 'feedback.delete', label: 'Feedback Delete', module: 'feedback', module_label: 'Feedback', action: 'delete', action_label: 'Delete' }
+  
 ];
 
 const LEGACY_PERMISSION_KEYS = [

@@ -31,6 +31,7 @@ router.use('/gallery-categories', require('./galleryCategoryRoutes'));
 router.use('/masters', require('./masterRoutes'));
 router.use('/news', require('./newsRoutes'));
 router.use('/events', require('./eventRoutes'));
+router.use('/feedback', require('../feedbackRoutes'));
 
 
 // Approved member/mobile data exposed to admin software under the same admin base URL.

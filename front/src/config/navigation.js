@@ -30,7 +30,8 @@ export const coreNavigation = [
   { to: '/posts', label: 'Posts', icon: FileText, title: 'Post Moderator', permission: 'posts.list' },
   { to: '/news', label: 'News', icon: FileText, title: 'News Moderator', permission: 'news.list' },
 
-  { to: '/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries', permission: 'contact-inquiries.list' }
+  { to: '/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries', permission: 'contact-inquiries.list' },
+  { to: '/feedback', label: 'Feedback', icon: FileText, title: 'Feedback', permission: 'feedback.list' }
 ]
 
 export const masterNavigation = [
