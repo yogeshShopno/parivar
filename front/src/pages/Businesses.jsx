@@ -76,6 +76,7 @@ export default function Businesses() {
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update business listing')
+      console.error(err)
     } finally {
       setFormLoading(false)
     }
@@ -155,7 +156,7 @@ export default function Businesses() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filtered.map(biz => (
             <div key={biz.id} className="relative overflow-hidden bg-[#0d1325]/40 border border-white/[0.06] hover:border-white/[0.12] rounded-2xl p-6 shadow-glass-sm hover:shadow-glass-md transition-all duration-300 flex flex-col justify-between group">
-              
+
               <div>
                 {/* Header card info */}
                 <div className="flex items-start justify-between gap-4">
@@ -208,7 +209,7 @@ export default function Businesses() {
                   <MapPin className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
                   <span className="text-slate-300">{biz.address}</span>
                 </div>
-                
+
                 {biz.website && (
                   <div className="flex items-center gap-2 pt-1.5">
                     <Globe className="w-3.5 h-3.5 text-violet-400" />
@@ -218,7 +219,7 @@ export default function Businesses() {
                   </div>
                 )}
               </div>
-              
+
               {/* Bottom colored indicator stripe */}
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-500 to-teal-500 opacity-25 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>

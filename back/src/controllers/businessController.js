@@ -25,7 +25,7 @@ const getBusinesses = async (req, res) => {
   try {
     const businesses = await Business.find({}).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'Businesses retrieved successfully', businesses.map(b => ({
-      id: b.id || String(b._id),
+      id: String(b._id),
       member_id: b.member_id || '',
       business_name: b.business_name || '',
       business_category_id: b.business_category_id || '',
@@ -63,7 +63,7 @@ const getBusinessById = async (req, res) => {
     }
 
     return apiResponse(res, 200, 'Business retrieved successfully', {
-      id: business.id || String(business._id),
+      id: String(business._id),
       member_id: business.member_id || '',
       business_name: business.business_name || '',
       business_category_id: business.business_category_id || '',
@@ -92,14 +92,12 @@ const getBusinessById = async (req, res) => {
 };
 
 
-
-
 const getBusinessCategoryList = async (req, res) => {
   try {
     const query = req.user ? ownerOrLegacyMemberQuery(req) : {};
     const categories = await BusinessCategory.find(query).sort({ _id: -1 }).lean();
     const data = categories.map((category) => ({
-      id: category.id || String(category._id),
+      id: String(category._id),
       business: category.business || category.name || ''
     }));
 
@@ -119,7 +117,7 @@ const addBusinessDetails = async (req, res) => {
     const { id } = req.params || req.body;
     const { business_category_id, business_name, number, whatsapp_number, GST_number, email, country_id, state_id, city_id, address, location_link, about_us, facebook, instagram, pinterest, youtube, website, status } = requestData(req);
 
-    if (!business_category_id || !business_name || !number || !email || !country_id || !state_id || !city_id || !address) {
+    if (!business_category_id || !business_name || !number || !email || !country_id || !state_id || !city_id ) {
       return apiResponse(res, 400, 'All required fields must be provided');
     }
 

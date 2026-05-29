@@ -17,6 +17,7 @@ router.use('/dashboard', require('./dashboardRoutes'));
 router.get('/permissions', protect, requirePermission('roles.list'), roleController.getPermissionOptions);
 router.use('/roles', require('./roleRoutes'));
 router.use('/businesses', require('./businessRoutes'));
+router.use('/business-categories', require('./businessCategoryRoutes'));
 router.use('/students', require('./studentRoutes'));
 router.use('/festivals', require('./festivalRoutes'));
 router.use('/matrimonies', require('./matrimonyRoutes'));

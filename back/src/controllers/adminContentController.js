@@ -208,7 +208,7 @@ const masterConfig = {
 const formatMaster = (type, item, config) => {
   const name = config.nameKeys?.map((key) => item[key]).find(Boolean) || item.name || '';
   return {
-    id: item.id || String(item._id),
+    id:String(item._id),
     type,
     name,
     parent_id: config.parentKey ? item[config.parentKey] || '' : item.parent_id || '',
