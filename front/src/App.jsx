@@ -48,6 +48,8 @@ export default function App() {
           <Route path="news" element={<PermissionRoute permission="news.list"><News /></PermissionRoute>} />
 
           <Route path="contact-inquiries" element={<PermissionRoute permission="contact-inquiries.list"><ContentPage type="inquiries" /></PermissionRoute>} />
+          <Route path="feedback" element={<PermissionRoute permission="feedback.list"><ContentPage type="feedback" /></PermissionRoute>} />
+
           <Route path="masters/:type" element={<MasterRoute />} />
           <Route path="settings" element={<PermissionRoute permission="settings.edit"><Settings /></PermissionRoute>} />
         </Route>
