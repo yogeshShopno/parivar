@@ -21,7 +21,7 @@ const initialState = {
   pinterest: '',
   youtube: '',
   website: '',
-  profile_image: '',
+  image: '',
   gallery_images: [],
   status: 1
 }
@@ -122,11 +122,13 @@ const [galleryPreviews, setGalleryPreviews] = useState([])
       instagram: business?.instagram || '',
       pinterest: business?.pinterest || '',
       youtube: business?.youtube || '',
-      profile_image: business?.profile_image || '',
+      image: business?.image || '',
       gallery_images: business?.gallery_images || [],
       
       status: Number(business?.status ?? 1)
     })
+setGalleryPreviews([])  
+  setProfilePreview(null)    
   }, [business])
 
   const validate = () => {
@@ -142,8 +144,8 @@ const [galleryPreviews, setGalleryPreviews] = useState([])
   }
 
   const handleSubmit = (event) => {
-    console.log('Submitting form with data:', formData)
     event.preventDefault()
+
     const nextErrors = validate()
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors)
@@ -355,10 +357,10 @@ const [galleryPreviews, setGalleryPreviews] = useState([])
       </div>
      <div>
   <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Profile Image</label>
-  {(profilePreview || formData.profile_image) && (
+  {(profilePreview || formData.image) && (
     <div className="relative w-20 h-20 mb-3 rounded-lg overflow-hidden border border-white/[0.08]">
       <img 
-        src={profilePreview || formData.profile_image} 
+        src={profilePreview || formData.image} 
         alt="preview" 
         className="w-full h-full object-cover"
       />
@@ -366,7 +368,7 @@ const [galleryPreviews, setGalleryPreviews] = useState([])
         type="button"
         onClick={() => {
           setProfilePreview(null)
-          setFormData({ ...formData, profile_image: '' })
+          setFormData({ ...formData, image: '' })
         }}
         className="absolute top-1 right-1 bg-rose-500 rounded-full p-1 text-white text-xs hover:bg-rose-600"
       >
@@ -380,7 +382,7 @@ const [galleryPreviews, setGalleryPreviews] = useState([])
       const file = e.target.files[0]
       if (file) {
         setProfilePreview(URL.createObjectURL(file))
-        setFormData({ ...formData, profile_image: file })
+        setFormData({ ...formData, image: file })
       }
     }}
     className="w-full bg-slate-950/40 text-slate-300 border border-white/[0.08] rounded-xl py-2.5 px-3 text-xs outline-none focus:border-brand-500/50"

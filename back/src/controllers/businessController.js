@@ -4,7 +4,7 @@ const User = require('../models/userModels');
 const Country = require('../models/countryModel');
 const State = require('../models/stateModel');
 const City = require('../models/cityModel');
-const { apiResponse,  memberPublicId,} = require('../utils/apiResponse');
+const { apiResponse, memberPublicId, publicUrl } = require('../utils/apiResponse');
 
 const requestData = (req) => ({
   ...req.query,
@@ -20,33 +20,49 @@ const findBusinessByRequestId = (req, id) => {
     ]
   });
 };
+const formatBusiness = (req, b, categoryName = 'Community Enterprise') => ({
+  id: String(b._id),
+  member_id: b.member_id || '',
+  business_name: b.business_name || '',
+  business_category_id: b.business_category_id || '',
+  business_category_name: categoryName,
+  number: b.number || '',
+  whatsapp_number: b.whatsapp_number || '',
+  GST_number: b.GST_number || '',
+  email: b.email || '',
+  country_id: b.country_id || '',
+  state_id: b.state_id || '',
+  city_id: b.city_id || '',
+  address: b.address || '',
+  location_link: b.location_link || '',
+  about_us: b.about_us || '',
+  facebook: b.facebook || '',
+  instagram: b.instagram || '',
+  pinterest: b.pinterest || '',
+  youtube: b.youtube || '',
+  website: b.website || '',
+image: publicUrl(req, b.image || b.image || ''),
+  gallery_images: (b.gallery_images || []).map(img => publicUrl(req, img)),
+  status: b.status !== undefined ? Number(b.status) : 1,
+});
 
 const getBusinesses = async (req, res) => {
   try {
-    const businesses = await Business.find({}).sort({ _id: -1 }).lean();
-    return apiResponse(res, 200, 'Businesses retrieved successfully', businesses.map(b => ({
-      id: String(b._id),
-      member_id: b.member_id || '',
-      business_name: b.business_name || '',
-      business_category_id: b.business_category_id || '',
-      number: b.number || '',
-      whatsapp_number: b.whatsapp_number || '',
-      GST_number: b.GST_number || '',
-      email: b.email || '',
-      country_id: b.country_id || '',
-      state_id: b.state_id || '',
-      city_id: b.city_id || '',
-      address: b.address || '',
-      location_link: b.location_link || '',
-      about_us: b.about_us || '',
-      facebook: b.facebook || '',
-      instagram: b.instagram || '',
-      website: b.website || '',
-      profile_image: b.profile_image || '',
-      gallery_images: b.gallery_images || [],
-      status: b.status !== undefined ? Number(b.status) : 1,
+    const [businesses, categories] = await Promise.all([
+      Business.find({}).sort({ _id: -1 }).lean(),
+      BusinessCategory.find({}).lean()
+    ]);
 
-    })));
+    const categoryMap = new Map();
+    categories.forEach(c => {
+      if (c._id) categoryMap.set(String(c._id), c.business || c.name || '');
+      if (c.id) categoryMap.set(String(c.id), c.business || c.name || '');
+    });
+
+    return apiResponse(res, 200, 'Businesses retrieved successfully', businesses.map(b => {
+      const categoryName = categoryMap.get(String(b.business_category_id)) || 'Community Enterprise';
+      return formatBusiness(req, b, categoryName);
+    }));
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving businesses', { error: error.message });
   }
@@ -56,36 +72,21 @@ const getBusinesses = async (req, res) => {
 const getBusinessById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const business = await findBusinessByRequestId(req, id);
     if (!business) {
       return apiResponse(res, 404, 'Business not found');
     }
 
-    return apiResponse(res, 200, 'Business retrieved successfully', {
-      id: String(business._id),
-      member_id: business.member_id || '',
-      business_name: business.business_name || '',
-      business_category_id: business.business_category_id || '',
-      number: business.number || '',
-      whatsapp_number: business.whatsapp_number || '',
-      GST_number: business.GST_number || '',
-      email: business.email || '',
-      country_id: business.country_id || '',
-      state_id: business.state_id || '',
-      city_id: business.city_id || '',
-      address: business.address || '',
-      location_link: business.location_link || '',
-      about_us: business.about_us || '',
-      facebook: business.facebook || '',
-      instagram: business.instagram || '',
-      pinterest: business.pinterest || '',
-      youtube: business.youtube || '',
-      website: business.website || '',
-      profile_image: business.profile_image || '',
-      gallery_images: business.gallery_images || [],
-      status: business.status !== undefined ? Number(business.status) : 1,
-    });
+    const category = await BusinessCategory.findOne({
+      $or: [
+        { id: String(business.business_category_id) },
+        ...(require('mongoose').isValidObjectId(business.business_category_id) ? [{ _id: business.business_category_id }] : [])
+      ]
+    }).lean();
+
+    const categoryName = category ? (category.business || category.name || '') : 'Community Enterprise';
+    return apiResponse(res, 200, 'Business retrieved successfully', formatBusiness(req, business, categoryName));
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving business', { error: error.message });
   }
@@ -107,9 +108,25 @@ const getBusinessCategoryList = async (req, res) => {
   }
 };
 
-const uploadedPath = (req, field) => {
-  const file = req.files?.[field]?.[0];
-  return file ? `/uploads/${file.filename}` : '';
+const imageFromRequest = (req, fallback = '') => {
+  // fields() puts files in req.files, not req.file
+  const file = req.files?.['image']?.[0] || req.files?.['image']?.[0];
+  if (file) return `/uploads/${file.filename}`;
+  if (req.body?.image && String(req.body.image).startsWith('/uploads/')) return req.body.image;
+  return fallback || '';
+};
+
+const toStoredPath = (url = '') => {
+  const text = String(url);
+  const idx = text.indexOf('/uploads/');
+  return idx >= 0 ? text.slice(idx) : text;
+};
+
+const galleryPath = (req, key) => {
+  const file = req.files?.[key]?.[0];
+  if (file) return `/uploads/${file.filename}`;
+  if (req.body?.[key] && String(req.body[key]).startsWith('/uploads/')) return req.body[key];
+  return '';
 };
 
 const addBusinessDetails = async (req, res) => {
@@ -117,22 +134,20 @@ const addBusinessDetails = async (req, res) => {
     const { id } = req.params || req.body;
     const { business_category_id, business_name, number, whatsapp_number, GST_number, email, country_id, state_id, city_id, address, location_link, about_us, facebook, instagram, pinterest, youtube, website, status } = requestData(req);
 
-    if (!business_category_id || !business_name || !number || !email || !country_id || !state_id || !city_id ) {
+    if (!business_category_id || !business_name || !number || !email || !country_id || !state_id || !city_id) {
       return apiResponse(res, 400, 'All required fields must be provided');
     }
 
     const currentMemberId = memberPublicId(req.user || {});
-    const isAdmin = req.user?.role === 'admin'; // Adjust based on your auth structure
+    const isAdmin = req.user?.role === 'admin';
 
     let business = null;
-    
+
     if (id) {
       business = await findBusinessByRequestId(req, id);
       if (!business) {
         return apiResponse(res, 404, 'Business not found');
       }
-      
-      // Authorization check
       if (!isAdmin && business.member_id !== currentMemberId) {
         return apiResponse(res, 403, 'Unauthorized - You can only edit your own business');
       }
@@ -148,34 +163,68 @@ const addBusinessDetails = async (req, res) => {
       country_id,
       state_id,
       city_id,
-      address,
+      address: address || '',
       location_link: location_link || '',
       about_us: about_us || '',
       facebook: facebook || '',
       instagram: instagram || '',
       pinterest: pinterest || '',
       youtube: youtube || '',
-      website: website || ''
+      website: website || '',
     };
 
-    // Handle profile image
-    const profilePath = uploadedPath(req, 'profile_image');
-    if (profilePath) businessData.profile_image = profilePath;
-
-    // Handle gallery images
-    const galleryImages = [];
-    for (let i = 1; i <= 5; i++) {
-      const path = uploadedPath(req, `gallery_image_${i}`);
-      if (path) galleryImages.push(path);
+    // ── Profile image (same pattern as events) ──────────────────────────────
+    // 1. New file uploaded → use that
+    // 2. existing_image sent from frontend (full URL) → strip to relative path
+    // 3. Updating and nothing sent → keep existing value from DB
+    const newProfilePath = imageFromRequest(req);
+    if (newProfilePath) {
+      businessData.image = newProfilePath;
+    } else if (req.body.existing_image !== undefined) {
+      businessData.image = toStoredPath(req.body.existing_image);
+    } else if (business) {
+      businessData.image = business.image || '';
+    } else {
+      businessData.image = '';
     }
-    if (galleryImages.length > 0) businessData.gallery_images = galleryImages;
+
+    // ── Gallery images ──────────────────────────────────────────────────────
+    let finalGalleryImages = [];
+
+    // 1. Existing URLs kept by the frontend (sent as existing_images)
+    if (req.body.existing_images !== undefined) {
+      const kept = (Array.isArray(req.body.existing_images)
+        ? req.body.existing_images
+        : [req.body.existing_images]).filter(Boolean);
+      finalGalleryImages = kept.map(toStoredPath);
+    } else if (business) {
+      // Update but no existing_images field sent → keep all existing
+      finalGalleryImages = (business.gallery_images || []).map(toStoredPath);
+    }
+
+    // 2. Append any newly uploaded gallery images (gallery_image_1 … gallery_image_5)
+    for (let i = 1; i <= 5; i++) {
+      const path = galleryPath(req, `gallery_image_${i}`);
+      if (path) finalGalleryImages.push(path);
+    }
+
+    businessData.gallery_images = finalGalleryImages;
 
     if (business) {
       // Update
       business.set(businessData);
       if (status !== undefined) business.status = Number(status);
       await business.save();
-      return apiResponse(res, 200, 'Business updated successfully', []);
+
+      const category = await BusinessCategory.findOne({
+        $or: [
+          { id: String(business.business_category_id) },
+          ...(require('mongoose').isValidObjectId(business.business_category_id) ? [{ _id: business.business_category_id }] : [])
+        ]
+      }).lean();
+
+      const categoryName = category ? (category.business || category.name || '') : 'Community Enterprise';
+      return apiResponse(res, 200, 'Business updated successfully', formatBusiness(req, business, categoryName));
     }
 
     // Create
@@ -183,9 +232,18 @@ const addBusinessDetails = async (req, res) => {
     businessData.member_id = currentMemberId;
     businessData.status = Number(status ?? 1);
     businessData.cdate = new Date().toISOString().slice(0, 10);
-    
-    await Business.create(businessData);
-    return apiResponse(res, 201, 'Business created successfully', []);
+
+    const doc = await Business.create(businessData);
+
+    const category = await BusinessCategory.findOne({
+      $or: [
+        { id: String(doc.business_category_id) },
+        ...(require('mongoose').isValidObjectId(doc.business_category_id) ? [{ _id: doc.business_category_id }] : [])
+      ]
+    }).lean();
+
+    const categoryName = category ? (category.business || category.name || '') : 'Community Enterprise';
+    return apiResponse(res, 201, 'Business created successfully', formatBusiness(req, doc, categoryName));
   } catch (error) {
     return apiResponse(res, 500, 'Error saving business', { error: error.message });
   }
@@ -196,11 +254,11 @@ const deleteBusiness = async (req, res) => {
   try {
     const { id } = req.params;
     const business = await findBusinessByRequestId(req, id);
-    
+
     if (!business) {
       return apiResponse(res, 404, 'Business not found');
     }
-    
+
     await Business.deleteOne({ _id: business._id });
     return apiResponse(res, 200, 'Business deleted successfully');
   } catch (error) {
