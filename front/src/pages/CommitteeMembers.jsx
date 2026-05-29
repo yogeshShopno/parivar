@@ -62,6 +62,7 @@ export default function CommitteeMembers() {
   }, [fetchUsers])
 
   const handleSubmit = async (formData) => {
+
     setSaving(true)
     try {
       if (selected) {
@@ -149,7 +150,7 @@ export default function CommitteeMembers() {
                       </div>
                     </div>
                   </td>
-                  <td className="p-4">{user.email || user.phone || '-'}</td>
+                  <td className="p-4">{user.email || user.number || '-'}</td>
                   <td className="p-4">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-300 font-medium">
                       <Sparkles className="w-3.5 h-3.5" />

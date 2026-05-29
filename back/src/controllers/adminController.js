@@ -153,7 +153,7 @@ const getUsers = async (req, res) => {
       last_name: u.last_name || '',
       name: fullName(u),
       email: u.email || '',
-      phone: u.number,
+      number: u.number,
       gender: u.gender || '',
       dob: u.dob || null,
       blood_group: u.blood_group || '',
@@ -177,6 +177,7 @@ const getUsers = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
+
   try {
     const {
       first_name,
@@ -198,7 +199,6 @@ const createUser = async (req, res) => {
       image
     } = req.body;
   
-    console.log('Creating user with data:', first_name, number);
 
 
     if (!first_name || !number) {
@@ -210,6 +210,9 @@ const createUser = async (req, res) => {
 
     if(await User.findOne({ email: email ? email.toLowerCase() : undefined })) {
       return apiResponse(res, 400, 'Email already exists');
+    }
+    if(await User.findOne({ number : number? number : undefined })) {
+      return apiResponse(res, 400, 'Number already exists');
     }
 
     if ((is_committee === true || is_committee === 'true') && req.file?.size > 1024 * 1024) {
@@ -227,9 +230,10 @@ const createUser = async (req, res) => {
     const assignedRoleId = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
 
     const owner = ownerFields(req);
+
     const newUser = new User({
       member_id: nextMemberId,
-      first_name,
+      first_name: first_name,
       middle_name: middle_name || '',
       last_name: last_name || '',
       email: email ? email.toLowerCase() : '',
@@ -247,27 +251,29 @@ const createUser = async (req, res) => {
       status: status === undefined ? 1 : Number(status),
       image: imageFromRequest(req),
       created_by_admin_id: owner.created_by_admin_id,
-      admin_id: owner.admin_id,
-      tenant_id: owner.tenant_id,
-      created_by_user_id: owner.created_by_user_id,
-      created_by_member_id: owner.created_by_member_id,
-      created_by_name: owner.created_by_name,
-      created_by_role: owner.created_by_role
+     
     });
 
     await newUser.save();
     
     return apiResponse(res, 201, 'User created successfully', {
       _id: newUser._id,
-      name: fullName(newUser),
+      first_name: newUser.first_name,
+      middle_name: newUser.middle_name || '',
+      last_name: newUser.last_name || '',
       email: newUser.email,
       number: newUser.number,
+      gender: newUser.gender || '',
+      dob: newUser.dob || null,
+      blood_group: newUser.blood_group || '',
+      relation: newUser.relation || 'Self',
+      is_committee: newUser.is_committee || false,
+      committee_role: newUser.committee_role || '',
+      role_id: newUser.role_id ? String(newUser.role_id) : '',
+      address: newUser.address || '',
       designation: newUser.designation || '',
       status: Number(newUser.status ?? 1),
       image: publicUrl(req, newUser.image || ''),
-      role: newUser.is_committee ? 'admin' : 'user',
-      is_committee: newUser.is_committee,
-      committee_role: newUser.committee_role,
       
 
     });
@@ -293,8 +299,9 @@ const updateUser = async (req, res) => {
       committee_role,
       role_id,
       address,
-      password,
       designation,
+      image,
+      password,
       status
     } = req.body;
 
@@ -317,7 +324,7 @@ const updateUser = async (req, res) => {
     if (middle_name !== undefined) user.middle_name = middle_name;
     if (last_name !== undefined) user.last_name = last_name;
     if (email !== undefined) user.email = email.toLowerCase();
-    if (phone) user.number = phone;
+    if (number !== undefined) user.number = number;
     if (gender !== undefined) user.gender = gender;
     if (dob !== undefined) user.dob = dob;
     if (blood_group !== undefined) user.blood_group = blood_group;
@@ -328,20 +335,30 @@ const updateUser = async (req, res) => {
     if (address !== undefined) user.address = address;
     if (designation !== undefined) user.designation = designation;
     if (status !== undefined) user.status = Number(status);
-    if (req.file || req.body.image) user.image = imageFromRequest(req, user.image);
     if (password) user.password = password;
+    if (req.file || req.body.image) user.image = imageFromRequest(req, user.image);
 
     await user.save();
 
     return apiResponse(res, 200, 'User updated successfully', {
-      id: user.member_id,
-      name: fullName(user),
+      id: user._id,
+      first_name: user.first_name,
+      middle_name: user.middle_name || '',
+      last_name: user.last_name || '',
       email: user.email,
-      phone: user.number,
+      number: user.number,
+      gender: user.gender || '',
+      dob: user.dob || null,
+      blood_group: user.blood_group || '',
+      relation: user.relation || 'Self',
+      is_committee: user.is_committee || false,
+      committee_role: user.committee_role || '',
+      role_id: user.role_id ? String(user.role_id) : '',
+      address: user.address || '',
       designation: user.designation || '',
       status: Number(user.status ?? 1),
       image: publicUrl(req, user.image || ''),
-      role: user.is_committee ? 'admin' : 'user'
+      
     });
   } catch (error) {
     return apiResponse(res, 500, 'Error updating user', { error: error.message });

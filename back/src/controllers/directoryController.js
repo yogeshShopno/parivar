@@ -2,7 +2,7 @@ const User = require('../models/userModels');
 const Country = require('../models/countryModel');
 const State = require('../models/stateModel');
 const City = require('../models/cityModel');
-const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
+const { apiResponse,  memberPublicId, publicUrl } = require('../utils/apiResponse');
 const { ownerOrLegacyMemberQuery } = require('../utils/ownership');
 
 const requestData = (req) => ({
@@ -35,7 +35,6 @@ const memberRow = (req, member, maps = {}) => {
   return {
     id,
     family_code: member.family_code || member.member_id || id,
-    full_name: fullName(member),
     number: member.number || '',
     district_id: member.district_id || '',
     taluka_id: member.taluka_id || '',
@@ -148,7 +147,9 @@ const getcommitteeMembers = async (req, res) => {
 
     const data = committee.map((member) => ({
       id: memberPublicId(member),
-      full_name: member.full_name || fullName(member),
+      first_name: member.first_name || '',
+      middle_name: member.middle_name || '',
+      last_name: member.last_name || '',
       number: member.number || '',
       role: member.username || member.committee_role || '',
       designation: member.designation || '',
