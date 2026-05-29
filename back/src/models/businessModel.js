@@ -95,7 +95,7 @@ const businessSchema = new mongoose.Schema({
     default: '',
     trim: true
   },
-  profile_image: {
+  image: {
     type: String, 
     default: ''
   },

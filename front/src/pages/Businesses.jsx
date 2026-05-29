@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Briefcase, MapPin, Phone, Globe, Trash2, Search, Edit2, RefreshCw, Plus } from 'lucide-react'
-import api from '../lib/api'
+import api, { assetUrl } from '../lib/api'
 import Modal from '../components/Modal'
 import BusinessForm from '../components/BusinessForm'
 
@@ -59,28 +59,74 @@ export default function Businesses() {
     setIsModalOpen(false)
     setSelectedBusiness(null)
   }
+const handleSubmit = async (formData) => {
+  setFormLoading(true)
+  setError('')
+  try {
+    const payload = new FormData()
 
-  const handleSubmit = async (formData) => {
-    setFormLoading(true)
-    setError('')
-    try {
-      if (selectedBusiness) {
-        await api.put(`/businesses/${selectedBusiness.id}`, formData)
-      } else {
-        await api.post('/businesses', formData)
+    // Append all text fields
+    const textFields = [
+      'business_category_id','business_name','number','whatsapp_number',
+      'GST_number','email','country_id','state_id','city_id','address',
+      'location_link','about_us','website','facebook','instagram',
+      'pinterest','youtube','status'
+    ]
+    textFields.forEach(key => {
+      if (formData[key] !== undefined && formData[key] !== null) {
+        payload.append(key, formData[key])
       }
-      await fetchBusinesses()
-      setSuccess(`Business listing ${selectedBusiness ? 'updated' : 'created'} successfully`)
-      setIsModalOpen(false)
-      setSelectedBusiness(null)
-      setTimeout(() => setSuccess(''), 3000)
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update business listing')
-      console.error(err)
-    } finally {
-      setFormLoading(false)
+    })
+
+    // Profile image — multer field name is 'image'
+    if (formData.image instanceof File) {
+      payload.append('image', formData.image)
+    } else {
+      payload.append('existing_image', formData.image || '')
     }
+
+    // Gallery images — append as gallery_image_1, gallery_image_2, ...
+    const galleryFiles = (formData.gallery_images || []).filter(f => f instanceof File)
+    galleryFiles.forEach((file, idx) => {
+      payload.append(`gallery_image_${idx + 1}`, file)
+    })
+
+    // Keep existing images (URLs that are strings)
+    const existingImages = (formData.gallery_images || []).filter(f => typeof f === 'string')
+    existingImages.forEach(img => {
+      payload.append('existing_images', img)
+    })
+
+    let res;
+    if (selectedBusiness) {
+      res = await api.put(`/businesses/${selectedBusiness.id}`, payload, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+    } else {
+      res = await api.post('/businesses', payload, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+    }
+
+    const savedData = res.data?.data || res.data;
+
+    if (selectedBusiness) {
+      setBusinesses(businesses.map(b => b.id === savedData.id ? savedData : b))
+    } else {
+      setBusinesses([savedData, ...businesses])
+    }
+
+    setSuccess(`Business listing ${selectedBusiness ? 'updated' : 'created'} successfully`)
+    setIsModalOpen(false)
+    setSelectedBusiness(null)
+    setTimeout(() => setSuccess(''), 3000)
+  } catch (err) {
+    setError(err.response?.data?.message || 'Failed to update business listing')
+    console.error(err)
+  } finally {
+    setFormLoading(false)
   }
+}
 
   const filtered = businesses.filter(b => 
     b.business_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -159,8 +205,21 @@ export default function Businesses() {
 
               <div>
                 {/* Header card info */}
-                <div className="flex items-start justify-between gap-4">
-                  <div>
+                <div className="flex items-start gap-4">
+                  {/* Profile/Logo Image */}
+                  {biz.image ? (
+                    <img 
+                      src={biz.image} 
+                      alt={biz.business_name} 
+                      className="w-14 h-14 rounded-xl object-cover border border-white/[0.08] shadow-md shrink-0 bg-slate-900"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-xl border border-white/[0.08] bg-slate-900/60 flex items-center justify-center text-slate-500 shrink-0">
+                      <Briefcase className="w-6 h-6 text-slate-600" />
+                    </div>
+                  )}
+
+                  <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-brand-500/15 border border-brand-500/25 text-brand-300 font-bold text-[10px] uppercase tracking-wide">
                         {biz.business_category_name || 'Community Enterprise'}
@@ -169,7 +228,7 @@ export default function Businesses() {
                         {Number(biz.status) === 1 ? 'Active' : 'Inactive'}
                       </span>
                     </div>
-                    <h3 className="text-base font-bold text-slate-100 mt-2.5 tracking-tight group-hover:text-white transition-colors">
+                    <h3 className="text-sm sm:text-base font-bold text-slate-100 mt-2 tracking-tight group-hover:text-white transition-colors truncate">
                       {biz.business_name}
                     </h3>
                   </div>
@@ -177,17 +236,17 @@ export default function Businesses() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleEdit(biz)}
-                      className="p-2.5 text-brand-400 hover:text-brand-300 bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/20 rounded-xl transition-all"
+                      className="p-2 text-brand-400 hover:text-brand-300 bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/20 rounded-xl transition-all"
                       title="Edit Enterprise"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(biz.id)}
-                      className="p-2.5 text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl transition-all"
+                      className="p-2 text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl transition-all"
                       title="Remove Enterprise"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
@@ -196,6 +255,24 @@ export default function Businesses() {
                 <p className="text-xs text-slate-400 leading-relaxed mt-4 line-clamp-3">
                   {biz.about_us || 'No business description provided by the enterprise owner. Contact the primary administrator for further details.'}
                 </p>
+
+                {/* Gallery Showcase */}
+                {biz.gallery_images && biz.gallery_images.length > 0 && (
+                  <div className="mt-4">
+                    <label className="block text-[9px] uppercase font-bold text-slate-500 mb-1.5 tracking-wider">Showroom Gallery</label>
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
+                      {biz.gallery_images.map((img, idx) => (
+                        <div key={idx} className="relative w-12 h-12 rounded-lg overflow-hidden border border-white/[0.08] shrink-0 bg-slate-900 group/img">
+                          <img 
+                            src={img} 
+                            alt={`gallery-${idx}`} 
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-110" 
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Action contacts and tags */}

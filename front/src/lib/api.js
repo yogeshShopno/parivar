@@ -10,7 +10,7 @@ export const assetUrl = (path) => {
 
 const api = axios.create({
   baseURL: `${API_BASE}/api/admin`,
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 'Content-Type': 'multipart/form-data' },
   timeout: 12000,
   transitional: {
     clarifyTimeoutError: true

@@ -7,8 +7,8 @@ const { getBusinessCategoryList, addBusinessDetails, getBusinesses, getBusinessB
 const router = express.Router();
 
 router.get('/business_category_list',  getBusinessCategoryList);
-router.post('/', protect, businessUpload, addBusinessDetails);
-router.put('/:id', protect, businessUpload, addBusinessDetails);
+router.post('/', protect, parseForm, addBusinessDetails);
+router.put('/:id', protect, parseForm, addBusinessDetails);
 
 router.get('/', getBusinesses);
 router.get('/:id',protect, getBusinessById);
