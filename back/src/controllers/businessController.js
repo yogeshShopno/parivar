@@ -41,7 +41,7 @@ const formatBusiness = (req, b, categoryName = 'Community Enterprise') => ({
   pinterest: b.pinterest || '',
   youtube: b.youtube || '',
   website: b.website || '',
-  image: publicUrl(req, b.image || ''),
+image: publicUrl(req, b.image || b.image || ''),
   gallery_images: (b.gallery_images || []).map(img => publicUrl(req, img)),
   status: b.status !== undefined ? Number(b.status) : 1,
 });
@@ -108,26 +108,38 @@ const getBusinessCategoryList = async (req, res) => {
   }
 };
 
-const uploadedPath = (req, field) => {
-  const file = req.files?.[field]?.[0];
-  return file ? `/uploads/${file.filename}` : '';
+const imageFromRequest = (req, fallback = '') => {
+  // fields() puts files in req.files, not req.file
+  const file = req.files?.['image']?.[0] || req.files?.['image']?.[0];
+  if (file) return `/uploads/${file.filename}`;
+  if (req.body?.image && String(req.body.image).startsWith('/uploads/')) return req.body.image;
+  return fallback || '';
+};
+
+const toStoredPath = (url = '') => {
+  const text = String(url);
+  const idx = text.indexOf('/uploads/');
+  return idx >= 0 ? text.slice(idx) : text;
+};
+
+const galleryPath = (req, key) => {
+  const file = req.files?.[key]?.[0];
+  if (file) return `/uploads/${file.filename}`;
+  if (req.body?.[key] && String(req.body[key]).startsWith('/uploads/')) return req.body[key];
+  return '';
 };
 
 const addBusinessDetails = async (req, res) => {
-  console.log('Received business details request:', {
-    body: req.body,
-   
-  });
   try {
     const { id } = req.params || req.body;
-    const { business_category_id, business_name, number, whatsapp_number, GST_number, email, country_id, state_id, city_id, address, location_link, about_us, facebook, instagram, pinterest, youtube, website, image, gallery_images, status, } = requestData(req);
+    const { business_category_id, business_name, number, whatsapp_number, GST_number, email, country_id, state_id, city_id, address, location_link, about_us, facebook, instagram, pinterest, youtube, website, status } = requestData(req);
 
     if (!business_category_id || !business_name || !number || !email || !country_id || !state_id || !city_id) {
       return apiResponse(res, 400, 'All required fields must be provided');
     }
 
     const currentMemberId = memberPublicId(req.user || {});
-    const isAdmin = req.user?.role === 'admin'; // Adjust based on your auth structure
+    const isAdmin = req.user?.role === 'admin';
 
     let business = null;
 
@@ -136,8 +148,6 @@ const addBusinessDetails = async (req, res) => {
       if (!business) {
         return apiResponse(res, 404, 'Business not found');
       }
-
-      // Authorization check
       if (!isAdmin && business.member_id !== currentMemberId) {
         return apiResponse(res, 403, 'Unauthorized - You can only edit your own business');
       }
@@ -153,7 +163,7 @@ const addBusinessDetails = async (req, res) => {
       country_id,
       state_id,
       city_id,
-      address,
+      address: address || '',
       location_link: location_link || '',
       about_us: about_us || '',
       facebook: facebook || '',
@@ -161,48 +171,43 @@ const addBusinessDetails = async (req, res) => {
       pinterest: pinterest || '',
       youtube: youtube || '',
       website: website || '',
-
     };
 
-    // Handle profile image
-    let profilePath = '';
-    const uploadedProfile = uploadedPath(req, 'image');
-    if (uploadedProfile) {
-      profilePath = uploadedProfile;
+    // ── Profile image (same pattern as events) ──────────────────────────────
+    // 1. New file uploaded → use that
+    // 2. existing_image sent from frontend (full URL) → strip to relative path
+    // 3. Updating and nothing sent → keep existing value from DB
+    const newProfilePath = imageFromRequest(req);
+    if (newProfilePath) {
+      businessData.image = newProfilePath;
     } else if (req.body.existing_image !== undefined) {
-      const text = String(req.body.existing_image);
-      const uploadIndex = text.indexOf('/uploads/');
-      profilePath = uploadIndex >= 0 ? text.slice(uploadIndex) : text;
+      businessData.image = toStoredPath(req.body.existing_image);
     } else if (business) {
-      profilePath = business.image || '';
+      businessData.image = business.image || '';
+    } else {
+      businessData.image = '';
     }
-    businessData.image = profilePath;
 
-    // Handle gallery images
+    // ── Gallery images ──────────────────────────────────────────────────────
     let finalGalleryImages = [];
-    
-    // 1. Get existing images that were kept
+
+    // 1. Existing URLs kept by the frontend (sent as existing_images)
     if (req.body.existing_images !== undefined) {
-      const norm = (Array.isArray(req.body.existing_images) 
-        ? req.body.existing_images 
-        : [req.body.existing_images]
-      ).filter(Boolean);
-      
-      finalGalleryImages = norm.map(img => {
-        const text = String(img);
-        const uploadIndex = text.indexOf('/uploads/');
-        return uploadIndex >= 0 ? text.slice(uploadIndex) : text;
-      });
+      const kept = (Array.isArray(req.body.existing_images)
+        ? req.body.existing_images
+        : [req.body.existing_images]).filter(Boolean);
+      finalGalleryImages = kept.map(toStoredPath);
     } else if (business) {
-      finalGalleryImages = business.gallery_images || [];
+      // Update but no existing_images field sent → keep all existing
+      finalGalleryImages = (business.gallery_images || []).map(toStoredPath);
     }
 
-    // 2. Add any newly uploaded gallery images
+    // 2. Append any newly uploaded gallery images (gallery_image_1 … gallery_image_5)
     for (let i = 1; i <= 5; i++) {
-      const path = uploadedPath(req, `gallery_image_${i}`);
+      const path = galleryPath(req, `gallery_image_${i}`);
       if (path) finalGalleryImages.push(path);
     }
-    
+
     businessData.gallery_images = finalGalleryImages;
 
     if (business) {
@@ -229,7 +234,7 @@ const addBusinessDetails = async (req, res) => {
     businessData.cdate = new Date().toISOString().slice(0, 10);
 
     const doc = await Business.create(businessData);
-    
+
     const category = await BusinessCategory.findOne({
       $or: [
         { id: String(doc.business_category_id) },

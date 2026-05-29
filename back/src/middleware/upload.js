@@ -107,8 +107,12 @@ const parseForm = (req, res, next) => {
       });
     }
 
+    // Populate req.body.image from req.file (single) or req.files.image[0] (fields)
     if (req.file && !req.body.image) {
       req.body.image = `/uploads/${req.file.filename}`;
+    }
+    if (req.files?.image?.[0] && !req.body.image) {
+      req.body.image = `/uploads/${req.files.image[0].filename}`;
     }
     if (req.files?.images?.length) {
       req.body.images = req.files.images.map((file) => `/uploads/${file.filename}`);
