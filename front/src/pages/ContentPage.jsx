@@ -159,10 +159,10 @@ const definitions = {
       { key: 'dob', label: 'Date of Birth', render: (row) => row.dob ? new Date(row.dob).toLocaleDateString('en-IN') : '-' }
     ]
   },
-  job_vacancies: {
-    title: 'Job Vacancies',
+  'job-vacancy': {
+    title: 'Job Vacancy',
     subtitle: 'Post and manage job vacancy listings',
-    endpoint: '/job-vacancies',
+    endpoint: '/job-vacancy',
     fields: [
       { name: 'title', label: 'Title' },
       { name: 'description', label: 'Description', type: 'textarea' },
