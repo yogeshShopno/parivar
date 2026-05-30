@@ -50,6 +50,7 @@ export default function App() {
           <Route path="contact-inquiries" element={<PermissionRoute permission="contact-inquiries.list"><ContentPage type="inquiries" /></PermissionRoute>} />
           <Route path="feedback" element={<PermissionRoute permission="feedback.list"><ContentPage type="feedback" /></PermissionRoute>} />
           <Route path="birthday" element={<PermissionRoute permission="birthday.list"><ContentPage type="birthday" /></PermissionRoute>} />
+          <Route path="job-vacancy" element={<PermissionRoute permission="job-vacancy.list"><ContentPage type="job-vacancy" /></PermissionRoute>} />
 
 
           <Route path="masters/:type" element={<MasterRoute />} />

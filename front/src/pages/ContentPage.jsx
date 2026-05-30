@@ -159,6 +159,30 @@ const definitions = {
       { key: 'dob', label: 'Date of Birth', render: (row) => row.dob ? new Date(row.dob).toLocaleDateString('en-IN') : '-' }
     ]
   },
+  job_vacancies: {
+    title: 'Job Vacancies',
+    subtitle: 'Post and manage job vacancy listings',
+    endpoint: '/job-vacancies',
+    fields: [
+      { name: 'title', label: 'Title' },
+      { name: 'description', label: 'Description', type: 'textarea' },
+      { name: 'qualifications', label: 'Qualifications', type: 'textarea' },
+      { name: 'company_name', label: 'Company Name' },
+      { name: 'location', label: 'Location' },
+      { name: 'job_type', label: 'Job Type' },
+      { name: 'salary', label: 'Salary' },
+      { name: 'contact_email', label: 'Contact Email', type: 'email' },
+      { name: 'contact_number', label: 'Contact Number' },
+      { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Active' }, { value: 0, label: 'Inactive' }] }
+    ],
+    columns: [
+      { key: 'title', label: 'Title' },
+      { key: 'company_name', label: 'Company Name' },
+      { key: 'location', label: 'Location' },
+      { key: 'job_type', label: 'Job Type' },
+      { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
+    ]
+  }
 }
 
 export default function ContentPage({ type }) {

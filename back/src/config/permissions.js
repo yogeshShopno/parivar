@@ -52,9 +52,13 @@ const PERMISSIONS = [
   { key: 'feedback.view', label: 'Feedback View', module: 'feedback', module_label: 'Feedback', action: 'view', action_label: 'View' },
   { key: 'feedback.add', label: 'Feedback Add', module: 'feedback', module_label: 'Feedback', action: 'add', action_label: 'Add' },
   { key: 'feedback.edit', label: 'Feedback Edit', module: 'feedback', module_label: 'Feedback', action: 'edit', action_label: 'Edit' },
-  { key: 'feedback.delete', label: 'Feedback Delete', module: 'feedback', module_label: 'Feedback', action: 'delete', action_label: 'Delete' }
-  
-  
+  { key: 'feedback.delete', label: 'Feedback Delete', module: 'feedback', module_label: 'Feedback', action: 'delete', action_label: 'Delete' },
+  { key: 'job-vacancy.list', label: 'Job Vacancy List', module: 'job-vacancy', module_label: 'Job Vacancy', action: 'list', action_label: 'List' },
+  { key: 'job-vacancy.add', label: 'Job Vacancy Add', module: 'job-vacancy', module_label: 'Job Vacancy', action: 'add', action_label: 'Add' },
+  { key: 'job-vacancy.edit', label: 'Job Vacancy Edit', module: 'job-vacancy', module_label: 'Job Vacancy', action: 'edit', action_label: 'Edit' },
+  { key: 'job-vacancy.delete', label: 'Job Vacancy Delete', module: 'job-vacancy', module_label: 'Job Vacancy', action: 'delete', action_label: 'Delete' }
+
+
 ];
 
 const LEGACY_PERMISSION_KEYS = [
