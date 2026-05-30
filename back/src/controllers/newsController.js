@@ -1,6 +1,5 @@
 const News = require('../models/newsModel');
 const { apiResponse, fullName, publicUrl } = require('../utils/apiResponse');
-const { adminMemberId, ownerOrLegacyMemberQuery, } = require('../utils/ownership');
 
 const isObjectId = (id) => require('mongoose').isValidObjectId(id);
 
@@ -9,21 +8,10 @@ const imageFromRequest = (req, fallback = '') => {
   return req.body.image || req.body.image_url || fallback || '';
 };
 
-const newsFilter = (req, extra = {}) => {
-  return {
-    $and: [
-      ownerOrLegacyMemberQuery(req),
-      extra
-    ]
-  };
-};
 
-const findNews = (req, id) => News.findOne(newsFilter(req, {
-  $or: [
-    {_id: String(id) },
-    ...(isObjectId(id) ? [{ _id: id }] : [])
-  ]
-}));
+const findNews = (req, id) => News.findOne(
+  isObjectId(id) ? { _id: id } : null
+);
 
 const formatNews = (req, item = {}) => {
   const image = item.image_url || (typeof item.image === 'string' ? item.image : '');
@@ -63,7 +51,7 @@ const newsPayload = (req, existing = {}) => {
 
 const getNewsList = async (req, res) => {
   try {
-		const news = await News.find(newsFilter(req)).sort({ _id: -1 }).lean();
+		const news = await News.find({}).sort({ _id: -1 }).lean();
 		return apiResponse(res, 200, 'News retrieved successfully', news.map((item) => formatNews(req, item)));
 	} catch (error) {
 		return apiResponse(res, 500, 'Error retrieving news', { error: error.message });
@@ -86,7 +74,6 @@ const addNews = async (req, res) => {
     console.log('Received request to add news with data:', req.body, 'and file:', req.file);
     try {
         const data = newsPayload(req);
-        Object.assign(data,  { member_id: adminMemberId(req) });
 
         const news = new News({
             ...data

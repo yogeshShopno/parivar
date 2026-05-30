@@ -96,7 +96,7 @@ const getBusinessById = async (req, res) => {
 
 const getBusinessCategoryList = async (req, res) => {
   try {
-    const query = req.user ? ownerOrLegacyMemberQuery(req) : {};
+    const query = req.user ? {} : {};
     const categories = await BusinessCategory.find(query).sort({ _id: -1 }).lean();
     const data = categories.map((category) => ({
       id: String(category._id),
