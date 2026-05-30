@@ -7,11 +7,7 @@ const roleSchema = new mongoose.Schema({
     required: [true, 'Role name is required'],
     trim: true
   },
-  description: {
-    type: String,
-    default: '',
-    trim: true
-  },
+
   permissions: {
     type: [String],
     default: [],

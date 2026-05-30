@@ -20,6 +20,7 @@ const findBusinessByRequestId = (req, id) => {
     ]
   });
 };
+
 const formatBusiness = (req, b, categoryName = 'Community Enterprise') => ({
   id: String(b._id),
   member_id: b.member_id || '',

@@ -1,6 +1,6 @@
 const News = require('../models/newsModel');
 const { apiResponse, fullName, publicUrl } = require('../utils/apiResponse');
-const { adminMemberId, ownerFields, ownerOrLegacyMemberQuery, initialStatus } = require('../utils/ownership');
+const { adminMemberId, ownerOrLegacyMemberQuery, } = require('../utils/ownership');
 
 const isObjectId = (id) => require('mongoose').isValidObjectId(id);
 
@@ -56,7 +56,6 @@ const newsPayload = (req, existing = {}) => {
     reporter_name: req.body.reporter_name || existing.reporter_name || fullName(req.user) || req.user?.email || 'Admin',
     location: req.body.location || existing.location || 'Admin',
     category: req.body.category || existing.category || '',
-    status: req.body.status !== undefined ? Number(req.body.status) : (existing.status !== undefined ? Number(existing.status) : initialStatus(req)),
     image_url: imageFromRequest(req, existing.image_url || (typeof existing.image === 'string' ? existing.image : '')),
     cdate: existing.cdate || new Date().toISOString().slice(0, 10)
   };
@@ -87,7 +86,7 @@ const addNews = async (req, res) => {
     console.log('Received request to add news with data:', req.body, 'and file:', req.file);
     try {
         const data = newsPayload(req);
-        Object.assign(data, ownerFields(req), { member_id: adminMemberId(req) });
+        Object.assign(data,  { member_id: adminMemberId(req) });
 
         const news = new News({
             ...data
@@ -107,7 +106,6 @@ const updateNews = async (req, res) => {
         }
 
         news.set(newsPayload(req, news));
-        news.set(ownerFields(req));
         await news.save();
 
         return apiResponse(res, 200, 'News saved successfully', formatNews(req, news.toObject()));

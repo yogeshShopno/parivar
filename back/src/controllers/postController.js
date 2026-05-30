@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Post = require('../models/postModel');
 const User = require('../models/userModels');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
-const { adminMemberId, ownerFields, ownerOrLegacyMemberQuery, ownerQuery, initialStatus } = require('../utils/ownership');
+const { adminMemberId, ownerOrLegacyMemberQuery} = require('../utils/ownership');
 
 const imageFromRequest = (req, fallback = '') => {
   if (req.file) return `/uploads/${req.file.filename}`;
@@ -27,7 +27,7 @@ const getPosts = async (req, res) => {
 
     if (isCommitteeOrAdmin) {
       // Admin sees all posts in their tenant
-      posts = await Post.find(ownerQuery(req)).sort({ createdAt: -1, _id: -1 }).lean();
+      posts = await Post.find({}).sort({ createdAt: -1, _id: -1 }).lean();
     } else {
       // Members see approved posts or their own pending posts
       posts = await Post.find({
@@ -149,17 +149,14 @@ const savePost = async (req, res) => {
 
     // Apply tenancy/ownership
     if (!existing) {
-      post.set(ownerFields(req));
+      post.set({});
     }
 
     // Admin approval logic
     if (isCommitteeOrAdmin) {
       // Admins can set status, default to approved
-      post.status = status !== undefined ? Number(status) : (existing ? existing.status : initialStatus(req));
-    } else {
-      // Members editing/creating always set to pending (0)
-      post.status = initialStatus(req);
-    }
+      post.status = status !== undefined ? Number(status) : (existing ? existing.status : 1);
+    } 
 
     if (req.file || req.body.image) {
       post.image = imageFromRequest(req, post.image);
