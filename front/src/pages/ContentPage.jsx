@@ -150,7 +150,17 @@ const definitions = {
       { key: 'email', label: 'Email' },
       { key: 'message', label: 'Message' }
     ]
-  }
+  },
+birthday: {
+  title: 'Birthdays',
+  subtitle: 'View and manage member birthdays',
+  endpoint: '/users?birthday',
+  fields: [{ name: 'name', label: 'Name' }, { name: 'dob', label: 'Date of Birth', type: 'date' }],
+  columns: [
+    { key: 'name', label: 'Name' },
+    { key: 'dob', label: 'Date of Birth', render: (row) => row.dob ? new Date(row.dob).toLocaleDateString('en-IN') : '-' }
+  ]
+}
 }
 
 export default function ContentPage({ type }) {

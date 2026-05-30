@@ -54,6 +54,7 @@ const PERMISSIONS = [
   { key: 'feedback.edit', label: 'Feedback Edit', module: 'feedback', module_label: 'Feedback', action: 'edit', action_label: 'Edit' },
   { key: 'feedback.delete', label: 'Feedback Delete', module: 'feedback', module_label: 'Feedback', action: 'delete', action_label: 'Delete' }
   
+  
 ];
 
 const LEGACY_PERMISSION_KEYS = [
