@@ -18,9 +18,7 @@ const getDonations = async (req, res) => {
     if (location) query.location = new RegExp(location, 'i');
     if (donation_purpose) query.donation_purpose = new RegExp(donation_purpose, 'i');
 
-    const donations = await Donation.find({
-      $and: [ownerOrLegacyMemberQuery(req), query]
-    }).sort({ _id: -1 }).lean();
+    const donations = await Donation.find(query).sort({ _id: -1 }).lean();
 
     return res.status(200).json({
       status: 200,
@@ -75,8 +73,7 @@ const addDonation = async (req, res) => {
       date,
       whose_possession: whose_possession && whose_possession.trim() !== '' ? whose_possession.trim() : 'direct',
       status: status === undefined ? 1 : Number(status),
-      cdate: new Date().toISOString().slice(0, 10),
-      ...ownerFields(req)
+      cdate: new Date().toISOString().slice(0, 10)
     };
 
     const donation = await Donation.create(donationData);
@@ -113,10 +110,7 @@ const updateDonation = async (req, res) => {
     }
 
     const donation = await Donation.findOne({
-      $and: [
-        ownerOrLegacyMemberQuery(req),
-        { $or: orConditions }
-      ]
+      $or: orConditions
     });
 
     if (!donation) {
@@ -181,10 +175,7 @@ const deleteDonation = async (req, res) => {
     }
 
     const result = await Donation.deleteOne({
-      $and: [
-        ownerOrLegacyMemberQuery(req),
-        { $or: orConditions }
-      ]
+      $or: orConditions
     });
 
     if (result.deletedCount === 0) {
@@ -220,9 +211,7 @@ const adminGetDonations = async (req, res) => {
     if (location) query.location = new RegExp(location, 'i');
     if (donation_purpose) query.donation_purpose = new RegExp(donation_purpose, 'i');
 
-    const donations = await Donation.find({
-      $and: [ownerQuery(req), query]
-    }).sort({ _id: -1 }).lean();
+    const donations = await Donation.find(query).sort({ _id: -1 }).lean();
 
     return res.status(200).json({
       status: 200,
@@ -258,7 +247,6 @@ const adminSaveDonation = async (req, res) => {
         orConditions.push({ _id: id });
       }
       existing = await Donation.findOne({
-        ...ownerQuery(req),
         $or: orConditions
       });
     }
@@ -295,9 +283,7 @@ const adminSaveDonation = async (req, res) => {
       cdate: new Date().toISOString().slice(0, 10)
     });
 
-    const updateFields = {
-      ...ownerFields(req)
-    };
+    const updateFields = {};
     if (donator_name !== undefined) updateFields.donator_name = donator_name;
     if (donate_amount !== undefined) updateFields.donate_amount = Number(donate_amount);
     if (location !== undefined) updateFields.location = location;
@@ -346,7 +332,6 @@ const adminDeleteDonation = async (req, res) => {
     }
 
     const result = await Donation.deleteOne({
-      ...ownerQuery(req),
       $or: orConditions
     });
 

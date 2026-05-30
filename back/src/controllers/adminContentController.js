@@ -34,18 +34,20 @@ const imageFromRequest = (req, fallback = '') => {
   return req.body.image || req.body.image_url || fallback || '';
 };
 
-const listContent = (Model, formatter, label) => async (req, res) => {
+const listContent = (Model, formatter, label, isGlobal = false) => async (req, res) => {
   try {
-    const rows = await Model.find(ownerQuery(req)).sort({ _id: -1 }).lean();
+    const query = isGlobal ? {} : ownerQuery(req);
+    const rows = await Model.find(query).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, `${label} retrieved successfully`, rows.map((row) => formatter(req, row)));
   } catch (error) {
     return apiResponse(res, 500, `Error retrieving ${label.toLowerCase()}`, { error: error.message });
   }
 };
 
-const deleteContent = (Model, label) => async (req, res) => {
+const deleteContent = (Model, label, isGlobal = false) => async (req, res) => {
   try {
-    const existing = await findById(Model, req.params.id, ownerQuery(req));
+    const query = isGlobal ? {} : ownerQuery(req);
+    const existing = await findById(Model, req.params.id, query);
     if (!existing) return apiResponse(res, 404, `${label} not found`);
     await existing.deleteOne();
     return apiResponse(res, 200, `${label} deleted successfully`);
@@ -56,18 +58,7 @@ const deleteContent = (Model, label) => async (req, res) => {
 
 
 
-const festivalPayload = (req, existing = {}) => {
-  const title = req.body.title || req.body.festival_name || existing.title || existing.festival_name || '';
-  const description = req.body.description || req.body.festival_description || existing.description || existing.festival_description || '';
-  return {
-    ...req.body,
-    title,
-    description,
-    festival_name: req.body.festival_name || title,
-    festival_description: req.body.festival_description || description,
-    image: imageFromRequest(req, existing.image)
-  };
-};
+
 
 const galleryPayload = (req, existing = {}) => {
   return {
@@ -87,9 +78,10 @@ const bannerPayload = (req, existing = {}) => ({
   link: req.body.link || existing.link || ''
 });
 
-const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (req, res) => {
+const saveContent = (Model, payloadBuilder, formatter, label, prefix, isGlobal = false) => async (req, res) => {
   try {
-    const existing = req.params.id ? await findById(Model, req.params.id, ownerQuery(req)) : null;
+    const query = isGlobal ? {} : ownerQuery(req);
+    const existing = req.params.id ? await findById(Model, req.params.id, query) : null;
     const payload = payloadBuilder(req, existing || {});
 
     if (!payload.title && ['Event', 'Festival', 'Gallery'].includes(label)) {
@@ -109,7 +101,7 @@ const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (
     if (label === 'Gallery' && !existing && hasGalleryImages) {
       const docs = await Promise.all(req.body.images.map(async (image, index) => {
         const doc = new Model({ id: await nextPublicId(Model, `${prefix}${index}_`) });
-        const galleryDocPayload = { ...payload, ...ownerFields(req), image };
+        const galleryDocPayload = { ...payload, ...(isGlobal ? {} : ownerFields(req)), image };
         delete galleryDocPayload.images;
         doc.set(galleryDocPayload);
         doc.status = initialStatus(req);
@@ -122,7 +114,7 @@ const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (
 
     const doc = existing || new Model({ id: await nextPublicId(Model, prefix) });
     delete payload.images;
-    doc.set({ ...payload, ...ownerFields(req) });
+    doc.set({ ...payload, ...(isGlobal ? {} : ownerFields(req)) });
     
     if (!existing) {
       doc.status = req.body.status !== undefined ? Number(req.body.status) : initialStatus(req);
@@ -139,17 +131,7 @@ const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (
 };
 
 
-const formatFestival = (req, item) => ({
-  id: item.id || String(item._id),
-  title: item.title || item.festival_name || '',
-  description: item.description || item.festival_description || '',
-  festival_name: item.festival_name || item.title || '',
-  festival_date: item.festival_date || item.date || '',
-  button_name: item.button_name || '',
-  button_link: item.button_link || '',
-  status: Number(item.status ?? 1),
-  image: publicUrl(req, item.image || '')
-});
+
 
 const formatBanner = (req, item) => ({
   id: item.id || String(item._id),
@@ -296,23 +278,12 @@ const deleteMaster = async (req, res) => {
   }
 };
 
-const getFestivalById = async (req, res) => {
-  try {
-    const doc = await findById(Festival, req.params.id, ownerQuery(req));
-    if (!doc) return apiResponse(res, 404, 'Festival not found');
-    return apiResponse(res, 200, 'Festival retrieved successfully', formatFestival(req, doc.toObject()));
-  } catch (error) {
-    return apiResponse(res, 500, 'Error retrieving festival', { error: error.message });
-  }
-};
+
 
 
 module.exports = {
 
-  getFestivals: listContent(Festival, formatFestival, 'Festivals'),
-  getFestivalById,
-  saveFestival: saveContent(Festival, festivalPayload, formatFestival, 'Festival', 'FST'),
-  deleteFestival: deleteContent(Festival, 'Festival'),
+
 
   getBanners: listContent(Banner, formatBanner, 'Banners'),
   saveBanner: saveContent(Banner, bannerPayload, formatBanner, 'Banner', 'BAN'),
