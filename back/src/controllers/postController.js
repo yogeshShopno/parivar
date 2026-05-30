@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Post = require('../models/postModel');
 const User = require('../models/userModels');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
-const { adminMemberId, ownerOrLegacyMemberQuery} = require('../utils/ownership');
+const { adminMemberId } = require('../utils/ownership');
 
 const imageFromRequest = (req, fallback = '') => {
   if (req.file) return `/uploads/${req.file.filename}`;
@@ -32,7 +32,6 @@ const getPosts = async (req, res) => {
       // Members see approved posts or their own pending posts
       posts = await Post.find({
         $and: [
-          ownerOrLegacyMemberQuery(req),
           {
             $or: [
               tenantStatusQuery(),
@@ -46,7 +45,6 @@ const getPosts = async (req, res) => {
     const memberIds = [...new Set(posts.map((post) => String(post.member_id || '')).filter(Boolean))];
     const members = await User.find({
       $and: [
-        ownerOrLegacyMemberQuery(req),
         { member_id: { $in: memberIds } }
       ]
     }).select('-password').lean();
@@ -80,17 +78,9 @@ const getPosts = async (req, res) => {
 const getPostById = async (req, res) => {
   try {
     const id = req.params.id || req.query.id;
-    const post = await Post.findOne({
-      $and: [
-        ownerOrLegacyMemberQuery(req),
-        {
-          $or: [
-            { id: String(id) },
-            { _id: String(id).match(/^[a-f\d]{24}$/i) ? id : undefined }
-          ].filter((condition) => Object.values(condition)[0] !== undefined)
-        }
-      ]
-    }).lean();
+    const post = await Post.findOne(
+      mongoose.isValidObjectId(id) ? { _id: id } : { id: String(id) }
+    ).lean();
 
     if (!post) {
       return apiResponse(res, 404, 'Post not found');
@@ -121,7 +111,6 @@ const savePost = async (req, res) => {
 
     const existing = id
       ? await Post.findOne({
-        ...ownerOrLegacyMemberQuery(req),
         $or: [{ id: String(id) }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
       })
       : null;
@@ -147,16 +136,13 @@ const savePost = async (req, res) => {
     post.title = title;
     post.description = description;
 
-    // Apply tenancy/ownership
-    if (!existing) {
-      post.set({});
-    }
+
 
     // Admin approval logic
     if (isCommitteeOrAdmin) {
       // Admins can set status, default to approved
       post.status = status !== undefined ? Number(status) : (existing ? existing.status : 1);
-    } 
+    }
 
     if (req.file || req.body.image) {
       post.image = imageFromRequest(req, post.image);
@@ -184,10 +170,11 @@ const deletePost = async (req, res) => {
     const isCommitteeOrAdmin = req.user && (req.user.is_committee || req.user.role === 'admin' || req.user.relation === 'Self');
     const ownId = currentMemberId(req);
 
-    const query = {
-      ...ownerOrLegacyMemberQuery(req),
-      $or: [{ id: String(id) }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
-    };
+    // postController.js — deletePost
+    const orConditions = [{ id: String(id) }];
+    if (mongoose.isValidObjectId(id)) orConditions.push({ _id: id });
+    const query = { $or: orConditions };
+    if (!isCommitteeOrAdmin) query.member_id = ownId;
 
     // If not admin, can only delete own post
     if (!isCommitteeOrAdmin) {
