@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const GalleryCategory = require('../models/galleryCategoryModel');
 const { apiResponse } = require('../utils/apiResponse');
-const { ownerFields, ownerQuery } = require('../utils/ownership');
+
+const isAdminUser = (user = {}) => Boolean(user?.committee_role === 'President' || user?.role_id);
 
 const idQuery = (id) => ({
   $or: [
@@ -36,7 +37,7 @@ const formatCategory = (item) => ({
 
 const getCategories = async (req, res) => {
   try {
-    const rows = await GalleryCategory.find(ownerQuery(req)).sort({ category: 1 }).lean();
+    const rows = await GalleryCategory.find({}).sort({ category: 1 }).lean();
     return apiResponse(res, 200, 'Gallery categories retrieved successfully', rows.map(formatCategory));
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving gallery categories', { error: error.message });
@@ -45,6 +46,9 @@ const getCategories = async (req, res) => {
 
 const saveCategory = async (req, res) => {
   try {
+    if (!isAdminUser(req.user)) {
+      return apiResponse(res, 403, 'Forbidden: Admin only');
+    }
     const categoryText = (req.body.category || '').trim();
     if (!categoryText) {
       return apiResponse(res, 400, 'Category name is required');
@@ -53,14 +57,11 @@ const saveCategory = async (req, res) => {
     await dropLegacyUniqueCategoryIndex();
 
     const existing = req.params.id
-      ? await GalleryCategory.findOne({
-          ...ownerQuery(req),
-          ...idQuery(req.params.id)
-        })
+      ? await GalleryCategory.findOne(idQuery(req.params.id))
       : null;
 
     const duplicate = await GalleryCategory.findOne({
-      ...ownerQuery(req),
+
       category: categoryText,
       ...(existing ? { _id: { $ne: existing._id } } : {})
     });
@@ -69,7 +70,7 @@ const saveCategory = async (req, res) => {
       return apiResponse(res, 400, 'Gallery category already exists');
     }
 
-    const doc = existing || new GalleryCategory({ ...ownerFields(req) });
+    const doc = existing || new GalleryCategory();
     doc.category = categoryText;
     await doc.save();
 
@@ -84,8 +85,11 @@ const saveCategory = async (req, res) => {
 
 const deleteCategory = async (req, res) => {
   try {
+    if (!isAdminUser(req.user)) {
+      return apiResponse(res, 403, 'Forbidden: Admin only');
+    }
+
     const existing = await GalleryCategory.findOne({
-      ...ownerQuery(req),
       ...idQuery(req.params.id)
     });
     if (!existing) return apiResponse(res, 404, 'Gallery category not found');
