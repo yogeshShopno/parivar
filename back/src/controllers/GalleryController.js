@@ -2,8 +2,6 @@ const mongoose = require('mongoose');
 const Gallery = require('../models/galleryModel');
 
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
-const { ownerFields, ownerQuery, initialStatus } = require('../utils/ownership');
-
 
 const isObjectId = (id) => mongoose.isValidObjectId(id);
 
@@ -65,7 +63,7 @@ const formatGallery = (req, item) => ({
 const getGallery = async (req, res) => {
 
   try {
-    const rows = await Gallery.find(ownerQuery(req)).sort({ _id: -1 }).lean();
+    const rows = await Gallery.find({}).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'Gallery retrieved successfully', rows.map((row) => formatGallery(req, row)));
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving gallery', { error: error.message });
@@ -74,7 +72,7 @@ const getGallery = async (req, res) => {
 
 const saveGallery = async (req, res) => {
   try {
-    const existing = req.params.id ? await findById(Gallery, req.params.id, ownerQuery(req)) : null;
+    const existing = req.params.id ? await findById(Gallery, req.params.id) : null;
     const payload = galleryPayload(req, existing || {});
 
     const hasImages = Array.isArray(payload.images) && payload.images.length > 0;
@@ -83,13 +81,8 @@ const saveGallery = async (req, res) => {
     }
 
     const doc = existing || new Gallery({});
-    doc.set({ ...payload, ...ownerFields(req) });
+    doc.set({ ...payload,  });
 
-    if (!existing) {
-      doc.status = req.body.status !== undefined ? Number(req.body.status) : initialStatus(req);
-    } else if (req.body.status !== undefined) {
-      doc.status = Number(req.body.status);
-    }
 
     await doc.save();
     return apiResponse(res, existing ? 200 : 201, 'Gallery saved successfully', formatGallery(req, doc.toObject()));
@@ -100,7 +93,7 @@ const saveGallery = async (req, res) => {
 
 const deleteGallery = async (req, res) => {
   try {
-    const existing = await findById(Gallery, req.params.id, ownerQuery(req));
+    const existing = await findById(Gallery, req.params.id);
     if (!existing) return apiResponse(res, 404, 'Gallery not found');
     await existing.deleteOne();
     return apiResponse(res, 200, 'Gallery deleted successfully');

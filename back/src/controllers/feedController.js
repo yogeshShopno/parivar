@@ -4,7 +4,6 @@ const Festival = require('../models/festivalModel');
 const Gallery = require('../models/galleryModel');
 const User = require('../models/userModels');
 const { apiResponse, fullName, memberPublicId, publicUrl, toArchiveDate } = require('../utils/apiResponse');
-const { ownedByActorQuery, ownerFields, ownerOrLegacyMemberQuery } = require('../utils/ownership');
 
 const requestData = (req) => ({
   ...req.query,
@@ -21,7 +20,7 @@ const getHome = async (req, res) => {
 
 const getGallery = async (req, res) => {
   try {
-    const images = await Gallery.find(ownerOrLegacyMemberQuery(req)).sort({ _id: -1 }).lean();
+    const images = await Gallery.find({}).sort({ _id: -1 }).lean();
     const byYear = new Map();
 
     images.forEach((item) => {
@@ -70,7 +69,7 @@ const getGallery = async (req, res) => {
 
 const getEvents = async (req, res) => {
   try {
-    const events = await Event.find(ownerOrLegacyMemberQuery(req)).sort({ _id: -1 }).lean();
+    const events = await Event.find({}).sort({ _id: -1 }).lean();
     const data = events.map((event) => ({
       id: event.id || String(event._id),
       event_category_id: event.event_category_id || '',
@@ -93,7 +92,7 @@ const getEvents = async (req, res) => {
 
 const getFestivals = async (req, res) => {
   try {
-    const festivals = await Festival.find(ownerOrLegacyMemberQuery(req)).sort({ _id: -1 }).lean();
+    const festivals = await Festival.find({}).sort({ _id: -1 }).lean();
     const data = festivals.map((festival) => ({
       id: festival.id || String(festival._id),
       festival_name: festival.festival_name || festival.title || '',

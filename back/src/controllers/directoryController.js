@@ -3,7 +3,6 @@ const Country = require('../models/countryModel');
 const State = require('../models/stateModel');
 const City = require('../models/cityModel');
 const { apiResponse,  memberPublicId, publicUrl } = require('../utils/apiResponse');
-const { ownerOrLegacyMemberQuery } = require('../utils/ownership');
 
 const requestData = (req) => ({
   ...req.query,
@@ -57,7 +56,7 @@ const getMembers = async (req, res) => {
   try {
     const query = {
       $and: [
-        ownerOrLegacyMemberQuery(req),
+       
         {
           $or: [
             { parent_id: null },
@@ -89,7 +88,7 @@ const getFamilyMembers = async (req, res) => {
 
     const parent = await User.findOne({
       $and: [
-        ownerOrLegacyMemberQuery(req),
+      
         { member_id: String(member_id) }
       ]
     }).select('-password').lean();
@@ -100,7 +99,6 @@ const getFamilyMembers = async (req, res) => {
 
     const family = await User.find({
       $and: [
-        ownerOrLegacyMemberQuery(req),
         {
           $or: [
             { parent_id: String(member_id) },
@@ -135,7 +133,6 @@ const getcommitteeMembers = async (req, res) => {
   try {
     const committee = await User.find({
       $and: [
-        ownerOrLegacyMemberQuery(req),
         {
           $or: [
             { is_committee: true },

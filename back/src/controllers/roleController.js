@@ -3,7 +3,6 @@ const Role = require('../models/roleModel');
 const User = require('../models/userModels');
 const { ACTIONS, ALL_PERMISSION_KEYS, PERMISSION_MODULES, PERMISSIONS } = require('../config/permissions');
 const { apiResponse } = require('../utils/apiResponse');
-const { ownerFields, ownerOrLegacyMemberQuery, ownerQuery } = require('../utils/ownership');
 
 const sanitizePermissions = (permissions = []) => {
   const input = Array.isArray(permissions) ? permissions : String(permissions).split(',');
@@ -13,7 +12,6 @@ const sanitizePermissions = (permissions = []) => {
 const formatRole = (role) => ({
   id: String(role._id),
   name: role.name,
-  description: role.description || '',
   permissions: role.permissions || [],
   permission_count: role.permissions?.length || 0,
   status: role.status ?? 1
@@ -36,7 +34,7 @@ const getPermissionOptions = async (req, res) => {
 
 const getRoles = async (req, res) => {
   try {
-    const roles = await Role.find(ownerOrLegacyMemberQuery(req)).sort({ name: 1 }).lean();
+    const roles = await Role.find({}).sort({ name: 1 }).lean();
     return apiResponse(res, 200, 'Roles retrieved successfully', roles.map(formatRole));
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving roles', { error: error.message });
@@ -46,7 +44,7 @@ const getRoles = async (req, res) => {
 const saveRole = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, description, permissions, status } = req.body;
+    const { name,  permissions, status } = req.body;
 
     if (!name || !String(name).trim()) {
       return apiResponse(res, 400, 'Role name is required');
@@ -54,10 +52,9 @@ const saveRole = async (req, res) => {
 
     const payload = {
       name: String(name).trim(),
-      description: description || '',
       permissions: sanitizePermissions(permissions),
       status: status === undefined ? 1 : Number(status),
-      ...ownerFields(req)
+    
     };
 
     let role;
@@ -65,7 +62,7 @@ const saveRole = async (req, res) => {
       if (!mongoose.isValidObjectId(id)) {
         return apiResponse(res, 400, 'Invalid role id');
       }
-      role = await Role.findOneAndUpdate({ _id: id, ...ownerQuery(req) }, payload, { new: true, runValidators: true });
+      role = await Role.findOneAndUpdate({ _id: id }, payload, { new: true, runValidators: true });
       if (!role) {
         return apiResponse(res, 404, 'Role not found');
       }
@@ -91,7 +88,6 @@ const deleteRole = async (req, res) => {
 
     const assignedUsers = await User.countDocuments({
       $and: [
-        ownerOrLegacyMemberQuery(req),
         { role_id: id }
       ]
     });
@@ -99,7 +95,7 @@ const deleteRole = async (req, res) => {
       return apiResponse(res, 409, 'Role is assigned to users and cannot be deleted');
     }
 
-    const deleted = await Role.findOneAndDelete({ _id: id, ...ownerQuery(req) });
+    const deleted = await Role.findOneAndDelete({ _id: id });
     if (!deleted) {
       return apiResponse(res, 404, 'Role not found');
     }
