@@ -32,7 +32,8 @@ export const coreNavigation = [
 
   { to: '/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries', permission: 'contact-inquiries.list' },
   { to: '/feedback', label: 'Feedback', icon: FileText, title: 'Feedback', permission: 'feedback.list' },
-  { to: '/birthday', label: 'Birthdays', icon: CalendarDays, title: 'Member Birthdays', permission: 'birthday.list' }
+  { to: '/birthday', label: 'Birthdays', icon: CalendarDays, title: 'Member Birthdays', permission: 'birthday.list' },
+  { to: '/job-vacancy', label: 'Job Vacancies', icon: Briefcase, title: 'Job Vacancies', permission: 'job-vacancy.list' }
 ]
 
 export const masterNavigation = [
