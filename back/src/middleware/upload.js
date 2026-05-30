@@ -1,24 +1,9 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
+const { uploadToExternalService } = require('../utils/fileUpload');
 
-const uploadDirectory = path.resolve(__dirname, '../../public/uploads');
-
-// Ensure uploads folder exists
-if (!fs.existsSync(uploadDirectory)) {
-  fs.mkdirSync(uploadDirectory, { recursive: true });
-}
-
-// Storage engine config
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDirectory);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
-  }
-});
+// Storage engine config (Memory storage to allow uploading to external service)
+const storage = multer.memoryStorage();
 
 // Image type validation
 const fileFilter = (req, file, cb) => {
@@ -47,22 +32,55 @@ const fileFields = [
   { name: 'gallery_image_3', maxCount: 1 },
   { name: 'gallery_image_4', maxCount: 1 },
   { name: 'gallery_image_5', maxCount: 1 },
-
 ];
 
 // Multer fields mapping for business details (Logo + up to 5 gallery images)
-const businessUpload = upload.fields([
+const multerBusinessUpload = upload.fields([
   { name: 'image', maxCount: 1 },
-  { name: 'gallery_image', maxCount: 1 },
-  { name: 'gallery_image', maxCount: 1 },
-  { name: 'gallery_image', maxCount: 1 },
-  { name: 'gallery_image', maxCount: 1 },
-  { name: 'gallery_image', maxCount: 1 },
-
+  { name: 'gallery_image', maxCount: 5 },
 ]);
 
+const businessUpload = (req, res, next) => {
+  multerBusinessUpload(req, res, async (err) => {
+    if (err) return next(err);
+    try {
+      if (req.files) {
+        for (const fieldName in req.files) {
+          const filesArray = req.files[fieldName];
+          for (let i = 0; i < filesArray.length; i++) {
+            const file = filesArray[i];
+            const imagePath = await uploadToExternalService(file, fieldName);
+            file.filename = imagePath;
+          }
+        }
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  });
+};
+
 // Multer single image upload for posts
-const postUpload = upload.single('image');
+const multerPostUpload = upload.single('image');
+
+const postUpload = (req, res, next) => {
+  multerPostUpload(req, res, async (err) => {
+    if (err) return next(err);
+    try {
+      if (req.file) {
+        const imagePath = await uploadToExternalService(req.file, req.file.fieldname);
+        req.body[req.file.fieldname] = imagePath;
+        // Delete req.file so controllers fall back to req.body.image and don't prepend /uploads/
+        delete req.file;
+      }
+      next();
+    } catch (error) {
+      next(error);
+    }
+  });
+};
+
 const parseForm = (req, res, next) => {
   if (!req.is('multipart/form-data')) {
     return next();
@@ -77,56 +95,67 @@ const parseForm = (req, res, next) => {
     { name: 'gallery_image_4', maxCount: 1 },
     { name: 'gallery_image_5', maxCount: 1 },
     { name: 'result_image', maxCount: 1 }
-  ])(req, res, (error) => {
+  ])(req, res, async (error) => {
     if (error) return next(error);
 
-    if (Array.isArray(req.files)) {
-      req.files.forEach((file) => {
-        const fieldName = file.fieldname;
-        const imagePath = `/uploads/${file.filename}`;
+    try {
+      if (Array.isArray(req.files)) {
+        for (const file of req.files) {
+          const fieldName = file.fieldname;
+          const imagePath = await uploadToExternalService(file, fieldName);
 
-        if (fieldName === 'image' && !req.file) {
-          req.file = file;
-        }
-
-        if (fieldName === 'images') {
-          if (!Array.isArray(req.body.images)) {
-            req.body.images = [];
+          if (fieldName === 'images') {
+            if (!Array.isArray(req.body.images)) {
+              req.body.images = [];
+            }
+            req.body.images.push(imagePath);
+            continue;
           }
-          req.body.images.push(imagePath);
-          return;
-        }
 
-        if (req.body[fieldName] === undefined) {
-          req.body[fieldName] = imagePath;
-        } else if (Array.isArray(req.body[fieldName])) {
-          req.body[fieldName].push(imagePath);
-        } else {
-          req.body[fieldName] = [req.body[fieldName], imagePath];
+          if (req.body[fieldName] === undefined) {
+            req.body[fieldName] = imagePath;
+          } else if (Array.isArray(req.body[fieldName])) {
+            req.body[fieldName].push(imagePath);
+          } else {
+            req.body[fieldName] = [req.body[fieldName], imagePath];
+          }
         }
-      });
-    }
+      } else if (req.files) {
+        for (const fieldName in req.files) {
+          const filesArray = req.files[fieldName];
+          for (const file of filesArray) {
+            const imagePath = await uploadToExternalService(file, fieldName);
+            
+            if (fieldName === 'images') {
+              if (!Array.isArray(req.body.images)) {
+                req.body.images = [];
+              }
+              req.body.images.push(imagePath);
+              continue;
+            }
 
-    // Populate req.body.image from req.file (single) or req.files.image[0] (fields)
-    if (req.file && !req.body.image) {
-      req.body.image = `/uploads/${req.file.filename}`;
-    }
-    if (req.files?.image?.[0] && !req.body.image) {
-      req.body.image = `/uploads/${req.files.image[0].filename}`;
-    }
-    if (req.files?.images?.length) {
-      req.body.images = req.files.images.map((file) => `/uploads/${file.filename}`);
-    }
-    for (let i = 1; i <= 5; i++) {
-      const key = `gallery_image_${i}`;
-      if (req.files?.[key]?.[0]) {
-        req.body[key] = `/uploads/${req.files[key][0].filename}`;
+            if (req.body[fieldName] === undefined) {
+              req.body[fieldName] = imagePath;
+            } else if (Array.isArray(req.body[fieldName])) {
+              req.body[fieldName].push(imagePath);
+            } else {
+              req.body[fieldName] = [req.body[fieldName], imagePath];
+            }
+          }
+        }
+      } else if (req.file) {
+        const imagePath = await uploadToExternalService(req.file, req.file.fieldname);
+        req.body[req.file.fieldname] = imagePath;
       }
+      
+      // Clear req.file and req.files so controllers don't prepend /uploads/
+      if (req.file) delete req.file;
+      if (req.files) delete req.files;
+
+      return next();
+    } catch (err) {
+      return next(err);
     }
-    if (req.files?.result_image?.[0]) {
-      req.body.result_image = `/uploads/${req.files.result_image[0].filename}`;
-    }
-    return next();
   });
 };
 

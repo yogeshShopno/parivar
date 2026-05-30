@@ -111,21 +111,19 @@ const getBusinessCategoryList = async (req, res) => {
 const imageFromRequest = (req, fallback = '') => {
   // fields() puts files in req.files, not req.file
   const file = req.files?.['image']?.[0] || req.files?.['image']?.[0];
-  if (file) return `/uploads/${file.filename}`;
-  if (req.body?.image && String(req.body.image).startsWith('/uploads/')) return req.body.image;
+  if (file) return file.filename;
+  if (req.body?.image) return req.body.image;
   return fallback || '';
 };
 
 const toStoredPath = (url = '') => {
-  const text = String(url);
-  const idx = text.indexOf('/uploads/');
-  return idx >= 0 ? text.slice(idx) : text;
+  return String(url);
 };
 
 const galleryPath = (req, key) => {
   const file = req.files?.[key]?.[0];
-  if (file) return `/uploads/${file.filename}`;
-  if (req.body?.[key] && String(req.body[key]).startsWith('/uploads/')) return req.body[key];
+  if (file) return file.filename;
+  if (req.body?.[key]) return req.body[key];
   return '';
 };
 
