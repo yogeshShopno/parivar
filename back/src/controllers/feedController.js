@@ -90,30 +90,12 @@ const getEvents = async (req, res) => {
   }
 };
 
-const getFestivals = async (req, res) => {
-  try {
-    const festivals = await Festival.find({}).sort({ _id: -1 }).lean();
-    const data = festivals.map((festival) => ({
-      id: festival.id || String(festival._id),
-      festival_name: festival.festival_name || festival.title || '',
-      festival_date: festival.festival_date || festival.date || '',
-      button_name: festival.button_name || '',
-      button_link: festival.button_link || '',
-      festival_description: festival.festival_description || festival.description || '',
-      image: publicUrl(req, festival.image || '')
-    }));
 
-    return apiResponse(res, 200, 'Festivals Data fetch successful', data);
-  } catch (error) {
-    return apiResponse(res, 500, 'Error retrieving festivals', { error: error.message });
-  }
-};
 
 
 
 module.exports = {
   getHome,
   getGallery,
-  getEvents,
-  getFestivals
+  getEvents
 };

@@ -16,9 +16,7 @@ const getMatrimonies = async (req, res) => {
     if (city) query.city = new RegExp(city, 'i');
     if (gender) query.gender = new RegExp(gender, 'i');
 
-    const matrimonies = await Matrimony.find({
-      $and: [ownerOrLegacyMemberQuery(req), query]
-    }).sort({ _id: -1 }).lean();
+    const matrimonies = await Matrimony.find(query).sort({ _id: -1 }).lean();
 
     return res.status(200).json({
       status: 200,
@@ -57,9 +55,7 @@ const getMatrimonyById = async (req, res) => {
       orConditions.push({ _id: id });
     }
 
-    const matrimony = await Matrimony.findOne({
-      $and: [ownerOrLegacyMemberQuery(req), { $or: orConditions }]
-    }).lean();
+    const matrimony = await Matrimony.findOne({ $or: orConditions }).lean();
 
     if (!matrimony) {
       return apiResponse(res, 404, 'Matrimony record not found');
@@ -139,8 +135,7 @@ const addMatrimony = async (req, res) => {
       city,
       about: about || '',
       status: status === undefined ? 1 : Number(status),
-      cdate: new Date().toISOString().slice(0, 10),
-      ...ownerFields(req)
+      cdate: new Date().toISOString().slice(0, 10)
     };
 
     const matrimonial = await Matrimony.create(data);
@@ -181,9 +176,7 @@ const updateMatrimony = async (req, res) => {
       orConditions.push({ _id: id });
     }
 
-    const matrimony = await Matrimony.findOne({
-      $and: [ownerOrLegacyMemberQuery(req), { $or: orConditions }]
-    });
+    const matrimony = await Matrimony.findOne({ $or: orConditions });
 
     if (!matrimony) {
       return apiResponse(res, 404, 'Matrimony record not found');
@@ -253,9 +246,7 @@ const deleteMatrimony = async (req, res) => {
       orConditions.push({ _id: id });
     }
 
-    const result = await Matrimony.deleteOne({
-      $and: [ownerOrLegacyMemberQuery(req), { $or: orConditions }]
-    });
+    const result = await Matrimony.deleteOne({ $or: orConditions });
 
     if (result.deletedCount === 0) {
       return apiResponse(res, 404, 'Matrimony record not found');

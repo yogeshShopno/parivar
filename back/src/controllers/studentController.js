@@ -16,9 +16,7 @@ const getStudents = async (req, res) => {
     if (student_name) query.student_name = new RegExp(student_name, 'i');
     if (school_name) query.school_name = new RegExp(school_name, 'i');
     
-    const students = await Student.find({
-      $and: [ownerOrLegacyMemberQuery(req), query]
-    }).sort({ _id: -1 }).lean();
+    const students = await Student.find(query).sort({ _id: -1 }).lean();
     
     return res.status(200).json({
       status: 200,
@@ -82,8 +80,7 @@ const addStudent = async (req, res) => {
       mobile_number_2: mobile_number_2 || '',
       result_image: result_image || '',
       status: status === undefined ? 1 : Number(status),
-      cdate: new Date().toISOString().slice(0, 10),
-      ...ownerFields(req)
+      cdate: new Date().toISOString().slice(0, 10)
     };
 
     const student = await Student.create(studentData);
@@ -124,10 +121,7 @@ const updateStudent = async (req, res) => {
     }
     
     const student = await Student.findOne({
-      $and: [
-        ownerOrLegacyMemberQuery(req),
-        { $or: orConditions }
-      ]
+      $or: orConditions
     });
 
     if (!student) {
@@ -200,10 +194,7 @@ const deleteStudent = async (req, res) => {
     }
     
     const result = await Student.deleteOne({
-      $and: [
-        ownerOrLegacyMemberQuery(req),
-        { $or: orConditions }
-      ]
+      $or: orConditions
     });
 
     if (result.deletedCount === 0) {
