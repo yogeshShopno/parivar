@@ -31,7 +31,8 @@ export const coreNavigation = [
   { to: '/news', label: 'News', icon: FileText, title: 'News Moderator', permission: 'news.list' },
 
   { to: '/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries', permission: 'contact-inquiries.list' },
-  { to: '/feedback', label: 'Feedback', icon: FileText, title: 'Feedback', permission: 'feedback.list' }
+  { to: '/feedback', label: 'Feedback', icon: FileText, title: 'Feedback', permission: 'feedback.list' },
+  { to: '/birthday', label: 'Birthdays', icon: CalendarDays, title: 'Member Birthdays', permission: 'birthday.list' }
 ]
 
 export const masterNavigation = [
