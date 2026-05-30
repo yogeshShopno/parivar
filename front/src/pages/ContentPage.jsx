@@ -46,34 +46,34 @@ const definitions = {
     title: 'Matrimonies',
     subtitle: 'Create and manage matrimony profiles',
     endpoint: '/matrimonies',
-   fields: [
-  { name: 'full_name', label: 'Full Name' },
-  { name: 'gender', label: 'Gender' },
-  { name: 'birthdate', label: 'Birthdate', type: 'date' },
-  { name: 'marital_status', label: 'Marital Status' },
-  { name: 'height', label: 'Height' },
-  { name: 'weight', label: 'Weight' },
-  { name: 'complexion', label: 'Complexion' },
-  { name: 'education', label: 'Education' },
-  { name: 'occupation', label: 'Occupation' },
-  { name: 'father_name', label: 'Father Name' },
-  { name: 'mother_name', label: 'Mother Name' },
-  { name: 'gotra', label: 'Gotra' },
-  { name: 'family_type', label: 'Family Type' },
-  { name: 'mobile_number', label: 'Mobile Number' },
-  { name: 'city', label: 'City' },
-  {
-    name: 'status',
-    label: 'Status',
-    type: 'select',
-    defaultValue: 1,
-    options: [
-      { value: 1, label: 'Active' },
-      { value: 0, label: 'Inactive' }
-    ]
-  },
-  { name: 'about', label: 'About', type: 'textarea' }
-],
+    fields: [
+      { name: 'full_name', label: 'Full Name' },
+      { name: 'gender', label: 'Gender' },
+      { name: 'birthdate', label: 'Birthdate', type: 'date' },
+      { name: 'marital_status', label: 'Marital Status' },
+      { name: 'height', label: 'Height' },
+      { name: 'weight', label: 'Weight' },
+      { name: 'complexion', label: 'Complexion' },
+      { name: 'education', label: 'Education' },
+      { name: 'occupation', label: 'Occupation' },
+      { name: 'father_name', label: 'Father Name' },
+      { name: 'mother_name', label: 'Mother Name' },
+      { name: 'gotra', label: 'Gotra' },
+      { name: 'family_type', label: 'Family Type' },
+      { name: 'mobile_number', label: 'Mobile Number' },
+      { name: 'city', label: 'City' },
+      {
+        name: 'status',
+        label: 'Status',
+        type: 'select',
+        defaultValue: 1,
+        options: [
+          { value: 1, label: 'Active' },
+          { value: 0, label: 'Inactive' }
+        ]
+      },
+      { name: 'about', label: 'About', type: 'textarea' }
+    ],
     columns: [
       { key: 'full_name', label: 'Name' },
       { key: 'gender', label: 'Gender' },
@@ -82,7 +82,6 @@ const definitions = {
       { key: 'mobile_number', label: 'Mobile' }
     ]
   },
-  
   gallery: {
     title: 'Gallery',
     subtitle: 'Maintain gallery images and categories',
@@ -99,7 +98,6 @@ const definitions = {
       { key: 'year', label: 'Year' }
     ]
   },
-
   banners: {
     title: 'Banner',
     subtitle: 'Control app banner slides and links',
@@ -151,16 +149,16 @@ const definitions = {
       { key: 'message', label: 'Message' }
     ]
   },
-birthday: {
-  title: 'Birthdays',
-  subtitle: 'View and manage member birthdays',
-  endpoint: '/users?birthday',
-  fields: [{ name: 'name', label: 'Name' }, { name: 'dob', label: 'Date of Birth', type: 'date' }],
-  columns: [
-    { key: 'name', label: 'Name' },
-    { key: 'dob', label: 'Date of Birth', render: (row) => row.dob ? new Date(row.dob).toLocaleDateString('en-IN') : '-' }
-  ]
-}
+  birthday: {
+    title: 'Birthdays',
+    subtitle: 'View and manage member birthdays',
+    endpoint: '/users?birthday',
+    fields: [{ name: 'name', label: 'Name' }, { name: 'dob', label: 'Date of Birth', type: 'date' }],
+    columns: [
+      { key: 'name', label: 'Name' },
+      { key: 'dob', label: 'Date of Birth', render: (row) => row.dob ? new Date(row.dob).toLocaleDateString('en-IN') : '-' }
+    ]
+  },
 }
 
 export default function ContentPage({ type }) {
