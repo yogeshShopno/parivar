@@ -50,7 +50,7 @@ const login = async (req, res) => {
     const permissions = getRolePermissions(user);
 
     // Restrict access to committee members, legacy self admins, or users with an assigned role.
-    if (!user.is_committee && user.committee_role !== 'Self'  && permissions.length === 0) {
+    if (!user.is_committee && user.committee_role !== 'Self' && permissions.length === 0) {
       return apiResponse(res, 403, 'Access denied: Insufficient permissions');
     }
 
@@ -113,6 +113,7 @@ const getStats = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const { search, gender, blood_group, is_committee } = req.query;
+    const birthday = 'birthday' in req.query;
     const query = {};
     const requestPermissions = getRolePermissions(req.user);
     const canListMembers = requestPermissions.includes('members.list') || requestPermissions.includes('users.manage');
@@ -127,6 +128,10 @@ const getUsers = async (req, res) => {
       query.is_committee = true;
     }
 
+    if (birthday) {
+      query.dob = { $exists: true };
+    }
+
     if (search) {
       query.$or = [
         { first_name: new RegExp(search, 'i') },
@@ -137,13 +142,19 @@ const getUsers = async (req, res) => {
       ];
     }
 
-    const users = await User.find({
-      $and: [
-        ownerOrLegacyMemberQuery(req),
-        query
-      ]
-    }).select('-password').populate('role_id').sort({ createdAt: -1 });
-    
+    const users = await User.find(query)
+      .select(birthday ? 'first_name middle_name last_name number dob' : '-password')
+      .populate(birthday ? '' : 'role_id')
+      .sort({ createdAt: -1 });
+
+    if (birthday) {
+      const formatted = users.map(u => ({
+        name: fullName(u),
+        number: u.number,
+        dob: u.dob || null
+      }));
+      return apiResponse(res, 200, 'Users birthday list retrieved successfully', formatted);
+    }
     // Map backend user to the fields expected by standard layout or user forms
     const formatted = users.map(u => ({
       id: u.member_id || String(u._id),
@@ -198,7 +209,7 @@ const createUser = async (req, res) => {
       status,
       image
     } = req.body;
-  
+
 
 
     if (!first_name || !number) {
@@ -208,10 +219,10 @@ const createUser = async (req, res) => {
       return apiResponse(res, 400, 'Invalid email format');
     }
 
-    if(await User.findOne({ email: email ? email.toLowerCase() : undefined })) {
+    if (await User.findOne({ email: email ? email.toLowerCase() : undefined })) {
       return apiResponse(res, 400, 'Email already exists');
     }
-    if(await User.findOne({ number : number? number : undefined })) {
+    if (await User.findOne({ number: number ? number : undefined })) {
       return apiResponse(res, 400, 'Number already exists');
     }
 
@@ -251,11 +262,11 @@ const createUser = async (req, res) => {
       status: status === undefined ? 1 : Number(status),
       image: imageFromRequest(req),
       created_by_admin_id: owner.created_by_admin_id,
-     
+
     });
 
     await newUser.save();
-    
+
     return apiResponse(res, 201, 'User created successfully', {
       _id: newUser._id,
       first_name: newUser.first_name,
@@ -274,7 +285,7 @@ const createUser = async (req, res) => {
       designation: newUser.designation || '',
       status: Number(newUser.status ?? 1),
       image: publicUrl(req, newUser.image || ''),
-      
+
 
     });
   } catch (error) {
@@ -358,7 +369,7 @@ const updateUser = async (req, res) => {
       designation: user.designation || '',
       status: Number(user.status ?? 1),
       image: publicUrl(req, user.image || ''),
-      
+
     });
   } catch (error) {
     return apiResponse(res, 500, 'Error updating user', { error: error.message });
@@ -393,7 +404,7 @@ const getStudents = async (req, res) => {
     if (standard) query.standard = new RegExp(standard, 'i');
     if (student_name) query.student_name = new RegExp(student_name, 'i');
     if (school_name) query.school_name = new RegExp(school_name, 'i');
-    
+
     const students = await Student.find({
       $and: [ownerQuery(req), query]
     }).sort({ _id: -1 }).lean();

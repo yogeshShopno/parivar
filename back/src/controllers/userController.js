@@ -1,6 +1,5 @@
 const User = require('../models/userModels');
 const jwt = require('jsonwebtoken');
-const { ownedByActorQuery, ownerFields, ownerOrLegacyMemberQuery } = require('../utils/ownership');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfamilykey';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '365d';
@@ -34,7 +33,7 @@ const sanitizeUser = (user) => {
 // Register a new user
 const register = async (req, res) => {
   console.log('Register request body:', req.body);
-  
+
   try {
     const {
       member_id, parent_member_id, first_name, middle_name, last_name, email, password,
@@ -53,7 +52,7 @@ const register = async (req, res) => {
       }
     }
 
-    const owner = req.user ? ownerFields(req) : {};
+    const owner = req.user ? req.user : {};
     const newUser = new User({
       member_id: member_id || await buildMemberId(),
       parent_member_id,
@@ -85,7 +84,7 @@ const register = async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json({ 
+    res.status(201).json({
       message: 'User registered successfully',
       data: sanitizeUser(newUser)
     });
@@ -145,16 +144,13 @@ const getProfile = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const { member_id, id, parent_member_id, is_committee, search, country_id, state_id, city_id } = requestData(req);
+
+    const { member_id, id, parent_member_id, is_committee, search, country_id, state_id, city_id, } = requestData(req);
+    const birthday = 'birthday' in (req.query || {});
 
     if (id || member_id) {
       const query = id ? mongooseQueryForUser(id) : { member_id };
-      const user = await User.findOne({
-        $and: [
-          ownerOrLegacyMemberQuery(req),
-          query
-        ]
-      }).select('-password');
+      const user = await User.findOne(query).select('-password');
 
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
@@ -163,6 +159,16 @@ const getUsers = async (req, res) => {
       return res.status(200).json({
         message: 'User retrieved successfully',
         data: user
+      });
+    }
+
+    if (birthday) {
+      const users = await User.find()
+        .select('first_name middle_name last_name number dob');
+
+      return res.status(200).json({
+        message: 'Users birthday list retrieved successfully',
+        data: users
       });
     }
 
@@ -183,12 +189,9 @@ const getUsers = async (req, res) => {
       ];
     }
 
-    const users = await User.find({
-      $and: [
-        ownerOrLegacyMemberQuery(req),
-        query
-      ]
-    }).select('-password').sort({ createdAt: -1 });
+
+    const users = await User.find(query).select('-password').sort({ createdAt: -1 });
+
 
     res.status(200).json({
       message: 'Users retrieved successfully',
@@ -209,9 +212,9 @@ const updateUser = async (req, res) => {
     }
 
     const user = await User.findOne({
-      $and: [
-        ownedByActorQuery(req),
-        mongooseQueryForUser(id)
+      $or: [
+        { _id: id },
+        { member_id: id }
       ]
     });
 
