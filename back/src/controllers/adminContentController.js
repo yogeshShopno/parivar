@@ -187,13 +187,9 @@ const getMasters = async (req, res) => {
     const type = req.params.type;
     const config = masterConfig[type];
     if (!config) return apiResponse(res, 404, 'Master type not found');
-
-    // Country, state, city are global data - no multi-tenancy
-    const isGlobalData = ['country', 'state', 'city'].includes(type);
-    const query = { ...(config.type ? { type: config.type } : {}), ...(isGlobalData ? {} : ownerQuery(req)) };
+    const query = { ...(config.type ? { type: config.type } : {}) };
     if (req.query.parent_id && config.parentKey) query[config.parentKey] = String(req.query.parent_id);
     if (req.query.parent_id && config.type) query.parent_id = String(req.query.parent_id);
-
     const rows = await config.Model.find(query).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'Master data retrieved successfully', rows.map((row) => formatMaster(type, row, config)));
   } catch (error) {
@@ -237,20 +233,14 @@ const deleteMaster = async (req, res) => {
     const type = req.params.type;
     const config = masterConfig[type];
     if (!config) return apiResponse(res, 404, 'Master type not found');
-
-    // Country, state, city are global data - no multi-tenancy
-    const isGlobalData = ['country', 'state', 'city'].includes(type);
-    const existing = await findById(config.Model, req.params.id, isGlobalData ? {} : ownerQuery(req));
+    const existing = await findById(config.Model, req.params.id);
     if (!existing) return apiResponse(res, 404, 'Master data not found');
-
     await existing.deleteOne();
     return apiResponse(res, 200, 'Master data deleted successfully');
   } catch (error) {
     return apiResponse(res, 500, 'Error deleting master data', { error: error.message });
   }
 };
-
-
 
 
 module.exports = {
