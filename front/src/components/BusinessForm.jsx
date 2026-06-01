@@ -38,6 +38,30 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
   const [profilePreview, setProfilePreview] = useState(null)
   const [galleryPreviews, setGalleryPreviews] = useState([])
 
+  const existingGalleryImages = (formData.gallery_images || []).filter((img) => typeof img === 'string' && img.trim())
+  const newGalleryFiles = (formData.gallery_images || []).filter((img) => img instanceof File)
+
+  const removeNewGalleryImage = (newIndex) => {
+    let currentFileIndex = -1
+    const nextGalleryImages = formData.gallery_images.filter((item) => {
+      if (!(item instanceof File)) return true
+      currentFileIndex += 1
+      return currentFileIndex !== newIndex
+    })
+
+    if (galleryPreviews[newIndex]) URL.revokeObjectURL(galleryPreviews[newIndex])
+    setGalleryPreviews(galleryPreviews.filter((_, index) => index !== newIndex))
+    setFormData({ ...formData, gallery_images: nextGalleryImages })
+  }
+
+  const removeExistingGalleryImage = (image) => {
+    setFormData({
+      ...formData,
+      gallery_images: formData.gallery_images.filter((item) => item !== image),
+      _deletedImages: [...(formData._deletedImages || []), image]
+    })
+  }
+
   useEffect(() => {
     fetchBusinessCategories()
     fetchCountries()
@@ -391,31 +415,26 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
 
       <div>
         <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Gallery Images</label>
-        {(galleryPreviews.length > 0 || formData.gallery_images.length > 0) && (
+        {(galleryPreviews.length > 0 || existingGalleryImages.length > 0) && (
           <div className="grid grid-cols-4 gap-2 mb-3">
-            {galleryPreviews.map((preview, idx) => (
+            {newGalleryFiles.map((file, idx) => (
               <div key={`new-${idx}`} className="relative w-20 h-20 rounded-lg overflow-hidden border border-border">
-                <img src={preview} alt={`preview-${idx}`} className="w-full h-full object-cover" />
+                <img src={galleryPreviews[idx]} alt={file.name || `preview-${idx}`} className="w-full h-full object-cover" />
                 <button
                   type="button"
-                  onClick={() => {
-                    setGalleryPreviews(galleryPreviews.filter((_, i) => i !== idx))
-                    setFormData({ ...formData, gallery_images: formData.gallery_images.filter((_, i) => i !== idx) })
-                  }}
+                  onClick={() => removeNewGalleryImage(idx)}
                   className="absolute top-1 right-1 bg-error rounded-full p-1 text-white text-xs hover:bg-error-bg hover:text-error-text"
                 >
                   ✕
                 </button>
               </div>
             ))}
-            {(typeof formData.gallery_images[0] === 'string') && formData.gallery_images.map((img, idx) => (
-              <div key={`old-${idx}`} className="relative w-20 h-20 rounded-lg overflow-hidden border border-border">
+            {existingGalleryImages.map((img, idx) => (
+              <div key={`old-${img}-${idx}`} className="relative w-20 h-20 rounded-lg overflow-hidden border border-border">
                 <img src={img} alt={`gallery-${idx}`} className="w-full h-full object-cover" />
                 <button
                   type="button"
-                  onClick={() => {
-                    setFormData({ ...formData, gallery_images: formData.gallery_images.filter((_, i) => i !== idx), _deletedImages: [...(formData._deletedImages || []), img] })
-                  }}
+                  onClick={() => removeExistingGalleryImage(img)}
                   className="absolute top-1 right-1 bg-error rounded-full p-1 text-white text-xs hover:bg-error-bg hover:text-error-text"
                 >
                   ✕
@@ -428,10 +447,11 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           type="file"
           multiple
           onChange={(e) => {
-            const files = Array.from(e.target.files)
+            const files = Array.from(e.target.files || []).filter((file) => file.type.startsWith('image/'))
             const previews = files.map(f => URL.createObjectURL(f))
             setGalleryPreviews([...galleryPreviews, ...previews])
             setFormData({ ...formData, gallery_images: [...formData.gallery_images, ...files] })
+            e.target.value = ''
           }}
           className="w-full bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-xs outline-none focus:border-primary/50"
           disabled={isLoading}

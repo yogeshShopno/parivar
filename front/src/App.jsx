@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Users from './pages/Users'
 import Businesses from './pages/Businesses'
+import BusinessProfile from './pages/BusinessProfile'
 import Students from './pages/Students'
 import Donations from './pages/Donations'
 import Settings from './pages/Settings'
@@ -28,6 +29,7 @@ export default function App() {
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/businesses/:id" element={<BusinessProfile />} />
         <Route
           path="/"
           element={
