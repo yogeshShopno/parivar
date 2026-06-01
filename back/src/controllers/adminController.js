@@ -7,7 +7,6 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
 const { getRolePermissions } = require('../middleware/auth');
-const { adminMemberId, ownerFields, ownerOrLegacyMemberQuery, ownerQuery } = require('../utils/ownership');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfamilykey';
 
@@ -85,24 +84,19 @@ const login = async (req, res) => {
 // Aggregated Dashboard stats
 const getStats = async (req, res) => {
   try {
-    const scopedOwner = ownerQuery(req);
-    const legacyOwner = ownerOrLegacyMemberQuery(req);
     const [userCount, businessCount, postCount, committeeCount] = await Promise.all([
-      User.countDocuments(legacyOwner),
-      Business.countDocuments(scopedOwner),
-      Post.countDocuments(scopedOwner),
-      User.countDocuments({ ...legacyOwner, is_committee: true })
+      User.countDocuments({}),
+      Business.countDocuments({}),
+      Post.countDocuments({}),
+      User.countDocuments({ is_committee: true })
     ]);
-
-    // Generate some interesting data patterns for mock charts over the last few months
-    // e.g., monthly users registered or monthly posts
     return apiResponse(res, 200, 'Dashboard statistics fetched successfully', {
       users: userCount,
       businesses: businessCount,
       posts: postCount,
       committee: committeeCount,
-      orders: postCount * 4, // for compatibility
-      revenue: businessCount * 1500 // for compatibility
+      orders: postCount * 4,
+      revenue: businessCount * 1500
     });
   } catch (error) {
     return apiResponse(res, 500, 'Error in getting stats', { error: error.message });
@@ -240,7 +234,6 @@ const createUser = async (req, res) => {
 
     const assignedRoleId = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
 
-    const owner = ownerFields(req);
 
     const newUser = new User({
       member_id: nextMemberId,
@@ -261,7 +254,6 @@ const createUser = async (req, res) => {
       designation: designation || '',
       status: status === undefined ? 1 : Number(status),
       image: imageFromRequest(req),
-      created_by_admin_id: owner.created_by_admin_id,
 
     });
 
@@ -317,12 +309,7 @@ const updateUser = async (req, res) => {
     } = req.body;
 
 
-    const user = await User.findOne({
-      $and: [
-        ownerOrLegacyMemberQuery(req),
-        { member_id: id }
-      ]
-    });
+    const user = await User.findOne({ member_id: id });
     if (!user) {
       return apiResponse(res, 404, 'User not found');
     }
@@ -351,7 +338,7 @@ const updateUser = async (req, res) => {
 
     await user.save();
 
-    return apiResponse(res, 200, 'User updated successfully', {
+    return apiResponse(res, 200, 'User updated deleteUser ', {
       id: user._id,
       first_name: user.first_name,
       middle_name: user.middle_name || '',
@@ -379,12 +366,7 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await User.deleteOne({
-      $and: [
-        ownerOrLegacyMemberQuery(req),
-        { member_id: id }
-      ]
-    });
+    const result = await User.deleteOne({ member_id: id });
     if (result.deletedCount === 0) {
       return apiResponse(res, 404, 'User not found');
     }
@@ -395,8 +377,6 @@ const deleteUser = async (req, res) => {
 };
 
 
-
-
 const getStudents = async (req, res) => {
   try {
     const { standard, student_name, school_name } = req.query;
@@ -405,9 +385,7 @@ const getStudents = async (req, res) => {
     if (student_name) query.student_name = new RegExp(student_name, 'i');
     if (school_name) query.school_name = new RegExp(school_name, 'i');
 
-    const students = await Student.find({
-      $and: [ownerQuery(req), query]
-    }).sort({ _id: -1 }).lean();
+const students = await Student.find(query).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, 'Students retrieved successfully', students.map(s => ({
       id: s.id || String(s._id),
       surname: s.surname || '',
@@ -450,10 +428,7 @@ const saveStudent = async (req, res) => {
       if (mongoose.isValidObjectId(id)) {
         orConditions.push({ _id: id });
       }
-      existing = await Student.findOne({
-        ...ownerQuery(req),
-        $or: orConditions
-      });
+      existing = await Student.findOne({ $or: orConditions });
     }
 
     if (id && !existing) {
@@ -470,7 +445,7 @@ const saveStudent = async (req, res) => {
       cdate: new Date().toISOString().slice(0, 10)
     });
 
-    student.set({ ...payload, ...ownerFields(req) });
+    student.set({ ...payload });
     await student.save();
 
     return apiResponse(res, existing ? 200 : 201, 'Student saved successfully', {
@@ -494,10 +469,9 @@ const saveStudent = async (req, res) => {
 const deleteStudent = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await Student.deleteOne({
-      ...ownerQuery(req),
-      $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
-    });
+const result = await Student.deleteOne({
+  $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
+});
     if (result.deletedCount === 0) {
       return apiResponse(res, 404, 'Student not found');
     }
