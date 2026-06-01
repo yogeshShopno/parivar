@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Matrimony = require('../models/matrimonyModel');
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
-const { ownerFields, ownerOrLegacyMemberQuery } = require('../utils/ownership');
 
 const requestData = (req) => ({
   ...req.query,

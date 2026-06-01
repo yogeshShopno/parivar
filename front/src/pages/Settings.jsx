@@ -92,17 +92,17 @@ export default function SettingsPage() {
   }
 
   const ColorInput = ({ label, value, keyName, desc }) => (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-colors">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-surface-secondary border border-border hover:bg-surface transition-colors text-text">
       <div className="max-w-md">
-        <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wide">{label}</h4>
-        <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">{desc}</p>
+        <h4 className="text-xs font-bold text-text uppercase tracking-wide">{label}</h4>
+        <p className="text-[10px] text-text-secondary mt-1 leading-relaxed">{desc}</p>
       </div>
       <div className="flex items-center gap-3">
         <input
           type="text"
           value={value}
           onChange={(e) => setConfig({ ...config, [keyName]: e.target.value })}
-          className="w-24 bg-slate-950/40 text-slate-300 font-mono text-center text-xs py-1.5 border border-white/[0.08] rounded-lg outline-none"
+          className="w-24 bg-input-bg text-text font-mono text-center text-xs py-1.5 border border-border rounded-lg outline-none"
         />
         <input
           type="color"
@@ -117,23 +117,23 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <div className="w-8 h-8 rounded-full border-2 border-brand-500/25 border-t-brand-500 animate-spin"></div>
-        <span className="text-slate-400 text-xs">Querying platform configuration...</span>
+        <div className="w-8 h-8 rounded-full border-2 border-primary/25 border-t-primary animate-spin"></div>
+        <span className="text-text-secondary text-xs">Querying platform configuration...</span>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 animate-slide-up select-none">
+    <div className="space-y-6 animate-slide-up select-none text-text">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">Platform Branding</h2>
-          <p className="text-slate-400 text-xs mt-0.5">Customize global styles, theme variables, and brand aesthetics</p>
+          <h2 className="text-xl font-bold text-text">Platform Branding</h2>
+          <p className="text-text-secondary text-xs mt-0.5">Customize global styles, theme variables, and brand aesthetics</p>
         </div>
         <button
           onClick={handleResetDefaults}
-          className="flex items-center gap-2 bg-slate-900/60 hover:bg-slate-900 border border-white/[0.06] hover:border-white/[0.12] text-slate-300 hover:text-white px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
+          className="flex items-center gap-2 bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Defaults
         </button>
@@ -141,14 +141,14 @@ export default function SettingsPage() {
 
       {/* Alerts */}
       {error && (
-        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+        <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+          <span className="w-2 h-2 rounded-full bg-error animate-ping"></span>
           {error}
         </div>
       )}
       {success && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+          <span className="w-2 h-2 rounded-full bg-success animate-ping"></span>
           {success}
         </div>
       )}
@@ -157,16 +157,16 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Core Inputs Form */}
-        <form onSubmit={handleSubmit} className="lg:col-span-2 bg-[#0d1325]/40 border border-white/[0.06] rounded-2xl p-6 shadow-glass-sm space-y-5">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
-            <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-              <Settings className="w-4 h-4 text-brand-400" />
+        <form onSubmit={handleSubmit} className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-glass-sm space-y-5">
+          <div className="flex items-center justify-between border-b border-border pb-4">
+            <h3 className="text-sm font-bold text-text flex items-center gap-2">
+              <Settings className="w-4 h-4 text-primary" />
               Branding Tokens Configurator
             </h3>
             <button
               type="submit"
               disabled={saveLoading}
-              className="flex items-center gap-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-glow-primary transition-all duration-300"
+              className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl text-xs font-bold shadow-glow-primary transition-all duration-300"
             >
               <Save className="w-4 h-4" />
               {saveLoading ? 'Saving Tokens...' : 'Commit Theme'}
@@ -234,19 +234,19 @@ export default function SettingsPage() {
         </form>
 
         {/* Live Preview Panel */}
-        <div className="bg-[#0d1325]/40 border border-white/[0.06] rounded-2xl p-6 shadow-glass-sm flex flex-col justify-between">
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-glass-sm flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2 border-b border-white/[0.06] pb-4 mb-6">
-              <Sparkles className="w-4 h-4 text-violet-400" />
-              <h3 className="text-sm font-bold text-slate-100">Live Brand Palette Preview</h3>
+            <div className="flex items-center gap-2 border-b border-border pb-4 mb-6">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-bold text-text">Live Brand Palette Preview</h3>
             </div>
             
-            <p className="text-[10px] text-slate-500 leading-relaxed mb-6">
+            <p className="text-[10px] text-text-secondary leading-relaxed mb-6">
               Preview represents the layout of the mobile application dashboard using current theme tokens.
             </p>
 
             {/* Mobile layout container mockup */}
-            <div className="w-full rounded-2xl border-4 border-slate-950 overflow-hidden shadow-glass-lg relative select-none" style={{ backgroundColor: config.backgroundColor }}>
+            <div className="w-full rounded-2xl border-4 border-text overflow-hidden shadow-glass-lg relative select-none" style={{ backgroundColor: config.backgroundColor }}>
               
               {/* Header Gradient mockup */}
               <div className="h-28 p-4 flex flex-col justify-between relative" style={{ backgroundImage: `linear-gradient(to bottom right, ${config.gradientStart}, ${config.gradientEnd})` }}>
@@ -285,8 +285,8 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="mt-6 p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04] text-[10px] text-slate-500 leading-relaxed flex gap-2">
-            <Info className="w-4 h-4 text-brand-400 shrink-0" />
+          <div className="mt-6 p-3.5 rounded-xl bg-surface-secondary border border-border text-[10px] text-text-secondary leading-relaxed flex gap-2">
+            <Info className="w-4 h-4 text-primary shrink-0" />
             <span>Theme tokens are synchronized dynamically with both web and mobile environments.</span>
           </div>
 

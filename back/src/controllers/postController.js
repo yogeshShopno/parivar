@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Post = require('../models/postModel');
 const User = require('../models/userModels');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
-const { adminMemberId } = require('../utils/ownership');
+
 
 const imageFromRequest = (req, fallback = '') => {
   if (req.file) return `/uploads/${req.file.filename}`;
@@ -129,7 +129,7 @@ const savePost = async (req, res) => {
 
     const post = existing || new Post({
       id: `POST${Date.now()}`,
-      member_id: isCommitteeOrAdmin && !existing ? adminMemberId(req) : (existing ? existing.member_id : currentMemberId(req)),
+member_id: existing ? existing.member_id : currentMemberId(req),
       cdate: new Date().toISOString().slice(0, 10)
     });
 

@@ -34,7 +34,7 @@ export default function MasterPage({ type }) {
 
   if (!label) {
     return (
-      <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-6 text-sm text-rose-300">
+      <div className="rounded-xl border border-error-border bg-error-bg p-6 text-sm text-error-text">
         Unknown master menu selected.
       </div>
     )
