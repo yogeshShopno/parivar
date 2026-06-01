@@ -18,6 +18,10 @@ import MasterPage from './pages/MasterPage'
 import News from './pages/News'
 import { hasPermission } from './lib/permissions'
 import Posts from './pages/Post'
+import { activeTheme, applyTheme } from './theme/theme'
+
+// Bootstrap selected design system theme
+applyTheme(activeTheme)
 
 export default function App() {
   return (
@@ -73,7 +77,7 @@ function PermissionRoute({ permission, children }) {
 
   if (!hasPermission(user, permission)) {
     return (
-      <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-6 text-sm text-rose-200">
+      <div className="rounded-2xl border border-error-border bg-error-bg p-6 text-sm text-error-text">
         You do not have permission to access this page.
       </div>
     )

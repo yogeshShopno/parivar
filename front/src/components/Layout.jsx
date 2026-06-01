@@ -5,10 +5,10 @@ import Header from './Header'
 
 export default function Layout() {
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-[#0c1020] via-[#111827] to-[#0f111a] text-slate-100 overflow-x-hidden font-sans">
+    <div className="min-h-screen flex bg-background text-text overflow-x-hidden font-sans">
       {/* Decorative dynamic ambient background glows */}
-      <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-500/10 blur-[120px]  animate-pulse-slow"></div>
-      <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-violet-500/10 blur-[120px]  animate-pulse-slow" style={{ animationDelay: '1.5s' }}></div>
+      <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary-glow blur-[120px] animate-pulse-slow"></div>
+      <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-primary-glow blur-[120px] animate-pulse-slow" style={{ animationDelay: '1.5s' }}></div>
 
       {/* Sidebar - fixed and styled */}
       <Sidebar />
