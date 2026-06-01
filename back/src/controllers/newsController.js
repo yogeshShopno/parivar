@@ -71,7 +71,6 @@ const getNewsById = async (req, res) => {
 };
 
 const addNews = async (req, res) => {
-    console.log('Received request to add news with data:', req.body, 'and file:', req.file);
     try {
         const data = newsPayload(req);
 

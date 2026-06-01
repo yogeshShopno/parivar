@@ -63,7 +63,6 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
 
     const imageError = await validateImage(formData.image)
     if (imageError) nextErrors.image = imageError
-    console.log('Validation errors:', nextErrors)
 
     return nextErrors
   }

@@ -59,7 +59,6 @@ const addFeedback = async (req, res) => {
         
 
         const currentMemberId = memberPublicId(req.user || {});
-        console.log(currentMemberId);
         // find existing feedback by member_id
         const existing = await Feedback.findOne({ member_id: String(currentMemberId) });
 

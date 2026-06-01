@@ -170,7 +170,6 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
     const nextErrors = validate()
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors)
-      console.log('Validation errors:', nextErrors)
       return
     }
     onSubmit(formData)
