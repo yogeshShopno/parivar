@@ -39,12 +39,7 @@ const ownerQuery = (req = {}) => ({
   created_by_admin_id: adminOwnerId(req)
 });
 
-const ownedByActorQuery = (req = {}) => ({
-  $or: [
-    { created_by_user_id: userObjectId(req.user) },
-    { member_id: adminMemberId(req) }
-  ]
-});
+
 
 const ownerOrLegacyMemberQuery = (req = {}) => ({
   $or: [
@@ -55,30 +50,18 @@ const ownerOrLegacyMemberQuery = (req = {}) => ({
   ]
 });
 
-const isAdminRequest = (req = {}) => String(req.originalUrl || req.baseUrl || '').startsWith('/api/admin');
 
-const requireMemberOrAdmin = (req, res, next) => {
-  if (req.user?._id || req.user?.member_id) {
-    return next();
-  }
 
-  return res.status(401).json({
-    status: 401,
-    message: 'Unauthorized: Member or admin token required',
-    data: []
-  });
-};
 
 module.exports = {
   adminMemberId,
   adminOwnerId,
   initialStatus,
-  isAdminRequest,
+
   isAdminUser,
   ownedByActorQuery,
   ownerFields,
   ownerOrLegacyMemberQuery,
   ownerQuery,
-  requireMemberOrAdmin,
   userObjectId
 };
