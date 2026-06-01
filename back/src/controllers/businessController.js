@@ -4,6 +4,7 @@ const User = require('../models/userModels');
 const Country = require('../models/countryModel');
 const State = require('../models/stateModel');
 const City = require('../models/cityModel');
+const { getRolePermissions } = require('../middleware/auth');
 const { apiResponse, memberPublicId, publicUrl } = require('../utils/apiResponse');
 
 const requestData = (req) => ({
@@ -138,7 +139,8 @@ const addBusinessDetails = async (req, res) => {
     }
 
     const currentMemberId = memberPublicId(req.user || {});
-    const isAdmin = req.user?.role === 'admin';
+    const permissions = getRolePermissions(req.user);
+    const isAdmin = req.user?.committee_role === 'President' || permissions.includes('businesses.edit') || !!req.user?.role_id;
 
     let business = null;
 

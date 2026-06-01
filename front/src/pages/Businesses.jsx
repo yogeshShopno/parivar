@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { Briefcase, MapPin, Phone, Globe, Trash2, Search, Edit2, RefreshCw, Plus } from 'lucide-react'
+import { Briefcase, MapPin, Phone, Globe, Trash2, Search, Edit2, RefreshCw, Plus, Eye } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import api, { assetUrl } from '../lib/api'
 import Modal from '../components/Modal'
 import BusinessForm from '../components/BusinessForm'
 
 export default function Businesses() {
+  const navigate = useNavigate()
   const [businesses, setBusinesses] = useState([])
   const [loading, setLoading] = useState(false)
   const [formLoading, setFormLoading] = useState(false)
@@ -50,6 +52,10 @@ export default function Businesses() {
     setIsModalOpen(true)
   }
 
+  const handleView = (business) => {
+    navigate(`/businesses/${business.id}`, { state: { business } })
+  }
+
   const handleCreate = () => {
     setSelectedBusiness(null)
     setIsModalOpen(true)
@@ -93,7 +99,7 @@ export default function Businesses() {
       })
 
       // Keep existing images (URLs that are strings)
-      const existingImages = (formData.gallery_images || []).filter(f => typeof f === 'string')
+      const existingImages = (formData.gallery_images || []).filter(f => typeof f === 'string' && f.trim())
       existingImages.forEach(img => {
         payload.append('existing_images', img)
       })
@@ -235,6 +241,13 @@ export default function Businesses() {
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleView(biz)}
+                      className="p-2 text-text hover:text-black bg-white hover:bg-surface-secondary border border-border rounded-xl transition-all"
+                      title="View Business Profile"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                    </button>
                     <button
                       onClick={() => handleEdit(biz)}
                       className="p-2 text-primary hover:text-primary-hover bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl transition-all"
