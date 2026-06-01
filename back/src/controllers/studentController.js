@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Student = require('../models/studentModel');
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
-const { ownerFields, ownerOrLegacyMemberQuery } = require('../utils/ownership');
 
 const requestData = (req) => ({
   ...req.query,

@@ -11,7 +11,7 @@ router.post('/', protect, parseForm, addBusinessDetails);
 router.put('/:id', protect, parseForm, addBusinessDetails);
 
 router.get('/', getBusinesses);
-router.get('/:id',protect, getBusinessById);
+router.get('/:id',getBusinessById);
 // Protected actions
 router.delete('/:id', protect, deleteBusiness);
 

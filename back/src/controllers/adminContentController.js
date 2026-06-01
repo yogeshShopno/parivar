@@ -11,7 +11,6 @@ const State = require('../models/stateModel');
 const City = require('../models/cityModel');
 const Master = require('../models/masterModel');
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
-const { ownerFields, ownerQuery, initialStatus } = require('../utils/ownership');
 
 const isObjectId = (id) => mongoose.isValidObjectId(id);
 
@@ -34,20 +33,18 @@ const imageFromRequest = (req, fallback = '') => {
   return req.body.image || req.body.image_url || fallback || '';
 };
 
-const listContent = (Model, formatter, label, isGlobal = false) => async (req, res) => {
+const listContent = (Model, formatter, label) => async (req, res) => {
   try {
-    const query = isGlobal ? {} : ownerQuery(req);
-    const rows = await Model.find(query).sort({ _id: -1 }).lean();
+    const rows = await Model.find({}).sort({ _id: -1 }).lean();
     return apiResponse(res, 200, `${label} retrieved successfully`, rows.map((row) => formatter(req, row)));
   } catch (error) {
     return apiResponse(res, 500, `Error retrieving ${label.toLowerCase()}`, { error: error.message });
   }
 };
 
-const deleteContent = (Model, label, isGlobal = false) => async (req, res) => {
+const deleteContent = (Model, label,) => async (req, res) => {
   try {
-    const query = isGlobal ? {} : ownerQuery(req);
-    const existing = await findById(Model, req.params.id, query);
+    const existing = await findById(Model, req.params.id);
     if (!existing) return apiResponse(res, 404, `${label} not found`);
     await existing.deleteOne();
     return apiResponse(res, 200, `${label} deleted successfully`);
@@ -63,7 +60,7 @@ const deleteContent = (Model, label, isGlobal = false) => async (req, res) => {
 const galleryPayload = (req, existing = {}) => {
   return {
     ...req.body,
-   
+
     image: imageFromRequest(req, existing.image),
     category: req.body.category || req.body.event_category || existing.category || 'General',
     year: req.body.year || existing.year || ''
@@ -78,52 +75,41 @@ const bannerPayload = (req, existing = {}) => ({
   link: req.body.link || existing.link || ''
 });
 
-const saveContent = (Model, payloadBuilder, formatter, label, prefix, isGlobal = false) => async (req, res) => {
+const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (req, res) => {
   try {
-    const query = isGlobal ? {} : ownerQuery(req);
-    const existing = req.params.id ? await findById(Model, req.params.id, query) : null;
+    const existing = req.params.id ? await findById(Model, req.params.id) : null;
     const payload = payloadBuilder(req, existing || {});
-
     if (!payload.title && ['Event', 'Festival', 'Gallery'].includes(label)) {
       return apiResponse(res, 400, `${label} title is required`);
     }
-
     if (!payload.description && ['Event', 'Festival'].includes(label)) {
       return apiResponse(res, 400, `${label} description is required`);
     }
-
     const hasGalleryImages = Array.isArray(req.body.images) && req.body.images.length > 0;
-
     if (!payload.image && label === 'Gallery' && !hasGalleryImages) {
       return apiResponse(res, 400, 'Gallery image is required');
     }
-
     if (label === 'Gallery' && !existing && hasGalleryImages) {
       const docs = await Promise.all(req.body.images.map(async (image, index) => {
         const doc = new Model({ id: await nextPublicId(Model, `${prefix}${index}_`) });
-        const galleryDocPayload = { ...payload, ...(isGlobal ? {} : ownerFields(req)), image };
+        const galleryDocPayload = { ...payload, image };
         delete galleryDocPayload.images;
         doc.set(galleryDocPayload);
-        doc.status = initialStatus(req);
+        doc.status = req.body.status !== undefined ? Number(req.body.status) : 1;
         await doc.save();
         return formatter(req, doc.toObject());
       }));
-
       return apiResponse(res, 201, 'Gallery saved successfully', docs);
     }
-
     const doc = existing || new Model({ id: await nextPublicId(Model, prefix) });
     delete payload.images;
-    doc.set({ ...payload, ...(isGlobal ? {} : ownerFields(req)) });
-    
+    doc.set(payload);
     if (!existing) {
-      doc.status = req.body.status !== undefined ? Number(req.body.status) : initialStatus(req);
+      doc.status = req.body.status !== undefined ? Number(req.body.status) : 1;
     } else if (req.body.status !== undefined) {
       doc.status = Number(req.body.status);
     }
-    
     await doc.save();
-
     return apiResponse(res, existing ? 200 : 201, `${label} saved successfully`, formatter(req, doc.toObject()));
   } catch (error) {
     return apiResponse(res, 500, `Error saving ${label.toLowerCase()}`, { error: error.message });
@@ -155,16 +141,14 @@ const formatInquiry = (req, item) => ({
 
 const saveInquiry = async (req, res) => {
   try {
-    const existing = req.params.id ? await findById(ContactInquiry, req.params.id, ownerQuery(req)) : null;
+    const existing = req.params.id ? await findById(ContactInquiry, req.params.id) : null;
     const doc = existing || new ContactInquiry({ id: await nextPublicId(ContactInquiry, 'INQ') });
-    doc.set({ ...req.body, ...ownerFields(req) });
-    
+    doc.set(req.body);
     if (!existing) {
-      doc.status = req.body.status !== undefined ? Number(req.body.status) : initialStatus(req);
+      doc.status = req.body.status !== undefined ? Number(req.body.status) : 1;
     } else if (req.body.status !== undefined) {
       doc.status = Number(req.body.status);
     }
-    
     await doc.save();
     return apiResponse(res, existing ? 200 : 201, 'Contact inquiry saved successfully', formatInquiry(req, doc.toObject()));
   } catch (error) {
@@ -190,7 +174,7 @@ const masterConfig = {
 const formatMaster = (type, item, config) => {
   const name = config.nameKeys?.map((key) => item[key]).find(Boolean) || item.name || '';
   return {
-    id:String(item._id),
+    id: String(item._id),
     type,
     name,
     parent_id: config.parentKey ? item[config.parentKey] || '' : item.parent_id || '',
@@ -222,15 +206,10 @@ const saveMaster = async (req, res) => {
     const type = req.params.type;
     const config = masterConfig[type];
     if (!config) return apiResponse(res, 404, 'Master type not found');
-
     const name = req.body.name || req.body[type] || req.body.business || req.body.country || req.body.state || req.body.city;
     if (!name) return apiResponse(res, 400, 'Name is required');
-
-    // Country, state, city are global data - no multi-tenancy
-    const isGlobalData = ['country', 'state', 'city'].includes(type);
-    const existing = req.params.id ? await findById(config.Model, req.params.id, isGlobalData ? {} : ownerQuery(req)) : null;
+    const existing = req.params.id ? await findById(config.Model, req.params.id) : null;
     const doc = existing || new config.Model({ id: await nextPublicId(config.Model, `${type.toUpperCase()}_`) });
-
     if (config.type) {
       doc.type = config.type;
       doc.name = name;
@@ -241,19 +220,12 @@ const saveMaster = async (req, res) => {
       doc.name = name;
       if (config.parentKey) doc[config.parentKey] = req.body.parent_id || req.body[config.parentKey] || doc[config.parentKey] || '';
     }
-
     if (!existing) {
-      doc.status = req.body.status !== undefined ? Number(req.body.status) : initialStatus(req);
+      doc.status = req.body.status !== undefined ? Number(req.body.status) : 1;
     } else if (req.body.status !== undefined) {
       doc.status = Number(req.body.status);
     }
-    
-    // Only add owner fields for tenant-specific data
-    if (!isGlobalData) {
-      doc.set(ownerFields(req));
-    }
     await doc.save();
-
     return apiResponse(res, existing ? 200 : 201, 'Master data saved successfully', formatMaster(type, doc.toObject(), config));
   } catch (error) {
     return apiResponse(res, 500, 'Error saving master data', { error: error.message });
@@ -282,9 +254,6 @@ const deleteMaster = async (req, res) => {
 
 
 module.exports = {
-
-
-
   getBanners: listContent(Banner, formatBanner, 'Banners'),
   saveBanner: saveContent(Banner, bannerPayload, formatBanner, 'Banner', 'BAN'),
   deleteBanner: deleteContent(Banner, 'Banner'),

@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Donation = require('../models/donationModel');
 const { apiResponse } = require('../utils/apiResponse');
-const { ownerFields, ownerQuery, ownerOrLegacyMemberQuery } = require('../utils/ownership');
 
 const requestData = (req) => ({
   ...req.query,
