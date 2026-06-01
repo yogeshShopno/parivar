@@ -13,8 +13,8 @@ router.get('/:id', protect, (req, res, next) => {
   req.query.id = req.params.id;
   return getUsers(req, res, next);
 });
-router.post('/', protect, parseForm, register);
-router.put('/:id', protect, parseForm, updateUser);
+router.post('/',  parseForm, register);
+router.put('/:id', protect, updateUser);
 
 
 module.exports = router;
