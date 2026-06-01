@@ -62,7 +62,6 @@ export default function CommitteeMembers() {
   }, [fetchUsers])
 
   const handleSubmit = async (formData) => {
-
     setSaving(true)
     try {
       if (selected) {
@@ -95,34 +94,34 @@ export default function CommitteeMembers() {
   }
 
   return (
-    <div className="space-y-6 animate-slide-up select-none">
+    <div className="space-y-6 animate-slide-up select-none text-text">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white">Committee Members</h2>
-          <p className="text-slate-400 text-xs mt-0.5">Manage committee member roles and profile details</p>
+          <h2 className="text-xl font-bold text-text">Committee Members</h2>
+          <p className="text-text-secondary text-xs mt-0.5">Manage committee member roles and profile details</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <button onClick={fetchUsers} className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-white/[0.06] text-slate-300 hover:text-white transition-all" title="Refresh">
+          <button onClick={fetchUsers} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
             <RefreshCw className="w-4 h-4" />
           </button>
           <div className="relative flex-1 sm:w-64">
-            <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-500" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search committee..." className="w-full bg-slate-950/40 text-slate-200 placeholder-slate-500 border border-white/[0.08] rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:border-brand-500/50" />
+            <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-text-secondary/60" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search committee..." className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:border-primary/50" />
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all">
+          <button onClick={openCreate} className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-glow-primary">
             <Plus className="w-4 h-4" /> Add
           </button>
         </div>
       </div>
 
-      {error && <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-4 rounded-2xl text-xs">{error}</div>}
-      {success && <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-2xl text-xs">{success}</div>}
+      {error && <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-xs">{error}</div>}
+      {success && <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-xs">{success}</div>}
 
-      <div className="bg-[#0d1325]/40 border border-white/[0.06] rounded-2xl overflow-hidden shadow-glass-sm">
+      <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-glass-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/[0.06] bg-slate-950/20 text-slate-400 text-[11px] font-bold uppercase tracking-wider">
+              <tr className="border-b border-border bg-surface-secondary text-text-secondary text-[11px] font-bold uppercase tracking-wider">
                 <th className="p-4">Member</th>
                 <th className="p-4">Contact</th>
                 <th className="p-4">Role</th>
@@ -130,40 +129,40 @@ export default function CommitteeMembers() {
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.04]">
+            <tbody className="divide-y divide-border">
               {loading ? (
-                <tr><td colSpan="5" className="p-12 text-center text-xs text-slate-500">Loading committee members...</td></tr>
+                <tr><td colSpan="5" className="p-12 text-center text-xs text-text-secondary">Loading committee members...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan="5" className="p-12 text-center text-xs text-slate-500">No committee members found</td></tr>
+                <tr><td colSpan="5" className="p-12 text-center text-xs text-text-secondary">No committee members found</td></tr>
               ) : filtered.map((user) => (
-                <tr key={user.id} className="hover:bg-white/[0.02] text-xs text-slate-300">
+                <tr key={user.id} className="hover:bg-surface-secondary/40 text-xs text-text">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       {user.image ? (
-                        <img src={user.image} alt="" className="h-9 w-9 rounded-lg object-cover border border-white/[0.08]" />
+                        <img src={user.image} alt="" className="h-9 w-9 rounded-lg object-cover border border-border" />
                       ) : (
-                        <div className="h-9 w-9 rounded-lg bg-slate-800 flex items-center justify-center text-[11px] font-bold text-slate-300">{user.name?.slice(0, 2) || 'CM'}</div>
+                        <div className="h-9 w-9 rounded-lg bg-surface-secondary flex items-center justify-center text-[11px] font-bold text-text-secondary">{user.name?.slice(0, 2) || 'CM'}</div>
                       )}
                       <div>
-                        <div className="font-semibold text-slate-200">{user.name}</div>
-                        <div className="text-[10px] text-slate-500">{user.designation || user.committee_role || '-'}</div>
+                        <div className="font-semibold text-text">{user.name}</div>
+                        <div className="text-[10px] text-text-secondary">{user.designation || user.committee_role || '-'}</div>
                       </div>
                     </div>
                   </td>
                   <td className="p-4">{user.email || user.number || '-'}</td>
                   <td className="p-4">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-300 font-medium">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary font-medium">
                       <Sparkles className="w-3.5 h-3.5" />
                       {user.role_name || 'Committee'}
                     </span>
                   </td>
                   <td className="p-4">
-                    <span className={`inline-flex px-2.5 py-1 rounded-lg border text-[10px] font-bold ${Number(user.status ?? 1) === 1 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300' : 'bg-slate-500/10 border-slate-500/20 text-slate-400'}`}>
+                    <span className={`inline-flex px-2.5 py-1 rounded-lg border text-[10px] font-bold ${Number(user.status ?? 1) === 1 ? 'bg-success-bg border-success-border text-success-text' : 'bg-surface-secondary border-border text-text-secondary'}`}>
                       {Number(user.status ?? 1) === 1 ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                   <td className="p-4 text-right">
-                    <button onClick={() => openEdit(user)} className="p-2 text-brand-400 bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/20 rounded-xl" title="Edit">
+                    <button onClick={() => openEdit(user)} className="p-2 text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl" title="Edit">
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                   </td>

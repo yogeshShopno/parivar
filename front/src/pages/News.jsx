@@ -3,7 +3,7 @@ import { FileText, Calendar, Trash2, Clock, Search, RefreshCw, Plus, Edit2 } fro
 import api, { assetUrl } from '../lib/api'
 import Modal from '../components/Modal'
 
-const fieldClass = 'w-full px-3 py-2.5 bg-slate-950/40 text-slate-200 border border-white/[0.08] focus:border-brand-500/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-brand-500/10'
+const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10'
 
 export default function News() {
   const [News, setNews] = useState([])
@@ -105,29 +105,29 @@ export default function News() {
   )
 
   return (
-    <div className="space-y-6 animate-slide-up select-none">
+    <div className="space-y-6 animate-slide-up select-none text-text">
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white">Feed Moderator</h2>
-          <p className="text-slate-400 text-xs mt-0.5">Moderate community News, announcements, and timeline activities</p>
+          <h2 className="text-xl font-bold text-text">Feed Moderator</h2>
+          <p className="text-text-secondary text-xs mt-0.5">Moderate community News, announcements, and timeline activities</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
             onClick={fetchNews}
-            className="flex items-center justify-center p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-white/[0.06] text-slate-300 hover:text-white transition-all"
+            className="flex items-center justify-center p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all"
             title="Refresh News"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-glow-primary"
           >
             <Plus className="w-4 h-4" /> Add
           </button>
           <div className="relative group flex-1 sm:w-64">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-text-secondary/60">
               <Search className="w-4 h-4" />
             </span>
             <input
@@ -135,7 +135,7 @@ export default function News() {
               placeholder="Search feed..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-950/40 text-slate-200 placeholder-slate-500 border border-white/[0.08] hover:border-white/[0.15] focus:border-brand-500/50 rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:ring-2 focus:ring-brand-500/10 transition-all duration-300"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
             />
           </div>
         </div>
@@ -143,14 +143,14 @@ export default function News() {
 
       {/* Alerts */}
       {error && (
-        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+        <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+          <span className="w-2 h-2 rounded-full bg-error animate-ping"></span>
           {error}
         </div>
       )}
       {success && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+          <span className="w-2 h-2 rounded-full bg-success animate-ping"></span>
           {success}
         </div>
       )}
@@ -158,59 +158,59 @@ export default function News() {
       {/* Main Grid */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-brand-500/25 border-t-brand-500 animate-spin"></div>
-          <span className="text-slate-400 text-xs">Querying announcements board...</span>
+          <div className="w-8 h-8 rounded-full border-2 border-primary/25 border-t-primary animate-spin"></div>
+          <span className="text-text-secondary text-xs">Querying announcements board...</span>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-[#0d1325]/40 border border-white/[0.06] rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
-          <FileText className="w-12 h-12 text-slate-600 animate-pulse-slow" />
+        <div className="bg-card border border-border rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
+          <FileText className="w-12 h-12 text-text-secondary/40 animate-pulse-slow" />
           <div>
-            <h4 className="font-bold text-slate-200">No News found</h4>
-            <p className="text-slate-500 text-xs mt-1">There are no announcements published under this search criteria</p>
+            <h4 className="font-bold text-text">No News found</h4>
+            <p className="text-text-secondary text-xs mt-1">There are no announcements published under this search criteria</p>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map(News => (
-            <div key={News.id} className="relative overflow-hidden bg-[#0d1325]/40 border border-white/[0.06] hover:border-white/[0.12] rounded-2xl shadow-glass-sm hover:shadow-glass-md transition-all duration-300 flex flex-col justify-between group">
+            <div key={News.id} className="relative overflow-hidden bg-card border border-border hover:border-text-secondary/20 rounded-2xl shadow-glass-sm hover:shadow-glass-md transition-all duration-300 flex flex-col justify-between group">
               
               {/* Optional image preview */}
               {News.image ? (
-                <div className="w-full h-40 bg-slate-950 overflow-hidden relative border-b border-white/[0.06]">
+                <div className="w-full h-40 bg-surface-secondary overflow-hidden relative border-b border-border">
                   <img
                     src={assetUrl(News.image)}
                     alt={News.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
                     onError={(e) => { e.target.style.display = 'none' }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0c1020] to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
                 </div>
               ) : (
-                <div className="w-full h-24 bg-gradient-to-br from-indigo-900/10 to-violet-900/10 border-b border-white/[0.04] flex items-center justify-center text-slate-700">
+                <div className="w-full h-24 bg-primary/5 border-b border-border flex items-center justify-center text-text-secondary">
                   <FileText className="w-8 h-8 opacity-45" />
                 </div>
               )}
 
               <div className="p-5 flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-500 font-semibold mb-2">
-                    <Calendar className="w-3.5 h-3.5 text-violet-400" />
+                  <div className="flex items-center gap-2 text-[10px] text-text-secondary font-semibold mb-2">
+                    <Calendar className="w-3.5 h-3.5 text-primary" />
                     <span>{News.cdate || 'Recent Announcement'}</span>
                   </div>
 
-                  <h3 className="text-sm font-bold text-slate-100 line-clamp-1 group-hover:text-white transition-colors">
+                  <h3 className="text-sm font-bold text-text line-clamp-1 group-hover:text-primary transition-colors">
                     {News.title}
                   </h3>
                   
-                  <p className="text-xs text-slate-400 leading-relaxed mt-2.5 line-clamp-3">
+                  <p className="text-xs text-text-secondary leading-relaxed mt-2.5 line-clamp-3">
                     {News.description}
                   </p>
                 </div>
 
-                <div className="mt-5 pt-3.5 border-t border-white/[0.04] flex items-center justify-between gap-4">
+                <div className="mt-5 pt-3.5 border-t border-border flex items-center justify-between gap-4">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase">
-                    <Clock className={`w-3.5 h-3.5 ${News.status === 0 ? 'text-amber-500' : 'text-slate-600'}`} />
-                    <span className={News.status === 0 ? 'text-amber-500' : 'text-slate-500'}>
+                    <Clock className={`w-3.5 h-3.5 ${News.status === 0 ? 'text-warning' : 'text-text-secondary/60'}`} />
+                    <span className={News.status === 0 ? 'text-warning' : 'text-text-secondary'}>
                       {News.status === 0 ? 'Pending Approval' : 'Active News'}
                     </span>
                   </div>
@@ -218,14 +218,14 @@ export default function News() {
                   <button
                     type="button"
                     onClick={() => openEdit(News)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-brand-300 bg-brand-500/10 hover:bg-brand-500/25 border border-brand-500/20 hover:border-brand-500/40 transition-all"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 transition-all"
                   >
                     <Edit2 className="w-3 h-3" /> Edit
                   </button>
 
                   <button
                     onClick={() => handleDelete(News.id)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/20 hover:border-rose-500/40 transition-all"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-error-text bg-error-bg hover:bg-error/20 border border-error-border hover:border-error/40 transition-all"
                   >
                     <Trash2 className="w-3 h-3" /> Moderate
                   </button>
@@ -237,28 +237,28 @@ export default function News() {
       )}
 
       <Modal isOpen={isModalOpen} title={selected ? 'Edit Feed News' : 'Add Feed News'} onClose={() => setIsModalOpen(false)}>
-        <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1">
+        <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 text-text">
           <div>
-            <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Title *</label>
+            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Title *</label>
             <input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={fieldClass} disabled={saving} />
           </div>
           <div>
-            <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Description *</label>
+            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Description *</label>
             <textarea rows="4" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className={fieldClass} disabled={saving} />
           </div>
           <div>
-            <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Status</label>
+            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Status</label>
             <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className={fieldClass} disabled={saving}>
-              <option value={1} className="bg-[#0c1020]">Active</option>
-              <option value={0} className="bg-[#0c1020]">Pending (Inactive)</option>
+              <option value={1} className="bg-surface text-text">Active</option>
+              <option value={0} className="bg-surface text-text">Pending (Inactive)</option>
             </select>
           </div>
           <div>
-            <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">Image</label>
-            <input type="file" accept="image/*" onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })} className="w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-500/15 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-brand-200 hover:file:bg-brand-500/25" disabled={saving} />
-            {selected?.image && <p className="text-[10px] text-slate-500 mt-2">Current image will be kept unless a new file is selected.</p>}
+            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Image</label>
+            <input type="file" accept="image/*" onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })} className="w-full text-xs text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary hover:file:bg-primary/20" disabled={saving} />
+            {selected?.image && <p className="text-[10px] text-text-secondary mt-2">Current image will be kept unless a new file is selected.</p>}
           </div>
-          <button type="submit" disabled={saving} className="w-full bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white py-3 rounded-xl font-semibold text-xs tracking-wider uppercase disabled:opacity-50">
+          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-xs tracking-wider uppercase disabled:opacity-50 shadow-glow-primary">
             {saving ? 'Saving...' : 'Save Feed News'}
           </button>
         </form>

@@ -3,7 +3,7 @@ import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 } from 'luci
 import api, { assetUrl } from '../lib/api'
 import Modal from '../components/Modal'
 
-const fieldClass = 'w-full px-3 py-2.5 bg-slate-950/40 text-slate-200 border border-white/[0.08] focus:border-brand-500/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-brand-500/10'
+const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10'
 
 export default function AdminCrudPage({ title, subtitle, endpoint, fields, columns, getRowTitle }) {
   const emptyForm = useMemo(() => {
@@ -155,57 +155,57 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
   })
 
   return (
-    <div className="space-y-6 animate-slide-up select-none">
+    <div className="space-y-6 animate-slide-up select-none text-text">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white">{title}</h2>
-          <p className="text-slate-400 text-xs mt-0.5">{subtitle}</p>
+          <h2 className="text-xl font-bold text-text">{title}</h2>
+          <p className="text-text-secondary text-xs mt-0.5">{subtitle}</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <button onClick={fetchRows} className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-900 border border-white/[0.06] text-slate-300 hover:text-white transition-all" title="Refresh">
+          <button onClick={fetchRows} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
             <RefreshCw className="w-4 h-4" />
           </button>
           <div className="relative flex-1 sm:w-64">
-            <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-text-secondary/60" />
             <input
               type="search"
               placeholder="Search records..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-950/40 text-slate-200 placeholder-slate-500 border border-white/[0.08] rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:border-brand-500/50"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:border-primary/50"
             />
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all">
+          <button onClick={openCreate} className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-glow-primary">
             <Plus className="w-4 h-4" /> Add
           </button>
         </div>
       </div>
 
-      {error && <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 p-4 rounded-2xl text-xs">{error}</div>}
-      {success && <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-2xl text-xs">{success}</div>}
+      {error && <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-xs">{error}</div>}
+      {success && <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-xs">{success}</div>}
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-brand-500/25 border-t-brand-500 animate-spin"></div>
-          <span className="text-slate-400 text-xs">Loading records...</span>
+          <div className="w-8 h-8 rounded-full border-2 border-primary/25 border-t-primary animate-spin"></div>
+          <span className="text-text-secondary text-xs">Loading records...</span>
         </div>
       ) : (
-        <div className="bg-[#0d1325]/40 border border-white/[0.06] rounded-2xl overflow-hidden shadow-glass-sm">
+        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-glass-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-white/[0.06] bg-slate-950/20 text-slate-400 text-[11px] font-bold uppercase tracking-wider">
+                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-[11px] font-bold uppercase tracking-wider">
                   {columns.map((column) => <th key={column.key} className="p-4">{column.label}</th>)}
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.04]">
+              <tbody className="divide-y divide-border">
                 {filteredRows.map((row) => (
-                  <tr key={row.id} className="hover:bg-white/[0.02] text-xs text-slate-300">
+                  <tr key={row.id} className="hover:bg-surface-secondary/40 text-xs text-text">
                     {columns.map((column) => (
                       <td key={column.key} className="p-4 max-w-md">
                         {column.type === 'image' && row[column.key] ? (
-                          <img src={assetUrl(row[column.key])} alt={row.title || title} className="h-12 w-16 rounded-lg object-cover border border-white/[0.08]" />
+                          <img src={assetUrl(row[column.key])} alt={row.title || title} className="h-12 w-16 rounded-lg object-cover border border-border" />
                         ) : (
                           <span className="line-clamp-2">{column.render ? column.render(row) : row[column.key] || '-'}</span>
                         )}
@@ -213,10 +213,10 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                     ))}
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <button onClick={() => openEdit(row)} className="p-2 text-brand-400 bg-brand-500/10 hover:bg-brand-500/20 border border-brand-500/20 rounded-xl" title="Edit">
+                        <button onClick={() => openEdit(row)} className="p-2 text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl" title="Edit">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => handleDelete(row)} className="p-2 text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl" title="Delete">
+                        <button onClick={() => handleDelete(row)} className="p-2 text-error-text bg-error-bg hover:bg-error/20 border border-error-border rounded-xl" title="Delete">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -225,7 +225,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                 ))}
                 {filteredRows.length === 0 && (
                   <tr>
-                    <td colSpan={columns.length + 1} className="p-12 text-center text-xs text-slate-500">No records found</td>
+                    <td colSpan={columns.length + 1} className="p-12 text-center text-xs text-text-secondary">No records found</td>
                   </tr>
                 )}
               </tbody>
@@ -235,23 +235,23 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
       )}
 
       <Modal isOpen={isModalOpen} title={selected ? `Edit ${title}` : `Add ${title}`} onClose={() => setIsModalOpen(false)}>
-        <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1">
+        <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 text-text">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fields.map((field) => (
               <div key={field.name}>
-                <label className="block text-[10px] uppercase font-bold text-slate-400 mb-1.5">{field.label}</label>
+                <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">{field.label}</label>
                 {field.type === 'textarea' ? (
                   <textarea rows="4" value={formData[field.name] || ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving} />
                 ) : field.type === 'select' ? (
                   <select value={formData[field.name] ?? ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving}>
-                    <option value="" className="bg-[#0c1020]">Select {field.label}</option>
-                    {field.options.map((option) => <option key={option.value} value={option.value} className="bg-[#0c1020]">{option.label}</option>)}
+                    <option value="" className="bg-surface text-text">Select {field.label}</option>
+                    {field.options.map((option) => <option key={option.value} value={option.value} className="bg-surface text-text">{option.label}</option>)}
                   </select>
                 ) : field.type === 'select-remote' ? (
                   <select value={formData[field.name] ?? ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving}>
-                    <option value="" className="bg-[#0c1020]">Select {field.label}</option>
+                    <option value="" className="bg-surface text-text">Select {field.label}</option>
                     {(remoteOptions[field.name] || []).map((option) => (
-                      <option key={option.id} value={option.id} className="bg-[#0c1020]">{option.name || option.country || option.state || option.city || option.business}</option>
+                      <option key={option.id} value={option.id} className="bg-surface text-text">{option.name || option.country || option.state || option.city || option.business}</option>
                     ))}
                   </select>
                 ) : field.type === 'file' ? (
@@ -261,11 +261,11 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                       accept={field.accept || 'image/*'}
                       multiple={field.multiple}
                       onChange={(e) => setFormData({ ...formData, [field.name]: field.multiple ? e.target.files : e.target.files?.[0] || '' })}
-                      className="w-full text-xs text-slate-300 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-500/15 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-brand-200 hover:file:bg-brand-500/25"
+                      className="w-full text-xs text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary hover:file:bg-primary/20"
                       disabled={saving}
                     />
                     {selected?.image && !field.multiple && (
-                      <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                      <div className="flex items-center gap-2 text-[10px] text-text-secondary">
                         <ImageIcon className="h-3.5 w-3.5" />
                         <span>Current image will be kept unless a new file is selected.</span>
                       </div>
@@ -277,7 +277,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
               </div>
             ))}
           </div>
-          <button type="submit" disabled={saving} className="w-full bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white py-3 rounded-xl font-semibold text-xs tracking-wider uppercase disabled:opacity-50">
+          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-xs tracking-wider uppercase disabled:opacity-50 shadow-glow-primary">
             {saving ? 'Saving...' : 'Save Record'}
           </button>
         </form>
