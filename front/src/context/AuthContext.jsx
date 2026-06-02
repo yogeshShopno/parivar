@@ -1,5 +1,4 @@
 import React, { createContext, useState, useCallback, useEffect } from 'react'
-import { memberApi } from '../lib/api'
 
 export const AuthContext = createContext()
 
@@ -16,12 +15,16 @@ export const AuthContext = createContext()
  */
 const fetchWebTheme = async () => {
   try {
-    const response = await memberApi.get('/get_app_theme')
-    
-    if (response.status === 200 && response.data?.data) {
-      const themeData = response.data.data
+    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+      const response = await fetch(`${apiBase}/api/get_app_theme`)
+    if (!response.ok) {
+      throw new Error(`Theme fetch failed with status ${response.status}`)
+    }
 
-      // Store each color with 'web_' prefix in localStorage
+    const json = await response.json()
+    const themeData = json.data || json
+
+    if (themeData) {
       Object.keys(themeData).forEach((key) => {
         if (typeof themeData[key] === 'string' || typeof themeData[key] === 'number') {
           localStorage.setItem(`web_${key}`, themeData[key])

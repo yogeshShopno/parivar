@@ -28,7 +28,7 @@ export const useWebTheme = () => {
       setError(null)
 
       // Fetch theme from backend
-      const response = await memberApi.get('/config/get_app_theme')
+      const response = await memberApi.get('/get_app_theme')
       
       if (response.status === 200 && response.data?.data) {
         const themeData = response.data.data

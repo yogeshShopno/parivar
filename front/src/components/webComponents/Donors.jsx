@@ -128,7 +128,8 @@ export default function Donors() {
                 color: 'transparent',
               }}
             >
-              Supporters
+              Supporters   
+        
             </span>
           </h2>
           <div
@@ -139,31 +140,6 @@ export default function Donors() {
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          <div
-            className="rounded-lg border p-5"
-            style={{ borderColor: theme.borderColor, backgroundColor: shadeColor(theme.backgroundColor, 2) }}
-          >
-            <p className="text-sm font-semibold" style={{ color: shadeColor(theme.textColor, 25) }}>
-              Total Donors
-            </p>
-            <p className="mt-1 text-3xl font-bold" style={{ color: theme.textColor }}>
-              {donors.length}
-            </p>
-          </div>
-          <div
-            className="rounded-lg border p-5"
-            style={{ borderColor: theme.borderColor, backgroundColor: shadeColor(theme.backgroundColor, 2) }}
-          >
-            <p className="text-sm font-semibold" style={{ color: shadeColor(theme.textColor, 25) }}>
-              Total Donations
-            </p>
-            <p className="mt-1 flex items-center text-3xl font-bold" style={{ color: theme.textColor }}>
-              <IndianRupee className="h-6 w-6" />
-              {formatAmount(totalAmount)}
-            </p>
-          </div>
-        </div>
 
         {(loading || error) && (
           <div

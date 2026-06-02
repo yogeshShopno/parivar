@@ -217,13 +217,13 @@ export default function WebHeader() {
             {/* Logo & Title */}
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               <div
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center font-bold text-lg transition-all duration-300"
+                className="w-12 h-12 rounded-lg  flex items-center justify-center font-bold text-lg transition-all duration-300"
                 style={{
                   backgroundImage: `linear-gradient(to right, ${theme.gradientStart}, ${theme.gradientEnd})`,
                   color: theme.fontColor || '#FFFFFF'
                 }}
               >
-                PP
+                VALA
               </div>
               <div className="hidden sm:block">
                 <h1
@@ -240,7 +240,6 @@ export default function WebHeader() {
                     color: shadeColor(theme.textColor || '#123524', 30)
                   }}
                 >
-                  Community Platform
                 </p>
               </div>
             </div>

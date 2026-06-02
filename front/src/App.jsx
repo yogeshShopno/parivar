@@ -39,14 +39,15 @@ export default function App() {
 
         {/* Admin Dashboard Routes */}
         <Route
-          path="/admin"
+          path="/admin/*"
           element={
             <ProtectedRoute>
               <Layout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<PermissionRoute permission="dashboard.view"><Dashboard /></PermissionRoute>} />
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<PermissionRoute permission="dashboard.view"><Dashboard /></PermissionRoute>} />
           <Route path="committee" element={<PermissionRoute permission="committee.list"><CommitteeMembers /></PermissionRoute>} />
           <Route path="roles" element={<PermissionRoute permission="roles.list"><Roles /></PermissionRoute>} />
           <Route path="users" element={<PermissionRoute permission="members.list"><Users /></PermissionRoute>} />
