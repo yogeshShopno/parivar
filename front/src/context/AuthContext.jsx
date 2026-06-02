@@ -1,21 +1,62 @@
 import React, { createContext, useState, useCallback, useEffect } from 'react'
+import { memberApi } from '../lib/api'
 
 export const AuthContext = createContext()
+
+/**
+ * Fetch and cache WEBSITE theme colors from backend
+ * 
+ * IMPORTANT: This is ONLY for website pages (WebHeader, etc.)
+ * Admin dashboard uses separate theme system (CSS variables in theme.js)
+ * 
+ * Website theme colors are stored with 'web_' prefix in localStorage:
+ * - web_primaryColor, web_backgroundColor, web_gradientStart, etc.
+ * 
+ * NO CONFLICT with admin dashboard theme colors!
+ */
+const fetchWebTheme = async () => {
+  try {
+    const response = await memberApi.get('/get_app_theme')
+    
+    if (response.status === 200 && response.data?.data) {
+      const themeData = response.data.data
+
+      // Store each color with 'web_' prefix in localStorage
+      Object.keys(themeData).forEach((key) => {
+        if (typeof themeData[key] === 'string' || typeof themeData[key] === 'number') {
+          localStorage.setItem(`web_${key}`, themeData[key])
+        }
+      })
+    }
+  } catch (err) {
+    console.error('Failed to fetch web theme:', err.message)
+  }
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Initialize from localStorage
+  // Initialize from localStorage and fetch theme
   useEffect(() => {
-    const stored = localStorage.getItem('auth_token')
-    const storedUser = localStorage.getItem('auth_user')
-    if (stored) {
-      setToken(stored)
-      setUser(storedUser ? JSON.parse(storedUser) : null)
+    const init = async () => {
+      // Restore auth state
+      const stored = localStorage.getItem('auth_token')
+      const storedUser = localStorage.getItem('auth_user')
+      if (stored) {
+        setToken(stored)
+        setUser(storedUser ? JSON.parse(storedUser) : null)
+      }
+
+      // Fetch website theme colors (separate from admin dashboard theme)
+      // Stored as web_* localStorage keys to prevent conflicts
+      await fetchWebTheme()
+
+      setLoading(false)
     }
-    setLoading(false)
+
+    init()
   }, [])
 
   const login = useCallback(async (email, password) => {

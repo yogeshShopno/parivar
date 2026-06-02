@@ -73,7 +73,7 @@ export default function Sidebar() {
               {visibleMasterNavigation.map(({ type, label }) => (
                 <NavLink
                   key={type}
-                  to={`/masters/${type}`}
+                  to={`/admin/masters/${type}`}
                   end
                   className={({ isActive }) =>
                     `block min-h-8 w-full rounded-md px-3 py-2 text-xs transition-colors ${

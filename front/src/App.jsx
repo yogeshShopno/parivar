@@ -20,6 +20,10 @@ import News from './pages/News'
 import { hasPermission } from './lib/permissions'
 import Posts from './pages/Post'
 import { activeTheme, applyTheme } from './theme/theme'
+// ___________________________________________________________
+
+import Home from './pages/websitePages/Home'
+
 
 // Bootstrap selected design system theme
 applyTheme(activeTheme)
@@ -28,10 +32,14 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/businesses/:id" element={<BusinessProfile />} />
+
+        {/* Admin Dashboard Routes */}
         <Route
-          path="/"
+          path="/admin"
           element={
             <ProtectedRoute>
               <Layout />
@@ -58,10 +66,10 @@ export default function App() {
           <Route path="birthday" element={<PermissionRoute permission="birthday.list"><ContentPage type="birthday" /></PermissionRoute>} />
           <Route path="job-vacancy" element={<PermissionRoute permission="job-vacancy.list"><ContentPage type="job-vacancy" /></PermissionRoute>} />
 
-
           <Route path="masters/:type" element={<MasterRoute />} />
           <Route path="settings" element={<PermissionRoute permission="settings.edit"><Settings /></PermissionRoute>} />
         </Route>
+        
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>
