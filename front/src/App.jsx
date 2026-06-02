@@ -20,6 +20,10 @@ import News from './pages/News'
 import { hasPermission } from './lib/permissions'
 import Posts from './pages/Post'
 import { activeTheme, applyTheme } from './theme/theme'
+// ___________________________________________________________
+
+import Home from './pages/websitePages/Home'
+
 
 // Bootstrap selected design system theme
 applyTheme(activeTheme)
@@ -28,17 +32,22 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/businesses/:id" element={<BusinessProfile />} />
+
+        {/* Admin Dashboard Routes */}
         <Route
-          path="/"
+          path="/admin/*"
           element={
             <ProtectedRoute>
               <Layout />
             </ProtectedRoute>
           }
         >
-          <Route index element={<PermissionRoute permission="dashboard.view"><Dashboard /></PermissionRoute>} />
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<PermissionRoute permission="dashboard.view"><Dashboard /></PermissionRoute>} />
           <Route path="committee" element={<PermissionRoute permission="committee.list"><CommitteeMembers /></PermissionRoute>} />
           <Route path="roles" element={<PermissionRoute permission="roles.list"><Roles /></PermissionRoute>} />
           <Route path="users" element={<PermissionRoute permission="members.list"><Users /></PermissionRoute>} />
@@ -58,10 +67,10 @@ export default function App() {
           <Route path="birthday" element={<PermissionRoute permission="birthday.list"><ContentPage type="birthday" /></PermissionRoute>} />
           <Route path="job-vacancy" element={<PermissionRoute permission="job-vacancy.list"><ContentPage type="job-vacancy" /></PermissionRoute>} />
 
-
           <Route path="masters/:type" element={<MasterRoute />} />
           <Route path="settings" element={<PermissionRoute permission="settings.edit"><Settings /></PermissionRoute>} />
         </Route>
+        
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>

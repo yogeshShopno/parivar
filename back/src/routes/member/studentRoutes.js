@@ -10,7 +10,7 @@ const { parseForm } = require('../../middleware/upload');
 
 const router = express.Router();
 
-router.get('/', protect, getStudents);
+router.get('/', getStudents);
 router.post('/', protect, parseForm, addStudent);
 router.put('/:id', protect, parseForm, updateStudent);
 router.delete('/:id', protect, deleteStudent);

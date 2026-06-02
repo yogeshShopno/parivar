@@ -5,7 +5,7 @@ const { protect, requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/', protect,  getGallery);
+router.get('/', getGallery);
 router.post('/', protect, requirePermission('gallery.add'), parseForm,saveGallery);
 router.put('/:id', protect, requirePermission('gallery.edit'), parseForm,saveGallery);
 router.delete('/:id', protect, requirePermission('gallery.delete'),deleteGallery);

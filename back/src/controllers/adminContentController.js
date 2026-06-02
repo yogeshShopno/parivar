@@ -91,7 +91,8 @@ const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (
     }
     if (label === 'Gallery' && !existing && hasGalleryImages) {
       const docs = await Promise.all(req.body.images.map(async (image, index) => {
-        const doc = new Model({ id: await nextPublicId(Model, `${prefix}${index}_`) });
+        const doc = new Model();
+        if (!doc.id) doc.id = await nextPublicId(Model, `${prefix}${index}_`);
         const galleryDocPayload = { ...payload, image };
         delete galleryDocPayload.images;
         doc.set(galleryDocPayload);
@@ -101,7 +102,8 @@ const saveContent = (Model, payloadBuilder, formatter, label, prefix) => async (
       }));
       return apiResponse(res, 201, 'Gallery saved successfully', docs);
     }
-    const doc = existing || new Model({ id: await nextPublicId(Model, prefix) });
+    const doc = existing || new Model();
+    if (!doc.id) doc.id = await nextPublicId(Model, prefix);
     delete payload.images;
     doc.set(payload);
     if (!existing) {
@@ -142,7 +144,8 @@ const formatInquiry = (req, item) => ({
 const saveInquiry = async (req, res) => {
   try {
     const existing = req.params.id ? await findById(ContactInquiry, req.params.id) : null;
-    const doc = existing || new ContactInquiry({ id: await nextPublicId(ContactInquiry, 'INQ') });
+    const doc = existing || new ContactInquiry();
+    if (!existing) doc.id = await nextPublicId(ContactInquiry, 'INQ');
     doc.set(req.body);
     if (!existing) {
       doc.status = req.body.status !== undefined ? Number(req.body.status) : 1;
@@ -168,7 +171,7 @@ const masterConfig = {
   'blood-group': { Model: Master, type: 'blood-group' },
   'event-category': { Model: Master, type: 'event-category' }
   ,
-  'gallery-category': { Model: GalleryCategory, nameKeys: ['category'] }
+  'gallery-category': { Model: GalleryCategory, nameKeys: ['category'], skipCustomId: true }
 };
 
 const formatMaster = (type, item, config) => {
@@ -205,7 +208,8 @@ const saveMaster = async (req, res) => {
     const name = req.body.name || req.body[type] || req.body.business || req.body.country || req.body.state || req.body.city;
     if (!name) return apiResponse(res, 400, 'Name is required');
     const existing = req.params.id ? await findById(config.Model, req.params.id) : null;
-    const doc = existing || new config.Model({ id: await nextPublicId(config.Model, `${type.toUpperCase()}_`) });
+    const doc = existing || new config.Model();
+    if (!existing && !config.skipCustomId) doc.id = await nextPublicId(config.Model, `${type.toUpperCase()}_`);
     if (config.type) {
       doc.type = config.type;
       doc.name = name;
