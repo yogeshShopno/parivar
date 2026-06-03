@@ -180,7 +180,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Business Name *</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Business Name *</label>
           <input
             type="text"
             value={formData.business_name}
@@ -188,10 +188,10 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
             className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10"
             disabled={isLoading}
           />
-          {errors.business_name && <p className="text-error-text text-xs mt-1 font-semibold">{errors.business_name}</p>}
+          {errors.business_name && <p className="text-error-text text-sm mt-1 font-semibold">{errors.business_name}</p>}
         </div>
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Business Category *</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Business Category *</label>
           <select
             value={formData.business_category_id}
             onChange={(e) => setFormData({ ...formData, business_category_id: e.target.value })}
@@ -203,10 +203,10 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
               <option key={category.id} value={category.id} className="bg-surface text-text">{category.business}</option>
             ))}
           </select>
-          {errors.business_category_id && <p className="text-error-text text-xs mt-1 font-semibold">{errors.business_category_id}</p>}
+          {errors.business_category_id && <p className="text-error-text text-sm mt-1 font-semibold">{errors.business_category_id}</p>}
         </div>
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Email *</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Email *</label>
           <input
             type="email"
             value={formData.email}
@@ -214,10 +214,10 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
             className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10"
             disabled={isLoading}
           />
-          {errors.email && <p className="text-error-text text-xs mt-1 font-semibold">{errors.email}</p>}
+          {errors.email && <p className="text-error-text text-sm mt-1 font-semibold">{errors.email}</p>}
         </div>
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">WhatsApp Number</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">WhatsApp Number</label>
           <input
             value={formData.whatsapp_number}
             onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
@@ -226,7 +226,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           />
         </div>
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Number</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Number</label>
           <input
             value={formData.number}
             onChange={(e) => setFormData({ ...formData, number: e.target.value })}
@@ -235,7 +235,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           />
         </div>
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">GST Number</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">GST Number</label>
           <input
             value={formData.GST_number}
             onChange={(e) => setFormData({ ...formData, GST_number: e.target.value })}
@@ -247,7 +247,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Country *</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Country *</label>
           <select
             value={formData.country_id}
             onChange={(e) => setFormData({ ...formData, country_id: e.target.value })}
@@ -259,10 +259,10 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
               <option key={country.id} value={country.id} className="bg-surface text-text">{country.name}</option>
             ))}
           </select>
-          {errors.country_id && <p className="text-error-text text-xs mt-1 font-semibold">{errors.country_id}</p>}
+          {errors.country_id && <p className="text-error-text text-sm mt-1 font-semibold">{errors.country_id}</p>}
         </div>
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">State *</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">State *</label>
           <select
             value={formData.state_id}
             onChange={(e) => setFormData({ ...formData, state_id: e.target.value })}
@@ -274,10 +274,10 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
               <option key={state.id} value={state.id} className="bg-surface text-text">{state.name}</option>
             ))}
           </select>
-          {errors.state_id && <p className="text-error-text text-xs mt-1 font-semibold">{errors.state_id}</p>}
+          {errors.state_id && <p className="text-error-text text-sm mt-1 font-semibold">{errors.state_id}</p>}
         </div>
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">City *</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">City *</label>
           <select
             value={formData.city_id}
             onChange={(e) => setFormData({ ...formData, city_id: e.target.value })}
@@ -289,12 +289,12 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
               <option key={city.id} value={city.id} className="bg-surface text-text">{city.name}</option>
             ))}
           </select>
-          {errors.city_id && <p className="text-error-text text-xs mt-1 font-semibold">{errors.city_id}</p>}
+          {errors.city_id && <p className="text-error-text text-sm mt-1 font-semibold">{errors.city_id}</p>}
         </div>
       </div>
 
       <div>
-        <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Location Link (Google Maps) *</label>
+        <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Location Link (Google Maps) *</label>
         <input
           value={formData.location_link}
           onChange={(e) => setFormData({ ...formData, location_link: e.target.value })}
@@ -302,11 +302,11 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10"
           disabled={isLoading}
         />
-        {errors.location_link && <p className="text-error-text text-xs mt-1 font-semibold">{errors.location_link}</p>}
+        {errors.location_link && <p className="text-error-text text-sm mt-1 font-semibold">{errors.location_link}</p>}
       </div>
 
       <div>
-        <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Address *</label>
+        <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Address *</label>
         <textarea
           rows="3"
           value={formData.address}
@@ -314,11 +314,11 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10"
           disabled={isLoading}
         />
-        {errors.address && <p className="text-error-text text-xs mt-1 font-semibold">{errors.address}</p>}
+        {errors.address && <p className="text-error-text text-sm mt-1 font-semibold">{errors.address}</p>}
       </div>
 
       <div>
-        <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">About Business</label>
+        <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">About Business</label>
         <textarea
           rows="4"
           value={formData.about_us}
@@ -330,7 +330,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Website</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Website</label>
           <input
             value={formData.website}
             onChange={(e) => setFormData({ ...formData, website: e.target.value })}
@@ -339,7 +339,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           />
         </div>
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Facebook</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Facebook</label>
           <input
             value={formData.facebook}
             onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
@@ -348,7 +348,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           />
         </div>
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Instagram</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Instagram</label>
           <input
             value={formData.instagram}
             onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
@@ -357,7 +357,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           />
         </div>
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Pinterest</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Pinterest</label>
           <input
             value={formData.pinterest}
             onChange={(e) => setFormData({ ...formData, pinterest: e.target.value })}
@@ -366,7 +366,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           />
         </div>
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">YouTube</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">YouTube</label>
           <input
             value={formData.youtube}
             onChange={(e) => setFormData({ ...formData, youtube: e.target.value })}
@@ -377,7 +377,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
       </div>
       
       <div>
-        <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Profile Image</label>
+        <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Profile Image</label>
         {(profilePreview || formData.image) && (
           <div className="relative w-20 h-20 mb-3 rounded-lg overflow-hidden border border-border">
             <img 
@@ -413,7 +413,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
       </div>
 
       <div>
-        <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Gallery Images</label>
+        <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Gallery Images</label>
         {(galleryPreviews.length > 0 || existingGalleryImages.length > 0) && (
           <div className="grid grid-cols-4 gap-2 mb-3">
             {newGalleryFiles.map((file, idx) => (
@@ -459,7 +459,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
       </div>
       
       <div>
-        <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Listing Status</label>
+        <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Listing Status</label>
         <select
           value={formData.status}
           onChange={(e) => setFormData({ ...formData, status: Number(e.target.value) })}

@@ -120,7 +120,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
         <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Primary Identity</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">First Name *</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">First Name *</label>
             <input
               type="text"
               value={formData.first_name}
@@ -128,11 +128,11 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
               className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               disabled={isLoading}
             />
-            {errors.first_name && <p className="text-error-text text-xs mt-1 font-semibold">{errors.first_name}</p>}
+            {errors.first_name && <p className="text-error-text text-sm mt-1 font-semibold">{errors.first_name}</p>}
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Middle Name</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Middle Name</label>
             <input
               type="text"
               value={formData.middle_name}
@@ -143,7 +143,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Last Name</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Last Name</label>
             <input
               type="text"
               value={formData.last_name}
@@ -160,7 +160,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
         <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Contact & Login Credentials</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Email Address</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Email Address</label>
             <input
               type="email"
               value={formData.email}
@@ -168,11 +168,11 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
               className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               disabled={isLoading}
             />
-            {errors.email && <p className="text-error-text text-xs mt-1 font-semibold">{errors.email}</p>}
+            {errors.email && <p className="text-error-text text-sm mt-1 font-semibold">{errors.email}</p>}
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Mobile Number *</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Mobile Number *</label>
             <input
               type="tel"
               value={formData.number}
@@ -180,11 +180,11 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
               className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               disabled={isLoading}
             />
-            {errors.number && <p className="text-error-text text-xs mt-1 font-semibold">{errors.number}</p>}
+            {errors.number && <p className="text-error-text text-sm mt-1 font-semibold">{errors.number}</p>}
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">
               {user ? 'Reset Password (optional)' : 'Password *'}
             </label>
             <input
@@ -195,7 +195,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
               className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               disabled={isLoading}
             />
-            {errors.password && <p className="text-error-text text-xs mt-1 font-semibold">{errors.password}</p>}
+            {errors.password && <p className="text-error-text text-sm mt-1 font-semibold">{errors.password}</p>}
           </div>
         </div>
       </div>
@@ -205,7 +205,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
         <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Family Metrics</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Relationship</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Relationship</label>
             <select
               value={formData.relation}
               onChange={(e) => setFormData({ ...formData, relation: e.target.value })}
@@ -219,7 +219,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Gender</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Gender</label>
             <select
               value={formData.gender}
               onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
@@ -234,7 +234,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Date of Birth</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Date of Birth</label>
             <input
               type="date"
               value={formData.dob}
@@ -245,7 +245,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Blood Group</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Blood Group</label>
             <select
               value={formData.blood_group}
               onChange={(e) => setFormData({ ...formData, blood_group: e.target.value })}
@@ -276,14 +276,14 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
               />
               <div className="text-sm">
                 <div className="font-semibold text-text">Flag as Committee Member</div>
-                <div className="text-xs text-text-secondary">Grants administrative privileges in core app</div>
+                <div className="text-sm text-text-secondary">Grants administrative privileges in core app</div>
               </div>
             </label>
 
             {formData.is_committee && (
               <div className="flex-1 w-full animate-fade-in grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Admin Role</label>
+                  <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Admin Role</label>
                   <select
                     value={formData.role_id}
                     onChange={(e) => setFormData({ ...formData, role_id: e.target.value })}
@@ -296,7 +296,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Committee Designation</label>
+                  <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Committee Designation</label>
                   <input
                     type="text"
                     placeholder="e.g. President, Vice President, Secretary"
@@ -317,7 +317,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
       <div>
         <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Residential Location</h4>
         <div>
-          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Home / Office Address</label>
+          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Home / Office Address</label>
           <textarea
             rows="3"
             value={formData.address}

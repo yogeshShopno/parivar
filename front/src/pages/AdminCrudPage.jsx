@@ -159,7 +159,6 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">{title}</h2>
-          <p className="text-text-secondary text-sm mt-0.5">{subtitle}</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button onClick={fetchRows} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
@@ -239,7 +238,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fields.map((field) => (
               <div key={field.name}>
-                <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">{field.label}</label>
+                <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">{field.label}</label>
                 {field.type === 'textarea' ? (
                   <textarea rows="4" value={formData[field.name] || ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving} />
                 ) : field.type === 'select' ? (
@@ -265,7 +264,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                       disabled={saving}
                     />
                     {selected?.image && !field.multiple && (
-                      <div className="flex items-center gap-2 text-xs text-text-secondary">
+                      <div className="flex items-center gap-2 text-sm text-text-secondary">
                         <ImageIcon className="h-3.5 w-3.5" />
                         <span>Current image will be kept unless a new file is selected.</span>
                       </div>

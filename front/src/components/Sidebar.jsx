@@ -52,14 +52,13 @@ export default function Sidebar() {
           <h2 className="font-bold text-base tracking-wide bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
             Parivar Admin
           </h2>
-          <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-bold uppercase tracking-wider text-primary">
+          <span className="rounded bg-primary/10 px-1.5 py-0.5 text-sm font-bold uppercase tracking-wider text-primary">
             Console HQ
           </span>
         </div>
       </div>
 
       <nav className="min-h-0 flex-1 overflow-y-auto pr-1">
-        <SectionLabel>Core Operations</SectionLabel>
         <div className="space-y-1">
           {visibleCoreNavigation.map((item) => (
             <LinkItem key={item.to} {...item} />
@@ -108,7 +107,7 @@ export default function Sidebar() {
           </div>
           <div className="min-w-0">
             <h4 className="truncate text-sm font-semibold text-text">{user.name || user.email || 'Administrator'}</h4>
-            <p className="text-xs text-text-secondary truncate capitalize">{user.role || 'Administrator'}</p>
+            <p className="text-sm text-text-secondary truncate capitalize">{user.role || 'Administrator'}</p>
           </div>
         </div>
       )}

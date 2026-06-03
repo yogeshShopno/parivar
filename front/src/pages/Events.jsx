@@ -172,7 +172,7 @@ export default function Events() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">Events</h2>
-          <p className="text-text-secondary text-sm mt-0.5">Manage event listings and calendar details</p>
+         
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button onClick={fetchRows} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
@@ -257,33 +257,33 @@ export default function Events() {
       <Modal isOpen={isModalOpen} title={selectedId ? 'Edit Event' : 'Add Event'} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 text-text">
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Title</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Title</label>
             <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={fieldClass} disabled={saving} />
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Description</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Description</label>
             <textarea rows="4" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className={fieldClass} disabled={saving} />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Event Date</label>
+              <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Event Date</label>
               <input type="date" value={formData.event_date} onChange={(e) => setFormData({ ...formData, event_date: e.target.value })} className={fieldClass} disabled={saving} />
             </div>
             <div>
-              <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Start Time</label>
+              <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Start Time</label>
               <input type="datetime-local" value={formData.start_time} onChange={(e) => setFormData({ ...formData, start_time: e.target.value })} className={fieldClass} disabled={saving} />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">End Time</label>
+              <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">End Time</label>
               <input type="datetime-local" value={formData.end_time} onChange={(e) => setFormData({ ...formData, end_time: e.target.value })} className={fieldClass} disabled={saving} />
             </div>
             <div>
-              <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Entry Type</label>
+              <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Entry Type</label>
               <select value={formData.entry_type} onChange={(e) => setFormData({ ...formData, entry_type: e.target.value })} className={fieldClass} disabled={saving}>
                 <option value="free" className="bg-surface text-text">Free</option>
                 <option value="paid" className="bg-surface text-text">Paid</option>
@@ -292,7 +292,7 @@ export default function Events() {
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Category</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Category</label>
             <select
               value={formData.event_category_id}
               onChange={(e) => {
@@ -314,17 +314,17 @@ export default function Events() {
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Location</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Location</label>
             <input type="text" value={formData.event_location} onChange={(e) => setFormData({ ...formData, event_location: e.target.value })} className={fieldClass} disabled={saving} />
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Location Link</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Location Link</label>
             <input type="text" value={formData.location_link} onChange={(e) => setFormData({ ...formData, location_link: e.target.value })} className={fieldClass} disabled={saving} />
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Image</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Image</label>
             <input
               type="file"
               accept="image/*"
@@ -333,7 +333,7 @@ export default function Events() {
               disabled={saving}
             />
             {existingImage && !formData.image && (
-              <div className="flex items-center gap-2 text-xs text-text-secondary mt-2">
+              <div className="flex items-center gap-2 text-sm text-text-secondary mt-2">
                 <ImageIcon className="h-3.5 w-3.5" />
                 <span>Current image will be kept unless a new file is selected.</span>
               </div>

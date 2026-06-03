@@ -52,7 +52,7 @@ export default function Header() {
         <div className="flex items-center gap-4">
           <div className="hidden lg:flex flex-col text-right">
             <div className="text-sm font-semibold text-text">{user?.name || 'Administrator'}</div>
-            <div className="text-xs text-primary font-bold tracking-wide flex items-center gap-1 justify-end">
+            <div className="text-sm text-primary font-bold tracking-wide flex items-center gap-1 justify-end">
               <Sparkles className="w-3 h-3 text-primary/80" />
               {user?.role}
             </div>

@@ -201,7 +201,7 @@ export default function GalleryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">Gallery</h2>
-          <p className="text-text-secondary text-sm mt-0.5">Maintain gallery images and categories</p>
+          
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button onClick={fetchData} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
@@ -256,7 +256,7 @@ export default function GalleryPage() {
                     </td>
                     <td className="p-4 max-w-xs line-clamp-1">{row.category || 'General'}</td>
                     <td className="p-4">{row.year || '-'}</td>
-                    <td className="p-4 text-xs text-text-secondary">{row.images?.length ?? 0} image(s)</td>
+                    <td className="p-4 text-sm text-text-secondary">{row.images?.length ?? 0} image(s)</td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => openEdit(row)} className="p-2 text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl" title="Edit">
@@ -283,7 +283,7 @@ export default function GalleryPage() {
       <Modal isOpen={isModalOpen} title={selected ? 'Edit Gallery Item' : 'Add Gallery Item'} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 text-text">
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Category</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Category</label>
             <select value={categoryId} onChange={handleCategorySelect} className={fieldClass} disabled={saving}>
               <option value="" className="bg-surface text-text">Choose existing category</option>
               {categories.map((item) => (
@@ -292,7 +292,7 @@ export default function GalleryPage() {
             </select>
           </div>
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Or add new category</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Or add new category</label>
             <input
               type="text"
               value={newCategoryName}
@@ -307,12 +307,12 @@ export default function GalleryPage() {
             />
           </div>
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Year</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Year</label>
             <input type="text" value={year} onChange={(e) => setYear(e.target.value)} className={fieldClass} disabled={saving} />
           </div>
 
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Gallery Images</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Gallery Images</label>
             <input
               type="file"
               accept="image/*"
@@ -321,7 +321,7 @@ export default function GalleryPage() {
               className="w-full text-sm text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
               disabled={saving}
             />
-            <p className="mt-2 text-xs text-text-secondary">Upload multiple images. Existing images stay unless removed below.</p>
+            <p className="mt-2 text-sm text-text-secondary">Upload multiple images. Existing images stay unless removed below.</p>
           </div>
 
           {(existingImages.length > 0 || filePreviews.length > 0) && (

@@ -128,8 +128,8 @@ export default function Dashboard() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-text tracking-tight">Operations Console</h2>
-          <p className="text-text-secondary text-sm mt-1">Real-time indicators and user registry metrics</p>
+          <h2 className="text-2xl font-bold text-text tracking-tight">Dashboard</h2>
+        
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-secondary border border-border text-sm text-text font-medium select-none shadow-sm">
           <Clock className="w-3.5 h-3.5 text-primary" />
@@ -161,12 +161,12 @@ export default function Dashboard() {
                 <span className="text-3xl font-extrabold text-text tracking-tight">
                   {card.value}
                 </span>
-                <span className="text-xs font-bold text-text-secondary">records</span>
+                <span className="text-sm font-bold text-text-secondary">records</span>
               </div>
 
               {/* Sparkline & Growth Indicator */}
               <div className="mt-5 flex items-center justify-between">
-                <span className="text-xs font-bold text-primary flex items-center gap-1">
+                <span className="text-sm font-bold text-primary flex items-center gap-1">
                   <TrendingUp className="w-3 h-3 text-primary" />
                   {card.change}
                 </span>
@@ -191,7 +191,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-sm font-bold text-text tracking-wide">Registration Distribution</h3>
-              <p className="text-xs text-text-secondary">6-Month moving average data</p>
+              <p className="text-sm text-text-secondary">6-Month moving average data</p>
             </div>
             <div className="flex items-center gap-1.5 text-sm text-primary font-bold bg-primary/10 px-2 py-0.5 rounded">
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -253,7 +253,7 @@ export default function Dashboard() {
             <h3 className="text-sm font-bold text-text tracking-wide flex items-center gap-2">
               Recent Activity
             </h3>
-            <p className="text-xs text-text-secondary">System actions audit logs</p>
+            <p className="text-sm text-text-secondary">System actions audit logs</p>
           </div>
 
           <div className="flex-1 space-y-5">
@@ -273,7 +273,7 @@ export default function Dashboard() {
                   <p className="text-text font-medium transition-colors">
                     {act.text}
                   </p>
-                  <div className="flex items-center gap-2 text-xs text-text-secondary mt-1">
+                  <div className="flex items-center gap-2 text-sm text-text-secondary mt-1">
                     <Clock className="w-3 h-3" />
                     <span>{act.time}</span>
                     <span>•</span>

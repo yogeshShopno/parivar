@@ -60,7 +60,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Email input */}
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-2 tracking-wider">Email Address</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-2 tracking-wider">Email Address</label>
             <input
               type="email"
               value={email}
@@ -73,7 +73,7 @@ export default function Login() {
 
           {/* Password Input */}
           <div>
-            <label className="block text-xs uppercase font-bold text-text-secondary mb-2 tracking-wider">Password</label>
+            <label className="block text-sm uppercase font-bold text-text-secondary mb-2 tracking-wider">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -104,7 +104,7 @@ export default function Login() {
         </form>
 
         {/* Credentials helper card */}
-        <div className="mt-8 p-4 rounded-2xl bg-surface-secondary border border-border text-xs text-text-secondary flex gap-3 items-start animate-fade-in" style={{ animationDelay: '0.4s' }}>
+        <div className="mt-8 p-4 rounded-2xl bg-surface-secondary border border-border text-sm text-text-secondary flex gap-3 items-start animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <Key className="w-4 h-4 text-primary mt-0.5 shrink-0" />
           <div>
             <div className="font-bold text-text">Admin Connect:</div>

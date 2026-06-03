@@ -275,7 +275,7 @@ export default function Events() {
                   </div>
                 </div>
                 <div
-                  className="absolute right-4 top-4 rounded-full px-3 py-1.5 text-xs font-bold uppercase"
+                  className="absolute right-4 top-4 rounded-full px-3 py-1.5 text-sm font-bold uppercase"
                   style={{
                     backgroundImage: `linear-gradient(to right, ${theme.gradientStart}, ${theme.gradientEnd})`,
                     color: theme.fontColor,

@@ -146,7 +146,6 @@ export default function Businesses() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">Business Directory</h2>
-          <p className="text-text-secondary text-sm mt-0.5">Manage and moderate community businesses and enterprise registries</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
@@ -228,10 +227,10 @@ export default function Businesses() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-xs uppercase tracking-wide">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-sm uppercase tracking-wide">
                         {biz.business_category_name || 'Community Enterprise'}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${Number(biz.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-surface-secondary text-text-secondary border border-border'}`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-bold ${Number(biz.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-surface-secondary text-text-secondary border border-border'}`}>
                         {Number(biz.status) === 1 ? 'Active' : 'Inactive'}
                       </span>
                     </div>

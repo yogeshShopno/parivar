@@ -98,7 +98,6 @@ export default function CommitteeMembers() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">Committee Members</h2>
-          <p className="text-text-secondary text-sm mt-0.5">Manage committee member roles and profile details</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button onClick={fetchUsers} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
@@ -145,7 +144,7 @@ export default function CommitteeMembers() {
                       )}
                       <div>
                         <div className="font-semibold text-text">{user.name}</div>
-                        <div className="text-xs text-text-secondary">{user.designation || user.committee_role || '-'}</div>
+                        <div className="text-sm text-text-secondary">{user.designation || user.committee_role || '-'}</div>
                       </div>
                     </div>
                   </td>
@@ -157,7 +156,7 @@ export default function CommitteeMembers() {
                     </span>
                   </td>
                   <td className="p-4">
-                    <span className={`inline-flex px-2.5 py-1 rounded-lg border text-xs font-bold ${Number(user.status ?? 1) === 1 ? 'bg-success-bg border-success-border text-success-text' : 'bg-surface-secondary border-border text-text-secondary'}`}>
+                    <span className={`inline-flex px-2.5 py-1 rounded-lg border text-sm font-bold ${Number(user.status ?? 1) === 1 ? 'bg-success-bg border-success-border text-success-text' : 'bg-surface-secondary border-border text-text-secondary'}`}>
                       {Number(user.status ?? 1) === 1 ? 'Active' : 'Inactive'}
                     </span>
                   </td>

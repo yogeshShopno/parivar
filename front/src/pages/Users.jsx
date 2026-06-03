@@ -161,7 +161,7 @@ export default function Users() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">Family Registry</h2>
-          <p className="text-text-secondary text-sm mt-0.5">View and manage all registered members</p>
+   
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -297,7 +297,7 @@ export default function Users() {
                         </div>
                         <div>
                           <div className="font-semibold text-text">{user.name}</div>
-                          <div className="text-xs text-text-secondary mt-0.5 capitalize">{user.relation || 'Self'}</div>
+                          <div className="text-sm text-text-secondary mt-0.5 capitalize">{user.relation || 'Self'}</div>
                         </div>
                       </div>
                     </td>
@@ -305,7 +305,7 @@ export default function Users() {
                     {/* Contact details */}
                     <td className="p-4">
                       <div>{user.email || <span className="text-text-secondary">No Email</span>}</div>
-                      <div className="text-xs text-text-secondary mt-0.5 font-mono">{user.phone}</div>
+                      <div className="text-sm text-text-secondary mt-0.5 font-mono">{user.phone}</div>
                     </td>
 
                     {/* Gender and Blood */}
@@ -329,7 +329,7 @@ export default function Users() {
                           <span>{user.committee_role || 'Committee'}</span>
                         </div>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded bg-surface-secondary text-text-secondary font-medium text-xs">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded bg-surface-secondary text-text-secondary font-medium text-sm">
                           Member
                         </span>
                       )}

@@ -131,7 +131,7 @@ export default function Donations() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">Donations</h2>
-          <p className="text-text-secondary text-sm mt-0.5">Track and manage donation records</p>
+        
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
@@ -154,15 +154,15 @@ export default function Donations() {
       {donations.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <div className="bg-success-bg border border-success-border rounded-2xl p-4">
-            <p className="text-success-text text-xs font-bold uppercase tracking-wider mb-1">Total Collected</p>
+            <p className="text-success-text text-sm font-bold uppercase tracking-wider mb-1">Total Collected</p>
             <p className="text-text text-lg font-bold">{formatAmount(totalAmount)}</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4">
-            <p className="text-text-secondary text-xs font-bold uppercase tracking-wider mb-1">Total Donors</p>
+            <p className="text-text-secondary text-sm font-bold uppercase tracking-wider mb-1">Total Donors</p>
             <p className="text-text text-lg font-bold">{donations.length}</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4 col-span-2 sm:col-span-1">
-            <p className="text-text-secondary text-xs font-bold uppercase tracking-wider mb-1">Avg Donation</p>
+            <p className="text-text-secondary text-sm font-bold uppercase tracking-wider mb-1">Avg Donation</p>
             <p className="text-text text-lg font-bold">{formatAmount(totalAmount / donations.length)}</p>
           </div>
         </div>
@@ -274,7 +274,7 @@ export default function Donations() {
                         <IndianRupee className="w-3.5 h-3.5" />
                         {Number(donation.donate_amount || 0).toLocaleString('en-IN')}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-bold ${
                         Number(donation.status) === 1
                           ? 'bg-success-bg text-success-text border border-success-border'
                           : 'bg-surface-secondary text-text-secondary border border-border'

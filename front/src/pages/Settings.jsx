@@ -94,7 +94,7 @@ export default function SettingsPage() {
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-surface-secondary border border-border hover:bg-surface transition-colors text-text">
       <div className="max-w-md">
         <h4 className="text-sm font-bold text-text uppercase tracking-wide">{label}</h4>
-        <p className="text-xs text-text-secondary mt-1 leading-relaxed">{desc}</p>
+        <p className="text-sm text-text-secondary mt-1 leading-relaxed">{desc}</p>
       </div>
       <div className="flex items-center gap-3">
         <input
@@ -231,7 +231,7 @@ export default function SettingsPage() {
               <h3 className="text-sm font-bold text-text">Live Brand Palette Preview</h3>
             </div>
 
-            <p className="text-xs text-text-secondary leading-relaxed mb-6">
+            <p className="text-sm text-text-secondary leading-relaxed mb-6">
               Preview represents the layout of the mobile application dashboard using current theme tokens.
             </p>
 
@@ -275,7 +275,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="mt-6 p-3.5 rounded-xl bg-surface-secondary border border-border text-xs text-text-secondary leading-relaxed flex gap-2">
+          <div className="mt-6 p-3.5 rounded-xl bg-surface-secondary border border-border text-sm text-text-secondary leading-relaxed flex gap-2">
             <Info className="w-4 h-4 text-primary shrink-0" />
             <span>Theme tokens are synchronized dynamically with both web and mobile environments.</span>
           </div>
