@@ -25,7 +25,7 @@ const fallbackMembers = [
     image: '/2.png',
   },
   {
-    name: 'Rajesh Patel',
+    name: 'Rajesh ',
     role: 'Elder & Mentor',
     image: '/3.png',
   },

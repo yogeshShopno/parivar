@@ -52,9 +52,7 @@ export default function Sidebar() {
           <h2 className="font-bold text-base tracking-wide bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
             Parivar Admin
           </h2>
-          <span className="rounded bg-primary/10 px-1.5 py-0.5 text-sm font-bold uppercase tracking-wider text-primary">
-            Console HQ
-          </span>
+         
         </div>
       </div>
 

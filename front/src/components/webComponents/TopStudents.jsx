@@ -14,40 +14,7 @@ const defaultTheme = {
   fontColor: '#FFFFFF',
 }
 
-const fallbackStudents = [
-  {
-    name: 'Riya Patel',
-    rank: '1st Rank',
-    standard: 'Class 12 Science',
-    score: '98.80%',
-    achievement: 'District Topper',
-    image: '/1.png',
-  },
-  {
-    name: 'Dev Shah',
-    rank: '2nd Rank',
-    standard: 'Class 10',
-    score: '97.60%',
-    achievement: 'School Topper',
-    image: '/2.png',
-  },
-  {
-    name: 'Krisha Mehta',
-    rank: '3rd Rank',
-    standard: 'Class 12 Commerce',
-    score: '96.40%',
-    achievement: 'Merit Scholar',
-    image: '/3.png',
-  },
-  {
-    name: 'Aarav Desai',
-    rank: '4th Rank',
-    standard: 'Class 8',
-    score: '95.20%',
-    achievement: 'Academic Excellence',
-    image: '/4.png',
-  },
-]
+
 
 const rankLabel = (index) => {
   const rank = index + 1
@@ -139,7 +106,7 @@ export default function TopStudents() {
     fetchStudents()
   }, [])
 
-  const visibleStudents = students.length > 0 ? students : fallbackStudents
+  const visibleStudents = students.length > 0 ? students : []
 
   return (
     <section

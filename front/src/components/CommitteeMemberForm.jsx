@@ -179,7 +179,7 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
         </div>
       </div>
 
-      <button type="submit" disabled={isLoading} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider uppercase transition-all disabled:opacity-50 shadow-glow-primary">
+      <button type="submit" disabled={isLoading} className="justify-self-end flex bg-primary hover:bg-primary-hover text-white px-3 py-3 rounded-xl font-semibold text-sm tracking-wider uppercase transition-all disabled:opacity-50 shadow-glow-primary">
         {isLoading ? 'Saving...' : member ? 'Save Committee Member' : 'Add Committee Member'}
       </button>
     </form>
