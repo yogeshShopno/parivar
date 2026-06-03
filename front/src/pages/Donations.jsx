@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   HeartHandshake,
   Trash2,
@@ -12,11 +12,28 @@ import {
   User2
 } from 'lucide-react'
 import api from '../lib/api'
+import { getDonationsList } from '../lib/api'
 import Modal from '../components/Modal'
+import Pagination from '../components/Pagination'
+import usePaginatedApi from '../hooks/usePaginatedApi'
 
 export default function Donations() {
-  const [donations, setDonations] = useState([])
-  const [loading, setLoading] = useState(false)
+  const {
+    data: donations,
+    pagination,
+    loading,
+    setFilters: setActiveFilters,
+    setPage,
+    refetch: fetchDonations
+  } = usePaginatedApi(getDonationsList, {
+    initialLimit: 10,
+    initialFilters: {
+      donator_name: '',
+      location: '',
+      donation_purpose: ''
+    }
+  })
+
   const [formLoading, setFormLoading] = useState(false)
   const [filters, setFilters] = useState({
     donator_name: '',
@@ -28,34 +45,11 @@ export default function Donations() {
   const [selectedDonation, setSelectedDonation] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  useEffect(() => {
-    fetchDonations()
-  }, [])
-
-  const fetchDonations = async () => {
-    setLoading(true)
-    try {
-      const params = new URLSearchParams()
-      if (filters.donator_name) params.append('donator_name', filters.donator_name)
-      if (filters.location) params.append('location', filters.location)
-      if (filters.donation_purpose) params.append('donation_purpose', filters.donation_purpose)
-      const res = await api.get('/donations', { params })
-      const data = res.data?.data || res.data || []
-      setDonations(data)
-      setError('')
-    } catch (err) {
-      setError('Failed to fetch donations')
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this donation?')) return
     try {
       await api.delete(`/donations/${id}`)
-      setDonations(donations.filter(d => d.id !== id))
+      await fetchDonations()
       setSuccess('Donation deleted successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -113,11 +107,14 @@ export default function Donations() {
     setFilters(prev => ({ ...prev, [name]: value }))
   }
 
-  const applyFilters = () => fetchDonations()
+  const applyFilters = () => {
+    setActiveFilters({ ...filters })
+  }
 
   const resetFilters = () => {
-    setFilters({ donator_name: '', location: '', donation_purpose: '' })
-    setTimeout(() => fetchDonations(), 0)
+    const reset = { donator_name: '', location: '', donation_purpose: '' }
+    setFilters(reset)
+    setActiveFilters(reset)
   }
 
   const formatAmount = (amount) =>
@@ -337,6 +334,8 @@ export default function Donations() {
           ))}
         </div>
       )}
+
+      <Pagination pagination={pagination} onPageChange={setPage} loading={loading} />
 
       {/* Add/Edit Modal */}
       <Modal

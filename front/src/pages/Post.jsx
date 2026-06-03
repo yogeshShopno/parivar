@@ -1,15 +1,24 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { FileText, Calendar, Trash2, Clock, Search, RefreshCw, Plus, Edit2 } from 'lucide-react'
-import api, { assetUrl } from '../lib/api'
+import api, { assetUrl, getPostsList } from '../lib/api'
 import Modal from '../components/Modal'
+import Pagination from '../components/Pagination'
+import usePaginatedApi from '../hooks/usePaginatedApi'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 
 export default function Post() {
-  const [posts, setPosts] = useState([])
-  const [loading, setLoading] = useState(false)
+  const {
+    data: posts,
+    pagination,
+    loading,
+    search,
+    setSearch,
+    setPage,
+    refetch: fetchPosts
+  } = usePaginatedApi(getPostsList, { initialLimit: 10 })
+
   const [saving, setSaving] = useState(false)
-  const [search, setSearch] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [selected, setSelected] = useState(null)
@@ -21,30 +30,11 @@ export default function Post() {
     image: null
   })
 
-  useEffect(() => {
-    fetchPosts()
-  }, [])
-
-  const fetchPosts = async () => {
-    setLoading(true)
-    try {
-      const res = await api.get('/posts')
-      const data = res.data?.data || res.data || []
-      setPosts(data)
-      setError('')
-    } catch (err) {
-      setError('Failed to load posts')
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this post from the community board?')) return
     try {
       await api.delete(`/posts/${id}`)
-      setPosts(posts.filter(p => p.id !== id))
+      await fetchPosts()
       setSuccess('Post deleted and moderated successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -98,11 +88,6 @@ export default function Post() {
       setSaving(false)
     }
   }
-
-  const filtered = posts.filter(p => 
-    p.title?.toLowerCase().includes(search.toLowerCase()) ||
-    p.description?.toLowerCase().includes(search.toLowerCase())
-  )
 
   return (
     <div className="space-y-6 animate-slide-up select-none text-text">
@@ -161,7 +146,7 @@ export default function Post() {
           <div className="w-8 h-8 rounded-full border-2 border-primary/25 border-t-primary animate-spin"></div>
           <span className="text-text-secondary text-sm">Querying announcements board...</span>
         </div>
-      ) : filtered.length === 0 ? (
+      ) : posts.length === 0 ? (
         <div className="bg-card border border-border rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
           <FileText className="w-12 h-12 text-text-secondary/40 animate-pulse-slow" />
           <div>
@@ -171,7 +156,7 @@ export default function Post() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map(post => (
+          {posts.map(post => (
             <div key={post.id} className="relative overflow-hidden bg-card border border-border hover:border-text-secondary/20 rounded-2xl shadow-glass-sm hover:shadow-glass-md transition-all duration-300 flex flex-col justify-between group">
               
               {/* Optional image preview */}
@@ -235,6 +220,8 @@ export default function Post() {
           ))}
         </div>
       )}
+
+      <Pagination pagination={pagination} onPageChange={setPage} loading={loading} />
 
       <Modal isOpen={isModalOpen} title={selected ? 'Edit Post' : 'Add Post'} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 text-text">

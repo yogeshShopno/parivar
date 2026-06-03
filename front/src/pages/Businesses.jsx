@@ -1,45 +1,36 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Briefcase, MapPin, Phone, Globe, Trash2, Search, Edit2, RefreshCw, Plus, Eye } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import api, { assetUrl } from '../lib/api'
+import api, { assetUrl, getBusinessesList } from '../lib/api'
 import Modal from '../components/Modal'
 import BusinessForm from '../components/BusinessForm'
+import Pagination from '../components/Pagination'
+import usePaginatedApi from '../hooks/usePaginatedApi'
 
 export default function Businesses() {
   const navigate = useNavigate()
-  const [businesses, setBusinesses] = useState([])
-  const [loading, setLoading] = useState(false)
+  const {
+    data: businesses,
+    pagination,
+    loading,
+    page,
+    search,
+    setSearch,
+    setPage,
+    refetch: fetchBusinesses
+  } = usePaginatedApi(getBusinessesList, { initialLimit: 10 })
+
   const [formLoading, setFormLoading] = useState(false)
-  const [search, setSearch] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [selectedBusiness, setSelectedBusiness] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  useEffect(() => {
-    fetchBusinesses()
-  }, [])
-
-  const fetchBusinesses = async () => {
-    setLoading(true)
-    try {
-      const res = await api.get('/businesses')
-      const data = res.data?.data || res.data || []
-      setBusinesses(data)
-      setError('')
-    } catch (err) {
-      setError('Failed to fetch business directory')
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this business listing?')) return
     try {
       await api.delete(`/businesses/${id}`)
-      setBusinesses(businesses.filter(b => b.id !== id))
+      await fetchBusinesses()
       setSuccess('Business listing deleted successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -116,12 +107,7 @@ export default function Businesses() {
       }
 
       const savedData = res.data?.data || res.data;
-
-      if (selectedBusiness) {
-        setBusinesses(businesses.map(b => b.id === savedData.id ? savedData : b))
-      } else {
-        setBusinesses([savedData, ...businesses])
-      }
+      await fetchBusinesses()
 
       setSuccess(`Business listing ${selectedBusiness ? 'updated' : 'created'} successfully`)
       setIsModalOpen(false)
@@ -135,10 +121,7 @@ export default function Businesses() {
     }
   }
 
-  const filtered = businesses.filter(b => 
-    b.business_name?.toLowerCase().includes(search.toLowerCase()) ||
-    b.about_us?.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = businesses
 
   return (
     <div className="space-y-6 animate-slide-up select-none text-text">
@@ -316,6 +299,8 @@ export default function Businesses() {
           ))}
         </div>
       )}
+
+      <Pagination pagination={pagination} currentPage={page} onPageChange={setPage} loading={loading} />
 
       <Modal
         isOpen={isModalOpen}

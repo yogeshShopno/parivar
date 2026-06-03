@@ -1,13 +1,30 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { GraduationCap, Phone, Trash2, Search, Edit2, RefreshCw, Plus, Image as ImageIcon } from 'lucide-react'
-import api, { assetUrl } from '../lib/api'
+import api, { assetUrl, getStudentsList } from '../lib/api'
 import Modal from '../components/Modal'
+import Pagination from '../components/Pagination'
+import usePaginatedApi from '../hooks/usePaginatedApi'
 
 export default function Students() {
-  const [students, setStudents] = useState([])
-  const [loading, setLoading] = useState(false)
+  const {
+    data: students,
+    pagination,
+    loading,
+    filters: activeFilters,
+    setFilters: setActiveFilters,
+    setPage,
+    refetch: fetchStudents
+  } = usePaginatedApi(getStudentsList, {
+    initialLimit: 10,
+    initialFilters: {
+      student_name: '',
+      school_name: '',
+      standard: ''
+    }
+  })
+
   const [formLoading, setFormLoading] = useState(false)
-  const [filters, setFilters] = useState({
+  const [localFilters, setLocalFilters] = useState({
     student_name: '',
     school_name: '',
     standard: ''
@@ -17,34 +34,11 @@ export default function Students() {
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  useEffect(() => {
-    fetchStudents()
-  }, [])
-
-  const fetchStudents = async () => {
-    setLoading(true)
-    try {
-      const params = new URLSearchParams()
-      if (filters.student_name) params.append('student_name', filters.student_name)
-      if (filters.school_name) params.append('school_name', filters.school_name)
-      if (filters.standard) params.append('standard', filters.standard)
-      const res = await api.get('/content/students', { params })
-      const data = res.data?.data || res.data || []
-      setStudents(data)
-      setError('')
-    } catch (err) {
-      setError('Failed to fetch students')
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this student?')) return
     try {
       await api.delete(`/content/students/${id}`)
-      setStudents(students.filter(s => s.id !== id))
+      await fetchStudents()
       setSuccess('Student deleted successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -92,16 +86,16 @@ export default function Students() {
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target
-    setFilters(prev => ({ ...prev, [name]: value }))
+    setLocalFilters(prev => ({ ...prev, [name]: value }))
   }
 
   const applyFilters = () => {
-    fetchStudents()
+    setActiveFilters({ ...localFilters })
   }
 
   const resetFilters = () => {
-    setFilters({ student_name: '', school_name: '', standard: '' })
-    fetchStudents()
+    setLocalFilters({ student_name: '', school_name: '', standard: '' })
+    setActiveFilters({ student_name: '', school_name: '', standard: '' })
   }
 
   return (
@@ -137,7 +131,7 @@ export default function Students() {
             <input
               type="text"
               name="student_name"
-              value={filters.student_name}
+              value={localFilters.student_name}
               onChange={handleFilterChange}
               placeholder="Search by student name"
               className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
@@ -148,7 +142,7 @@ export default function Students() {
             <input
               type="text"
               name="school_name"
-              value={filters.school_name}
+              value={localFilters.school_name}
               onChange={handleFilterChange}
               placeholder="Search by school name"
               className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
@@ -159,7 +153,7 @@ export default function Students() {
             <input
               type="text"
               name="standard"
-              value={filters.standard}
+              value={localFilters.standard}
               onChange={handleFilterChange}
               placeholder="Search by standard"
               className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
@@ -281,6 +275,8 @@ export default function Students() {
           ))}
         </div>
       )}
+
+      <Pagination pagination={pagination} onPageChange={setPage} loading={loading} />
 
       <Modal
         isOpen={isModalOpen}

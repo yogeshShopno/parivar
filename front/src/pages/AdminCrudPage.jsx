@@ -1,7 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
 import api, { assetUrl } from '../lib/api'
 import Modal from '../components/Modal'
+import Pagination from '../components/Pagination'
+import usePaginatedApi from '../hooks/usePaginatedApi'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 
@@ -10,9 +12,18 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
     return fields.reduce((acc, field) => ({ ...acc, [field.name]: field.defaultValue ?? '' }), {})
   }, [fields])
 
-  const [rows, setRows] = useState([])
-  const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(false)
+  const fetcher = useCallback((params) => api.get(endpoint, { params }), [endpoint])
+
+  const {
+    data: rows,
+    pagination,
+    loading,
+    search,
+    setSearch,
+    setPage,
+    refetch: fetchRows
+  } = usePaginatedApi(fetcher, { initialLimit: 10 })
+
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -24,28 +35,6 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
   useEffect(() => {
     setFormData(emptyForm)
   }, [emptyForm])
-
-  useEffect(() => {
-    fetchRows()
-  }, [endpoint])
-
-  
-  useEffect(() => {
-    fetchRows()
-  }, [endpoint])
-
-  const fetchRows = async () => {
-    setLoading(true)
-    try {
-      const res = await api.get(endpoint)
-      setRows(res.data?.data || res.data || [])
-      setError('')
-    } catch (err) {
-      setError(`Failed to load ${title.toLowerCase()}`)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const openCreate = () => {
     setSelected(null)
@@ -141,18 +130,13 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
     if (!window.confirm(`Delete ${getRowTitle?.(row) || row.title || row.name || 'this record'}?`)) return
     try {
       await api.delete(`${endpoint}/${row.id}`)
-      setRows(rows.filter((item) => item.id !== row.id))
+      await fetchRows()
       setSuccess(`${title} deleted successfully`)
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(err.response?.data?.message || `Failed to delete ${title.toLowerCase()}`)
     }
   }
-
-  const filteredRows = rows.filter((row) => {
-    const text = JSON.stringify(row).toLowerCase()
-    return text.includes(search.toLowerCase())
-  })
 
   return (
     <div className="space-y-6 animate-slide-up select-none text-text">
@@ -199,7 +183,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredRows.map((row) => (
+                {rows.map((row) => (
                   <tr key={row.id} className="hover:bg-surface-secondary/40 text-sm text-text">
                     {columns.map((column) => (
                       <td key={column.key} className="p-4 max-w-md">
@@ -222,7 +206,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                     </td>
                   </tr>
                 ))}
-                {filteredRows.length === 0 && (
+                {rows.length === 0 && (
                   <tr>
                     <td colSpan={columns.length + 1} className="p-12 text-center text-sm text-text-secondary">No records found</td>
                   </tr>
@@ -230,6 +214,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
               </tbody>
             </table>
           </div>
+          <Pagination pagination={pagination} onPageChange={setPage} loading={loading} />
         </div>
       )}
 

@@ -1,65 +1,41 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Edit2, Plus, RefreshCw, Search, Sparkles } from 'lucide-react'
-import api from '../lib/api'
+import api, { getCommitteeMembersList } from '../lib/api'
 import { normalizeRoles, unwrapApiData } from '../lib/roles'
 import Modal from '../components/Modal'
 import CommitteeMemberForm from '../components/CommitteeMemberForm'
+import Pagination from '../components/Pagination'
+import usePaginatedApi from '../hooks/usePaginatedApi'
 
 export default function CommitteeMembers() {
-  const [users, setUsers] = useState([])
+  const {
+    data: users,
+    pagination,
+    loading,
+    search,
+    setSearch,
+    setPage,
+    refetch: fetchUsers
+  } = usePaginatedApi(getCommitteeMembersList, { initialLimit: 10 })
+
   const [roles, setRoles] = useState([])
-  const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [selected, setSelected] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const requestIdRef = useRef(0)
-
-  const fetchUsers = useCallback(async (options = {}) => {
-    const requestId = requestIdRef.current + 1
-    requestIdRef.current = requestId
-    setLoading(true)
-    try {
-      const res = await api.get('/users', {
-        params: { is_committee: true },
-        signal: options.signal
-      })
-      if (requestId !== requestIdRef.current) return
-      setUsers(res.data?.data || res.data || [])
-      setError('')
-    } catch (err) {
-      if (err.code === 'ERR_CANCELED') return
-      const timeoutMessage = err.code === 'ETIMEDOUT' || err.code === 'ECONNABORTED'
-        ? 'Committee request timed out. Please check the backend connection and try again.'
-        : 'Failed to load committee members'
-      setError(timeoutMessage)
-    } finally {
-      if (requestId === requestIdRef.current && !options.signal?.aborted) {
-        setLoading(false)
-      }
-    }
-  }, [])
-
-  const fetchRoles = useCallback(async () => {
-    try {
-      const res = await api.get('/roles')
-      setRoles(normalizeRoles(unwrapApiData(res)))
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load roles')
-    }
-  }, [])
 
   useEffect(() => {
-    const controller = new AbortController()
-    fetchUsers({ signal: controller.signal })
-    fetchRoles()
-
-    return () => {
-      controller.abort()
+    const fetchRoles = async () => {
+      try {
+        const res = await api.get('/roles')
+        setRoles(normalizeRoles(unwrapApiData(res)))
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to load roles')
+      }
     }
-  }, [fetchUsers])
+    fetchRoles()
+  }, [])
 
   const handleSubmit = async (formData) => {
     setSaving(true)
@@ -81,7 +57,7 @@ export default function CommitteeMembers() {
     }
   }
 
-  const filtered = users.filter((user) => JSON.stringify(user).toLowerCase().includes(search.toLowerCase()))
+  const filtered = users
 
   const openCreate = () => {
     setSelected(null)
@@ -91,6 +67,11 @@ export default function CommitteeMembers() {
   const openEdit = (user) => {
     setSelected(user)
     setIsModalOpen(true)
+  }
+
+  const handlePageChange = (pageNumber) => {
+    const nextPage = Number(pageNumber) || 1
+    setPage(nextPage)
   }
 
   return (
@@ -170,6 +151,7 @@ export default function CommitteeMembers() {
             </tbody>
           </table>
         </div>
+        <Pagination pagination={pagination} onPageChange={handlePageChange} loading={loading} />
       </div>
 
       <Modal isOpen={isModalOpen} title={selected ? 'Edit Committee Member' : 'Add Committee Member'} onClose={() => setIsModalOpen(false)}>

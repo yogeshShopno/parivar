@@ -1,69 +1,42 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Edit2, Trash2, Plus, Search, RefreshCw, Sparkles, Users as UsersIcon } from 'lucide-react'
-import api from '../lib/api'
+import api, { getUsersList } from '../lib/api'
 import { normalizeRoles, unwrapApiData } from '../lib/roles'
 import Modal from '../components/Modal'
 import UserForm from '../components/UserForm'
+import Pagination from '../components/Pagination'
+import usePaginatedApi from '../hooks/usePaginatedApi'
 
 export default function Users() {
-  const [users, setUsers] = useState([])
+  const {
+    data: users,
+    pagination,
+    loading,
+    search: searchQuery,
+    setSearch: setSearchQuery,
+    filters,
+    setFilters,
+    setPage,
+    refetch: fetchUsers
+  } = usePaginatedApi(getUsersList, {
+    initialLimit: 10,
+    initialFilters: {
+      gender: '',
+      blood_group: '',
+      is_committee: ''
+    }
+  })
+
+  const filterGender = filters.gender || ''
+  const filterBloodGroup = filters.blood_group || ''
+  const filterCommittee = filters.is_committee || ''
+
   const [roles, setRoles] = useState([])
-  const [loading, setLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState(null)
   const [formLoading, setFormLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-
-  // Advanced search & filter states
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filterGender, setFilterGender] = useState('')
-  const [filterBloodGroup, setFilterBloodGroup] = useState('')
-  const [filterCommittee, setFilterCommittee] = useState('')
-  const requestIdRef = useRef(0)
-
-  const fetchUsers = useCallback(async (options = {}) => {
-    const requestId = requestIdRef.current + 1
-    requestIdRef.current = requestId
-    setLoading(true)
-    try {
-      const nextSearch = options.searchQuery ?? searchQuery
-      const nextGender = options.filterGender ?? filterGender
-      const nextBloodGroup = options.filterBloodGroup ?? filterBloodGroup
-      const nextCommittee = options.filterCommittee ?? filterCommittee
-      const params = {}
-      if (nextSearch) params.search = nextSearch
-      if (nextGender) params.gender = nextGender
-      if (nextBloodGroup) params.blood_group = nextBloodGroup
-      if (nextCommittee) params.is_committee = nextCommittee
-
-      const res = await api.get('/users', { params, signal: options.signal })
-      if (requestId !== requestIdRef.current) return
-      const data = res.data?.data || res.data || []
-      setUsers(data)
-      setError('')
-    } catch (err) {
-      if (err.code === 'ERR_CANCELED') return
-      const timeoutMessage = err.code === 'ETIMEDOUT' || err.code === 'ECONNABORTED'
-        ? 'Members request timed out. Please check the backend connection and try again.'
-        : 'Failed to load members from server'
-      setError(timeoutMessage)
-      console.error(err)
-    } finally {
-      if (requestId === requestIdRef.current && !options.signal?.aborted) {
-        setLoading(false)
-      }
-    }
-  }, [filterBloodGroup, filterCommittee, filterGender, searchQuery])
-
-  useEffect(() => {
-    const controller = new AbortController()
-    fetchUsers({ signal: controller.signal })
-
-    return () => {
-      controller.abort()
-    }
-  }, [fetchUsers])
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -81,7 +54,6 @@ export default function Users() {
   // Handle Search submit
   const handleSearchSubmit = (e) => {
     e.preventDefault()
-    fetchUsers()
   }
 
   // Create/Update user
@@ -117,7 +89,7 @@ export default function Users() {
     if (!window.confirm('Are you sure you want to delete this family member? This action is permanent.')) return
     try {
       await api.delete(`/users/${userId}`)
-      setUsers(users.filter(u => u.id !== userId))
+      await fetchUsers()
       setSuccess('Member deleted successfully')
       setTimeout(() => setSuccess(''), 4000)
     } catch (err) {
@@ -144,15 +116,17 @@ export default function Users() {
 
   const clearFilters = () => {
     setSearchQuery('')
-    setFilterGender('')
-    setFilterBloodGroup('')
-    setFilterCommittee('')
-    fetchUsers({
-      searchQuery: '',
-      filterGender: '',
-      filterBloodGroup: '',
-      filterCommittee: ''
+    setFilters({
+      gender: '',
+      blood_group: '',
+      is_committee: ''
     })
+  }
+
+  const handlePageChange = (pageNumber) => {
+    console.log('Changing to page:', pageNumber)
+    const nextPage = Number(pageNumber) || 1
+    setPage(nextPage)
   }
 
   return (
@@ -215,7 +189,7 @@ export default function Users() {
           <div>
             <select
               value={filterGender}
-              onChange={(e) => setFilterGender(e.target.value)}
+              onChange={(e) => setFilters(current => ({ ...current, gender: e.target.value }))}
               className="w-full bg-input-bg text-text border border-input-border rounded-xl py-2.5 px-3.5 text-sm outline-none focus:border-primary/50 transition-all cursor-pointer"
             >
               <option value="" className="bg-surface text-text">All Genders</option>
@@ -229,7 +203,7 @@ export default function Users() {
           <div>
             <select
               value={filterBloodGroup}
-              onChange={(e) => setFilterBloodGroup(e.target.value)}
+              onChange={(e) => setFilters(current => ({ ...current, blood_group: e.target.value }))}
               className="w-full bg-input-bg text-text border border-input-border rounded-xl py-2.5 px-3.5 text-sm outline-none focus:border-primary/50 transition-all cursor-pointer"
             >
               <option value="" className="bg-surface text-text">All Blood Groups</option>
@@ -243,7 +217,7 @@ export default function Users() {
           <div>
             <select
               value={filterCommittee}
-              onChange={(e) => setFilterCommittee(e.target.value)}
+              onChange={(e) => setFilters(current => ({ ...current, is_committee: e.target.value }))}
               className="w-full bg-input-bg text-text border border-input-border rounded-xl py-2.5 px-3.5 text-sm outline-none focus:border-primary/50 transition-all cursor-pointer"
             >
               <option value="" className="bg-surface text-text">All Roles</option>
@@ -359,7 +333,8 @@ export default function Users() {
               </tbody>
             </table>
           </div>
-        </div>
+        <Pagination  pagination={pagination}  onPageChange={handlePageChange} loading={loading} />
+      </div>
       )}
 
       {/* Editor Modal overlay */}

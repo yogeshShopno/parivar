@@ -1,7 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
-import api, { assetUrl } from '../lib/api'
+import api, { assetUrl, getEventsList } from '../lib/api'
 import Modal from '../components/Modal'
+import Pagination from '../components/Pagination'
+import usePaginatedApi from '../hooks/usePaginatedApi'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 
@@ -20,12 +22,22 @@ const defaultForm = {
 }
 
 export default function Events() {
-  const [rows, setRows] = useState([])
-  const [loading, setLoading] = useState(false)
+  const {
+    data: rows,
+    pagination,
+    loading,
+    search,
+    setPage,
+    setSearch,
+    refetch: fetchRows
+  } = usePaginatedApi(getEventsList, {
+    initialLimit: 10,
+    sortBy: 'event_date',
+    sortOrder: 'asc'
+  })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [search, setSearch] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedId, setSelectedId] = useState('')
   const [existingImage, setExistingImage] = useState('')
@@ -44,22 +56,8 @@ export default function Events() {
     }
   }
 
-  const fetchRows = async () => {
-    setLoading(true)
-    try {
-      const res = await api.get(endpoint)
-      setRows(res.data?.data || res.data || [])
-      setError('')
-    } catch (err) {
-      setError('Failed to load events')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
     fetchCategories()
-    fetchRows()
   }, [])
 
   const resetForm = () => {
@@ -154,18 +152,13 @@ export default function Events() {
     if (!window.confirm(`Delete ${row.title || row.event_name || 'this event'}?`)) return
     try {
       await api.delete(`${endpoint}/${id}`)
-      setRows(rows.filter((item) => (item.id || item._id) !== id))
+      await fetchRows()
       setSuccess('Event deleted successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to delete event')
     }
   }
-
-  const filteredRows = rows.filter((row) => {
-    const text = JSON.stringify(row).toLowerCase()
-    return text.includes(search.toLowerCase())
-  })
 
   return (
     <div className="space-y-6 animate-slide-up select-none text-text">
@@ -216,7 +209,7 @@ export default function Events() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredRows.map((row) => (
+                {rows.map((row) => (
                   <tr key={row.id || row._id} className="hover:bg-surface-secondary/40 text-sm text-text">
                     <td className="p-4 max-w-[120px]">
                       {row.image ? (
@@ -243,7 +236,7 @@ export default function Events() {
                     </td>
                   </tr>
                 ))}
-                {filteredRows.length === 0 && (
+                {rows.length === 0 && (
                   <tr>
                     <td colSpan={5} className="p-12 text-center text-sm text-text-secondary">No events found</td>
                   </tr>
@@ -251,6 +244,7 @@ export default function Events() {
               </tbody>
             </table>
           </div>
+          <Pagination pagination={pagination} onPageChange={setPage} loading={loading} />
         </div>
       )}
 

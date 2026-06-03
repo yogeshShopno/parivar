@@ -1,17 +1,26 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
-import api, { assetUrl } from '../lib/api'
+import api, { assetUrl, getGalleryList } from '../lib/api'
 import Modal from '../components/Modal'
+import Pagination from '../components/Pagination'
+import usePaginatedApi from '../hooks/usePaginatedApi'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 
 const createPreviewUrl = (file) => URL.createObjectURL(file)
 
 export default function GalleryPage() {
-  const [rows, setRows] = useState([])
+  const {
+    data: rows,
+    pagination,
+    loading,
+    search,
+    setSearch,
+    setPage,
+    refetch: fetchGallery
+  } = usePaginatedApi(getGalleryList, { initialLimit: 12 })
+
   const [categories, setCategories] = useState([])
-  const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -36,7 +45,8 @@ export default function GalleryPage() {
   }), [])
 
   useEffect(() => {
-    fetchData()
+    fetchGallery()
+    fetchCategories()
   }, [])
 
   useEffect(() => {
@@ -57,20 +67,12 @@ export default function GalleryPage() {
     }
   }, [filePreviews])
 
-  const fetchData = async () => {
-    setLoading(true)
+  const fetchCategories = async () => {
     try {
-      const [galleryRes, categoryRes] = await Promise.all([
-        api.get('/gallery'),
-        api.get('/gallery-categories')
-      ])
-      setRows(galleryRes.data?.data || [])
+      const categoryRes = await api.get('/gallery-categories')
       setCategories(categoryRes.data?.data || [])
-      setError('')
     } catch (err) {
-      setError('Failed to load gallery data')
-    } finally {
-      setLoading(false)
+      // ignore category load failure for now
     }
   }
 
@@ -161,7 +163,7 @@ export default function GalleryPage() {
       setSuccess('Gallery saved successfully')
       setIsModalOpen(false)
       setSelected(null)
-      await fetchData()
+      await fetchGallery()
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save gallery')
@@ -174,7 +176,7 @@ export default function GalleryPage() {
     if (!window.confirm(`Delete gallery item?`)) return
     try {
       await api.delete(`/gallery/${row.id}`)
-      setRows(rows.filter((item) => item.id !== row.id))
+      await fetchGallery()
       setSuccess('Gallery deleted successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -182,19 +184,14 @@ export default function GalleryPage() {
     }
   }
 
-  const fetchCategories = async () => {
-    try {
-      const res = await api.get('/gallery-categories')
-      setCategories(res.data?.data || [])
-    } catch (err) {
-      // ignore category load failure for now
-    }
-  }
-
-  const filteredRows = rows.filter((row) => {
-    const text = JSON.stringify(row).toLowerCase()
-    return text.includes(search.toLowerCase())
-  })
+  // const fetchCategories = async () => {
+  //   try {
+  //     const res = await api.get('/gallery-categories')
+  //     setCategories(res.data?.data || [])
+  //   } catch (err) {
+  //     setError('Failed to load gallery categories')
+  //   }
+  // }
 
   return (
     <div className="space-y-6 animate-slide-up select-none text-text">
@@ -204,7 +201,7 @@ export default function GalleryPage() {
           
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <button onClick={fetchData} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
+          <button onClick={() => { fetchGallery(); fetchCategories() }} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
             <RefreshCw className="w-4 h-4" />
           </button>
           <div className="relative flex-1 sm:w-64">
@@ -245,7 +242,7 @@ export default function GalleryPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredRows.map((row) => (
+                {rows.map((row) => (
                   <tr key={row.id} className="hover:bg-surface-secondary/40 text-sm text-text">
                     <td className="p-4 max-w-[100px]">
                       {row.images?.[0] ? (
@@ -269,7 +266,7 @@ export default function GalleryPage() {
                     </td>
                   </tr>
                 ))}
-                {filteredRows.length === 0 && (
+                {rows.length === 0 && (
                   <tr>
                     <td colSpan="5" className="p-12 text-center text-sm text-text-secondary">No gallery items found</td>
                   </tr>
@@ -277,6 +274,7 @@ export default function GalleryPage() {
               </tbody>
             </table>
           </div>
+          <Pagination pagination={pagination} onPageChange={setPage} loading={loading} />
         </div>
       )}
 

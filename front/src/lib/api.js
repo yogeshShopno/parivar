@@ -59,4 +59,14 @@ const setupInterceptors = (axiosInstance) => {
 setupInterceptors(api)
 setupInterceptors(memberApi)
 
+export const getEventsList = (params = {}) => api.get('/events', { params })
+export const getUsersList = (params = {}) => api.get('/users', { params })
+export const getStudentsList = (params = {}) => api.get('/content/students', { params })
+export const getBusinessesList = (params = {}) => api.get('/businesses', { params })
+export const getPostsList = (params = {}) => api.get('/posts', { params })
+export const getNewsList = (params = {}) => api.get('/news', { params })
+export const getDonationsList = (params = {}) => api.get('/donations', { params })
+export const getCommitteeMembersList = (params = {}) => api.get('/users', { params: { is_committee: true, ...params } })
+export const getGalleryList = (params = {}) => api.get('/gallery', { params })
+
 export default api
