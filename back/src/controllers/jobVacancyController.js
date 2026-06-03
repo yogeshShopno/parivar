@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const JobVacancy = require('../models/jobVacancy');
 const { apiResponse } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const requestData = (req) => ({ ...req.query, ...req.body });
 
@@ -32,12 +33,14 @@ const extractVacancyData = (data) => {
 
 const getJobVacancies = async (req, res) => {
   try {
-    const query = buildSearchQuery(requestData(req));
+    const { data: jobVacancies, pagination } = await queryHelper(JobVacancy, requestData(req), {
+      searchFields: ['title', 'company_name', 'location', 'description', 'qualifications'],
+      filterFields: ['job_type', 'status'],
+      defaultSort: { createdAt: -1 },
+      lean: false
+    });
 
-
-    const jobVacancies = await JobVacancy.find(query).sort({ createdAt: -1 });
-
-    return apiResponse(res, 200, "Job vacancies retrieved successfully", jobVacancies);
+    return apiResponse(res, 200, "Job vacancies retrieved successfully", jobVacancies, pagination);
 
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving Vacancies', { error: error.message });

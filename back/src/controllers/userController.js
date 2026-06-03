@@ -1,5 +1,6 @@
 const User = require('../models/userModels');
 const jwt = require('jsonwebtoken');
+const queryHelper = require('../utils/queryHelper');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfamilykey';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '365d';
@@ -178,23 +179,21 @@ const getUsers = async (req, res) => {
     if (country_id) query.country_id = country_id;
     if (state_id) query.state_id = state_id;
     if (city_id) query.city_id = city_id;
-    if (search) {
-      query.$or = [
-        { first_name: new RegExp(search, 'i') },
-        { middle_name: new RegExp(search, 'i') },
-        { last_name: new RegExp(search, 'i') },
-        { number: new RegExp(search, 'i') },
-        { email: new RegExp(search, 'i') }
-      ];
-    }
-
-
-    const users = await User.find(query).select('-password').sort({ createdAt: -1 });
+    const { data: users, pagination } = await queryHelper(User, requestData(req), {
+      baseQuery: query,
+      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email'],
+      filterFields: ['parent_member_id', 'is_committee', 'country_id', 'state_id', 'city_id', 'gender', 'blood_group', 'relation', 'status'],
+      select: '-password',
+      defaultSort: { createdAt: -1 },
+      lean: false
+    });
 
 
     res.status(200).json({
+      ...(pagination ? { status: 200 } : {}),
       message: 'Users retrieved successfully',
-      data: users
+      data: users,
+      ...(pagination ? { pagination } : {})
     });
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving users', error: error.message });

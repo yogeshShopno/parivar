@@ -3,6 +3,7 @@ const Role = require('../models/roleModel');
 const User = require('../models/userModels');
 const { ACTIONS, ALL_PERMISSION_KEYS, PERMISSION_MODULES, PERMISSIONS } = require('../config/permissions');
 const { apiResponse } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const sanitizePermissions = (permissions = []) => {
   const input = Array.isArray(permissions) ? permissions : String(permissions).split(',');
@@ -34,8 +35,12 @@ const getPermissionOptions = async (req, res) => {
 
 const getRoles = async (req, res) => {
   try {
-    const roles = await Role.find({}).sort({ name: 1 }).lean();
-    return apiResponse(res, 200, 'Roles retrieved successfully', roles.map(formatRole));
+    const { data, pagination } = await queryHelper(Role, req.query, {
+      searchFields: ['name', 'permissions'],
+      filterFields: ['name', 'status'],
+      defaultSort: { name: 1 }
+    });
+    return apiResponse(res, 200, 'Roles retrieved successfully', data.map(formatRole), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving roles', { error: error.message });
   }

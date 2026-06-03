@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Donation = require('../models/donationModel');
 const { apiResponse } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const requestData = (req) => ({
   ...req.query,
@@ -11,13 +12,10 @@ const requestData = (req) => ({
 
 const getDonations = async (req, res) => {
   try {
-    const { donator_name, location, donation_purpose } = requestData(req);
-    const query = {};
-    if (donator_name) query.donator_name = new RegExp(donator_name, 'i');
-    if (location) query.location = new RegExp(location, 'i');
-    if (donation_purpose) query.donation_purpose = new RegExp(donation_purpose, 'i');
-
-    const donations = await Donation.find(query).sort({ _id: -1 }).lean();
+    const { data: donations, pagination } = await queryHelper(Donation, requestData(req), {
+      searchFields: ['donator_name', 'location', 'donation_purpose', 'whose_possession'],
+      filterFields: ['donator_name', 'location', 'donation_purpose', 'whose_possession', 'status']
+    });
 
     return res.status(200).json({
       status: 200,
@@ -31,7 +29,8 @@ const getDonations = async (req, res) => {
         date: d.date || '',
         whose_possession: d.whose_possession || 'direct',
         status: Number(d.status ?? 1)
-      }))
+      })),
+      ...(pagination ? { pagination } : {})
     });
   } catch (error) {
     return res.status(500).json({
@@ -204,13 +203,10 @@ const deleteDonation = async (req, res) => {
 
 const adminGetDonations = async (req, res) => {
   try {
-    const { donator_name, location, donation_purpose } = req.query;
-    const query = {};
-    if (donator_name) query.donator_name = new RegExp(donator_name, 'i');
-    if (location) query.location = new RegExp(location, 'i');
-    if (donation_purpose) query.donation_purpose = new RegExp(donation_purpose, 'i');
-
-    const donations = await Donation.find(query).sort({ _id: -1 }).lean();
+    const { data: donations, pagination } = await queryHelper(Donation, req.query, {
+      searchFields: ['donator_name', 'location', 'donation_purpose', 'whose_possession'],
+      filterFields: ['donator_name', 'location', 'donation_purpose', 'whose_possession', 'status']
+    });
 
     return res.status(200).json({
       status: 200,
@@ -224,7 +220,8 @@ const adminGetDonations = async (req, res) => {
         date: d.date || '',
         whose_possession: d.whose_possession || 'direct',
         status: Number(d.status ?? 1)
-      }))
+      })),
+      ...(pagination ? { pagination } : {})
     });
   } catch (error) {
     return res.status(500).json({

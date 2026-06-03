@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
 const { getRolePermissions } = require('../middleware/auth');
+const queryHelper = require('../utils/queryHelper');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfamilykey';
 
@@ -263,17 +264,16 @@ const getStats = async (req, res) => {
 // --- Users Management ---
 const getUsers = async (req, res) => {
   try {
-    const { search, gender, blood_group, is_committee } = req.query;
     const birthday = 'birthday' in req.query;
     const query = {};
     const requestPermissions = getRolePermissions(req.user);
     const canListMembers = requestPermissions.includes('members.list') || requestPermissions.includes('users.manage');
     const canListCommittee = requestPermissions.includes('committee.list') || requestPermissions.includes('committee.manage');
 
-    if (gender) query.gender = gender;
-    if (blood_group) query.blood_group = blood_group;
-    if (is_committee !== undefined) {
-      query.is_committee = is_committee === 'true';
+    if (req.query.gender) query.gender = req.query.gender;
+    if (req.query.blood_group) query.blood_group = req.query.blood_group;
+    if (req.query.is_committee !== undefined) {
+      query.is_committee = req.query.is_committee === 'true';
     }
     if (!canListMembers && canListCommittee) {
       query.is_committee = true;
@@ -283,20 +283,15 @@ const getUsers = async (req, res) => {
       query.dob = { $exists: true };
     }
 
-    if (search) {
-      query.$or = [
-        { first_name: new RegExp(search, 'i') },
-        { middle_name: new RegExp(search, 'i') },
-        { last_name: new RegExp(search, 'i') },
-        { number: new RegExp(search, 'i') },
-        { email: new RegExp(search, 'i') }
-      ];
-    }
-
-    const users = await User.find(query)
-      .select(birthday ? 'first_name middle_name last_name number dob' : '-password')
-      .populate(birthday ? '' : 'role_id')
-      .sort({ createdAt: -1 });
+    const { data: users, pagination } = await queryHelper(User, req.query, {
+      baseQuery: query,
+      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email'],
+      filterFields: ['gender', 'blood_group', 'is_committee', 'committee_role', 'role_id', 'status'],
+      select: birthday ? 'first_name middle_name last_name number dob' : '-password',
+      populate: birthday ? '' : 'role_id',
+      defaultSort: { createdAt: -1 },
+      lean: false
+    });
 
     if (birthday) {
       const formatted = users.map(u => ({
@@ -304,7 +299,7 @@ const getUsers = async (req, res) => {
         number: u.number,
         dob: u.dob || null
       }));
-      return apiResponse(res, 200, 'Users birthday list retrieved successfully', formatted);
+      return apiResponse(res, 200, 'Users birthday list retrieved successfully', formatted, pagination);
     }
     // Map backend user to the fields expected by standard layout or user forms
     const formatted = users.map(u => ({
@@ -332,7 +327,7 @@ const getUsers = async (req, res) => {
       role: u.is_committee ? 'admin' : 'user'
     }));
 
-    return apiResponse(res, 200, 'Users retrieved successfully', formatted);
+    return apiResponse(res, 200, 'Users retrieved successfully', formatted, pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving users', { error: error.message });
   }
@@ -553,13 +548,10 @@ const deleteUser = async (req, res) => {
 
 const getStudents = async (req, res) => {
   try {
-    const { standard, student_name, school_name } = req.query;
-    const query = {};
-    if (standard) query.standard = new RegExp(standard, 'i');
-    if (student_name) query.student_name = new RegExp(student_name, 'i');
-    if (school_name) query.school_name = new RegExp(school_name, 'i');
-
-const students = await Student.find(query).sort({ _id: -1 }).lean();
+    const { data: students, pagination } = await queryHelper(Student, req.query, {
+      searchFields: ['surname', 'student_name', 'father_name', 'school_name', 'standard', 'mobile_number'],
+      filterFields: ['standard', 'student_name', 'school_name', 'status']
+    });
     return apiResponse(res, 200, 'Students retrieved successfully', students.map(s => ({
       id: s.id || String(s._id),
       surname: s.surname || '',
@@ -572,7 +564,7 @@ const students = await Student.find(query).sort({ _id: -1 }).lean();
       mobile_number_2: s.mobile_number_2 || '',
       result_image: publicUrl(req, s.result_image || ''),
       status: Number(s.status ?? 1)
-    })));
+    })), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving students', { error: error.message });
   }

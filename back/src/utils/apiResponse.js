@@ -11,12 +11,18 @@ const publicUrl = (req, value) => {
   return `${req.protocol}://${req.get('host')}${normalized}`;
 };
 
-const apiResponse = (res, status, message, data = []) => {
-  return res.status(status).json({
+const apiResponse = (res, status, message, data = [], pagination) => {
+  const payload = {
     status,
     message,
     data
-  });
+  };
+
+  if (pagination) {
+    payload.pagination = pagination;
+  }
+
+  return res.status(status).json(payload);
 };
 
 const fullName = (member = {}) => {

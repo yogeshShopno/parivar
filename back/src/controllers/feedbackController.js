@@ -1,5 +1,6 @@
 const Feedback = require('../models/FeedbackModel');
 const { apiResponse, memberPublicId } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const findFeedbackByRequestId = (id) =>
     Feedback.findOne({
@@ -23,9 +24,13 @@ const getAllFeedback = async (req, res) => {
         const currentMemberId = memberPublicId(req.user || {});
 
         const query = isAdmin ? {} : { member_id: currentMemberId };
-        const feedbacks = await Feedback.find(query).sort({ _id: -1 }).lean();
+        const { data: feedbacks, pagination } = await queryHelper(Feedback, req.query, {
+            baseQuery: query,
+            searchFields: ['name', 'email', 'message'],
+            filterFields: ['member_id']
+        });
 
-        return apiResponse(res, 200, 'Feedbacks retrieved successfully', feedbacks.map(formatFeedback));
+        return apiResponse(res, 200, 'Feedbacks retrieved successfully', feedbacks.map(formatFeedback), pagination);
     } catch (error) {
         return apiResponse(res, 500, 'Error retrieving feedbacks', { error: error.message });
     }

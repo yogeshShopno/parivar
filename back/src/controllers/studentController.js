@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Student = require('../models/studentModel');
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const requestData = (req) => ({
   ...req.query,
@@ -9,13 +10,10 @@ const requestData = (req) => ({
 
 const getStudents = async (req, res) => {
   try {
-    const { standard, student_name, school_name } = requestData(req);
-    const query = {};
-    if (standard) query.standard = new RegExp(standard, 'i');
-    if (student_name) query.student_name = new RegExp(student_name, 'i');
-    if (school_name) query.school_name = new RegExp(school_name, 'i');
-    
-    const students = await Student.find(query).sort({ _id: -1 }).lean();
+    const { data: students, pagination } = await queryHelper(Student, requestData(req), {
+      searchFields: ['surname', 'student_name', 'father_name', 'school_name', 'standard', 'mobile_number'],
+      filterFields: ['standard', 'student_name', 'school_name', 'status']
+    });
     
     return res.status(200).json({
       status: 200,
@@ -32,7 +30,8 @@ const getStudents = async (req, res) => {
         mobile_number_2: s.mobile_number_2 || '',
         result_image: publicUrl(req, s.result_image || ''),
         status: Number(s.status ?? 1)
-      }))
+      })),
+      ...(pagination ? { pagination } : {})
     });
   } catch (error) {
     return res.status(500).json({

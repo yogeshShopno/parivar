@@ -6,6 +6,7 @@ const State = require('../models/stateModel');
 const City = require('../models/cityModel');
 const { getRolePermissions } = require('../middleware/auth');
 const { apiResponse, memberPublicId, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const requestData = (req) => ({
   ...req.query,
@@ -50,8 +51,11 @@ image: publicUrl(req, b.image || b.image || ''),
 
 const getBusinesses = async (req, res) => {
   try {
-    const [businesses, categories] = await Promise.all([
-      Business.find({}).sort({ _id: -1 }).lean(),
+    const [{ data: businesses, pagination }, categories] = await Promise.all([
+      queryHelper(Business, req.query, {
+        searchFields: ['business_name', 'number', 'whatsapp_number', 'GST_number', 'email', 'address', 'about_us', 'website'],
+        filterFields: ['member_id', 'business_category_id', 'country_id', 'state_id', 'city_id', 'status']
+      }),
       BusinessCategory.find({}).lean()
     ]);
 
@@ -64,7 +68,7 @@ const getBusinesses = async (req, res) => {
     return apiResponse(res, 200, 'Businesses retrieved successfully', businesses.map(b => {
       const categoryName = categoryMap.get(String(b.business_category_id)) || 'Community Enterprise';
       return formatBusiness(req, b, categoryName);
-    }));
+    }), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving businesses', { error: error.message });
   }
@@ -98,13 +102,17 @@ const getBusinessById = async (req, res) => {
 const getBusinessCategoryList = async (req, res) => {
   try {
     const query = req.user ? {} : {};
-    const categories = await BusinessCategory.find(query).sort({ _id: -1 }).lean();
+    const { data: categories, pagination } = await queryHelper(BusinessCategory, req.query, {
+      baseQuery: query,
+      searchFields: ['business', 'name'],
+      filterFields: ['business', 'name']
+    });
     const data = categories.map((category) => ({
       id: String(category._id),
       business: category.business || category.name || ''
     }));
 
-    return apiResponse(res, 200, 'Business category data fetch successfully', data);
+    return apiResponse(res, 200, 'Business category data fetch successfully', data, pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving business categories', { error: error.message });
   }

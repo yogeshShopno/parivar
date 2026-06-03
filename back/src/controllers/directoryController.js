@@ -3,6 +3,7 @@ const Country = require('../models/countryModel');
 const State = require('../models/stateModel');
 const City = require('../models/cityModel');
 const { apiResponse,  memberPublicId, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const requestData = (req) => ({
   ...req.query,
@@ -69,10 +70,15 @@ const getMembers = async (req, res) => {
       ]
     };
 
-    const members = await User.find(query).select('-password').sort({ _id: -1 }).lean();
+    const { data: members, pagination } = await queryHelper(User, req.query, {
+      baseQuery: query,
+      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email', 'family_code', 'address'],
+      filterFields: ['country_id', 'state_id', 'city_id', 'district_id', 'taluka_id', 'village_id'],
+      select: '-password'
+    });
     const maps = await locationMaps(req);
 
-    return apiResponse(res, 200, 'Memebers Data fetch successful', members.map((member) => memberRow(req, member, maps)));
+    return apiResponse(res, 200, 'Memebers Data fetch successful', members.map((member) => memberRow(req, member, maps)), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving directory', { error: error.message });
   }
@@ -97,16 +103,21 @@ const getFamilyMembers = async (req, res) => {
       return apiResponse(res, 401, 'Invalid member');
     }
 
-    const family = await User.find({
-      $and: [
-        {
-          $or: [
-            { parent_id: String(member_id) },
-            { parent_member_id: String(member_id) }
-          ]
-        }
-      ]
-    }).select('-password').sort({ _id: -1 }).lean();
+    const { data: family, pagination } = await queryHelper(User, req.query, {
+      baseQuery: {
+        $and: [
+          {
+            $or: [
+              { parent_id: String(member_id) },
+              { parent_member_id: String(member_id) }
+            ]
+          }
+        ]
+      },
+      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email', 'relation'],
+      filterFields: ['relation', 'gender', 'blood_group', 'status'],
+      select: '-password'
+    });
     const maps = await locationMaps(req);
 
     return apiResponse(res, 200, 'Family Memeber Data fetch successful', family.map((member) => {
@@ -123,7 +134,7 @@ const getFamilyMembers = async (req, res) => {
       };
 
       return memberRow(req, merged, maps);
-    }));
+    }), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving family tree', { error: error.message });
   }
@@ -131,16 +142,21 @@ const getFamilyMembers = async (req, res) => {
 
 const getcommitteeMembers = async (req, res) => {
   try {
-    const committee = await User.find({
-      $and: [
-        {
-          $or: [
-            { is_committee: true },
-            { role_id: { $ne: null }, status: 1 }
-          ]
-        }
-      ]
-    }).select('-password').sort({ _id: -1 }).lean();
+    const { data: committee, pagination } = await queryHelper(User, req.query, {
+      baseQuery: {
+        $and: [
+          {
+            $or: [
+              { is_committee: true },
+              { role_id: { $ne: null }, status: 1 }
+            ]
+          }
+        ]
+      },
+      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email', 'committee_role', 'designation'],
+      filterFields: ['committee_role', 'designation', 'role_id', 'status'],
+      select: '-password'
+    });
 
     const data = committee.map((member) => ({
       id: memberPublicId(member),
@@ -153,7 +169,7 @@ const getcommitteeMembers = async (req, res) => {
       image: publicUrl(req, member.signature || member.image || member.profile_image || '')
     }));
 
-    return apiResponse(res, 200, 'committee Memeber Data fetch successful', data);
+    return apiResponse(res, 200, 'committee Memeber Data fetch successful', data, pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving committee', { error: error.message });
   }
@@ -161,11 +177,14 @@ const getcommitteeMembers = async (req, res) => {
 
 const getCountryList = async (req, res) => {
   try {
-    const countries = await Country.find(({})).sort({ _id: -1 }).lean();
-    return apiResponse(res, 200, 'Country data fetch successfully', countries.map((country) => ({
+    const { data, pagination } = await queryHelper(Country, req.query, {
+      searchFields: ['country', 'name'],
+      filterFields: ['country', 'name', 'status']
+    });
+    return apiResponse(res, 200, 'Country data fetch successfully', data.map((country) => ({
       id: country.id || String(country._id),
       country: country.country || country.name || ''
-    })));
+    })), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving countries', { error: error.message });
   }
@@ -179,14 +198,15 @@ const getStateList = async (req, res) => {
       return apiResponse(res, 401, 'Country id is required');
     }
 
-    const states = await State.find({
-    
-      country_id: String(country_id)
-    }).sort({ _id: -1 }).lean();
-    return apiResponse(res, 200, 'State data fetch successfully', states.map((state) => ({
+    const { data, pagination } = await queryHelper(State, req.query, {
+      baseQuery: { country_id: String(country_id) },
+      searchFields: ['state', 'name'],
+      filterFields: ['state', 'name', 'status']
+    });
+    return apiResponse(res, 200, 'State data fetch successfully', data.map((state) => ({
       id: state.id || String(state._id),
       state: state.state || state.name || ''
-    })));
+    })), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving states', { error: error.message });
   }
@@ -200,14 +220,15 @@ const getCityList = async (req, res) => {
       return apiResponse(res, 401, 'State id is required');
     }
 
-    const cities = await City.find({
-
-      state_id: String(state_id)
-    }).sort({ _id: -1 }).lean();
-    return apiResponse(res, 200, 'City data fetch successfully', cities.map((city) => ({
+    const { data, pagination } = await queryHelper(City, req.query, {
+      baseQuery: { state_id: String(state_id) },
+      searchFields: ['city', 'name'],
+      filterFields: ['city', 'name', 'status']
+    });
+    return apiResponse(res, 200, 'City data fetch successfully', data.map((city) => ({
       id: city.id || String(city._id),
       city: city.city || city.name || ''
-    })));
+    })), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving cities', { error: error.message });
   }

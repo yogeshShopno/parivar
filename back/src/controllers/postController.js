@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Post = require('../models/postModel');
 const User = require('../models/userModels');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 
 const imageFromRequest = (req, fallback = '') => {
@@ -23,23 +24,33 @@ const getPosts = async (req, res) => {
   try {
     const isCommitteeOrAdmin = req.user && (req.user.is_committee || req.user.role === 'admin' || req.user.relation === 'Self');
     let posts;
+    let pagination;
     let ownId = currentMemberId(req);
 
     if (isCommitteeOrAdmin) {
       // Admin sees all posts in their tenant
-      posts = await Post.find({}).sort({ createdAt: -1, _id: -1 }).lean();
+      ({ data: posts, pagination } = await queryHelper(Post, req.query, {
+        searchFields: ['title', 'description', 'member_id'],
+        filterFields: ['member_id', 'status', 'country_id', 'state_id', 'city_id'],
+        defaultSort: { createdAt: -1, _id: -1 }
+      }));
     } else {
       // Members see approved posts or their own pending posts
-      posts = await Post.find({
-        $and: [
-          {
-            $or: [
-              tenantStatusQuery(),
-              { member_id: ownId }
-            ]
-          }
-        ]
-      }).sort({ createdAt: -1, _id: -1 }).lean();
+      ({ data: posts, pagination } = await queryHelper(Post, req.query, {
+        baseQuery: {
+          $and: [
+            {
+              $or: [
+                tenantStatusQuery(),
+                { member_id: ownId }
+              ]
+            }
+          ]
+        },
+        searchFields: ['title', 'description', 'member_id'],
+        filterFields: ['member_id', 'status', 'country_id', 'state_id', 'city_id'],
+        defaultSort: { createdAt: -1, _id: -1 }
+      }));
     }
 
     const memberIds = [...new Set(posts.map((post) => String(post.member_id || '')).filter(Boolean))];
@@ -69,7 +80,7 @@ const getPosts = async (req, res) => {
       };
     });
 
-    return apiResponse(res, 200, 'Posts retrieved successfully', data);
+    return apiResponse(res, 200, 'Posts retrieved successfully', data, pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving posts', { error: error.message });
   }

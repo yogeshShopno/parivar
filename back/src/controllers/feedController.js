@@ -4,6 +4,7 @@ const Festival = require('../models/festivalModel');
 const Gallery = require('../models/galleryModel');
 const User = require('../models/userModels');
 const { apiResponse, fullName, memberPublicId, publicUrl, toArchiveDate } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const requestData = (req) => ({
   ...req.query,
@@ -20,7 +21,10 @@ const getHome = async (req, res) => {
 
 const getGallery = async (req, res) => {
   try {
-    const images = await Gallery.find({}).sort({ _id: -1 }).lean();
+    const { data: images, pagination } = await queryHelper(Gallery, req.query, {
+      searchFields: ['category', 'year'],
+      filterFields: ['category', 'year', 'gallery_category_id']
+    });
     const byYear = new Map();
 
     images.forEach((item) => {
@@ -61,7 +65,7 @@ const getGallery = async (req, res) => {
       categories: Array.from(yearGroup.categories.values())
     }));
 
-    return apiResponse(res, 200, 'Gallery Data fetch successful', data);
+    return apiResponse(res, 200, 'Gallery Data fetch successful', data, pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving gallery', { error: error.message });
   }
@@ -69,7 +73,10 @@ const getGallery = async (req, res) => {
 
 const getEvents = async (req, res) => {
   try {
-    const events = await Event.find({}).sort({ _id: -1 }).lean();
+    const { data: events, pagination } = await queryHelper(Event, req.query, {
+      searchFields: ['title', 'description', 'event_category_name', 'event_name', 'event_location', 'entry_type'],
+      filterFields: ['event_category_id', 'event_category_name', 'entry_type']
+    });
     const data = events.map((event) => ({
       id: event.id || String(event._id),
       event_category_id: event.event_category_id || '',
@@ -84,7 +91,7 @@ const getEvents = async (req, res) => {
       image: publicUrl(req, event.image || '')
     }));
 
-    return apiResponse(res, 200, 'Events Data fetch successful', data);
+    return apiResponse(res, 200, 'Events Data fetch successful', data, pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving events', { error: error.message });
   }

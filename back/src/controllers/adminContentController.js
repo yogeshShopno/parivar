@@ -11,6 +11,7 @@ const State = require('../models/stateModel');
 const City = require('../models/cityModel');
 const Master = require('../models/masterModel');
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const isObjectId = (id) => mongoose.isValidObjectId(id);
 
@@ -35,8 +36,11 @@ const imageFromRequest = (req, fallback = '') => {
 
 const listContent = (Model, formatter, label) => async (req, res) => {
   try {
-    const rows = await Model.find({}).sort({ _id: -1 }).lean();
-    return apiResponse(res, 200, `${label} retrieved successfully`, rows.map((row) => formatter(req, row)));
+    const { data, pagination } = await queryHelper(Model, req.query, {
+      searchFields: ['title', 'subtitle', 'name', 'email', 'phone', 'subject', 'message', 'category', 'year'],
+      filterFields: ['status', 'category', 'year']
+    });
+    return apiResponse(res, 200, `${label} retrieved successfully`, data.map((row) => formatter(req, row)), pagination);
   } catch (error) {
     return apiResponse(res, 500, `Error retrieving ${label.toLowerCase()}`, { error: error.message });
   }
@@ -193,8 +197,12 @@ const getMasters = async (req, res) => {
     const query = { ...(config.type ? { type: config.type } : {}) };
     if (req.query.parent_id && config.parentKey) query[config.parentKey] = String(req.query.parent_id);
     if (req.query.parent_id && config.type) query.parent_id = String(req.query.parent_id);
-    const rows = await config.Model.find(query).sort({ _id: -1 }).lean();
-    return apiResponse(res, 200, 'Master data retrieved successfully', rows.map((row) => formatMaster(type, row, config)));
+    const { data, pagination } = await queryHelper(config.Model, req.query, {
+      baseQuery: query,
+      searchFields: [...(config.nameKeys || ['name']), 'name'],
+      filterFields: ['status']
+    });
+    return apiResponse(res, 200, 'Master data retrieved successfully', data.map((row) => formatMaster(type, row, config)), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving master data', { error: error.message });
   }

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Matrimony = require('../models/matrimonyModel');
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const requestData = (req) => ({
   ...req.query,
@@ -9,13 +10,10 @@ const requestData = (req) => ({
 
 const getMatrimonies = async (req, res) => {
   try {
-    const { full_name, city, gender } = requestData(req);
-    const query = {};
-    if (full_name) query.full_name = new RegExp(full_name, 'i');
-    if (city) query.city = new RegExp(city, 'i');
-    if (gender) query.gender = new RegExp(gender, 'i');
-
-    const matrimonies = await Matrimony.find(query).sort({ _id: -1 }).lean();
+    const { data: matrimonies, pagination } = await queryHelper(Matrimony, requestData(req), {
+      searchFields: ['full_name', 'city', 'education', 'occupation', 'father_name', 'mother_name', 'gotra', 'mobile_number'],
+      filterFields: ['full_name', 'city', 'gender', 'marital_status', 'family_type', 'status']
+    });
 
     return res.status(200).json({
       status: 200,
@@ -39,7 +37,8 @@ const getMatrimonies = async (req, res) => {
         city: item.city || '',
         about: item.about || '',
         status: Number(item.status ?? 1)
-      }))
+      })),
+      ...(pagination ? { pagination } : {})
     });
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving matrimony records', { error: error.message });

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const GalleryCategory = require('../models/galleryCategoryModel');
 const { apiResponse } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const isAdminUser = (user = {}) => Boolean(user?.committee_role === 'President' || user?.role_id);
 
@@ -37,8 +38,12 @@ const formatCategory = (item) => ({
 
 const getCategories = async (req, res) => {
   try {
-    const rows = await GalleryCategory.find({}).sort({ category: 1 }).lean();
-    return apiResponse(res, 200, 'Gallery categories retrieved successfully', rows.map(formatCategory));
+    const { data, pagination } = await queryHelper(GalleryCategory, req.query, {
+      searchFields: ['category'],
+      filterFields: ['category'],
+      defaultSort: { category: 1 }
+    });
+    return apiResponse(res, 200, 'Gallery categories retrieved successfully', data.map(formatCategory), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving gallery categories', { error: error.message });
   }

@@ -1,5 +1,6 @@
 const Event = require('../models/eventModel');
 const { apiResponse, fullName, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const isObjectId = (id) => require('mongoose').isValidObjectId(id);
 
@@ -59,8 +60,11 @@ const eventPayload = (req, existing = {}) => {
 
 const getEventsList = async (req, res) => {
   try {
-    const events = await Event.find({}).sort({ _id: -1 }).lean();
-    return apiResponse(res, 200, 'Events retrieved successfully', events.map((item) => formatEvent(req, item)));
+    const { data, pagination } = await queryHelper(Event, req.query, {
+      searchFields: ['title', 'description', 'event_category_name', 'event_name', 'event_location', 'entry_type'],
+      filterFields: ['event_category_id', 'event_category_name', 'entry_type']
+    });
+    return apiResponse(res, 200, 'Events retrieved successfully', data.map((item) => formatEvent(req, item)), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving events', { error: error.message });
   }

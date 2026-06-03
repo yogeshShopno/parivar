@@ -1,5 +1,6 @@
 const News = require('../models/newsModel');
 const { apiResponse, fullName, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const isObjectId = (id) => require('mongoose').isValidObjectId(id);
 
@@ -51,8 +52,11 @@ const newsPayload = (req, existing = {}) => {
 
 const getNewsList = async (req, res) => {
   try {
-		const news = await News.find({}).sort({ _id: -1 }).lean();
-		return apiResponse(res, 200, 'News retrieved successfully', news.map((item) => formatNews(req, item)));
+		const { data, pagination } = await queryHelper(News, req.query, {
+      searchFields: ['title', 'description', 'content', 'category', 'reporter_name', 'location'],
+      filterFields: ['category', 'reporter_name', 'location', 'status']
+    });
+		return apiResponse(res, 200, 'News retrieved successfully', data.map((item) => formatNews(req, item)), pagination);
 	} catch (error) {
 		return apiResponse(res, 500, 'Error retrieving news', { error: error.message });
 	}
