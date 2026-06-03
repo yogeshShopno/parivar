@@ -270,12 +270,12 @@ export default function Events() {
                   <div className="text-xl font-bold leading-none" style={{ color: theme.textColor }}>
                     {event.day}
                   </div>
-                  <div className="mt-1 text-xs font-semibold" style={{ color: theme.primaryColor }}>
+                  <div className="mt-1 text-sm font-semibold" style={{ color: theme.primaryColor }}>
                     {event.month}
                   </div>
                 </div>
                 <div
-                  className="absolute right-4 top-4 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase"
+                  className="absolute right-4 top-4 rounded-full px-3 py-1.5 text-xs font-bold uppercase"
                   style={{
                     backgroundImage: `linear-gradient(to right, ${theme.gradientStart}, ${theme.gradientEnd})`,
                     color: theme.fontColor,
@@ -291,7 +291,7 @@ export default function Events() {
               <div className="p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold"
                     style={{
                       backgroundColor: shadeColor(theme.backgroundColor, 2),
                       color: theme.primaryColor,
@@ -300,7 +300,7 @@ export default function Events() {
                     <Users className="h-3.5 w-3.5" />
                     {event.category}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-xs" style={{ color: theme.textColor }}>
+                  <span className="inline-flex items-center gap-1 text-sm" style={{ color: theme.textColor }}>
                     <Users className="h-3.5 w-3.5" />
                     {event.attendees}
                   </span>

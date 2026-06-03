@@ -235,7 +235,7 @@ export default function WebHeader() {
                   vala Parivar
                 </h1>
                 <p
-                  className="text-xs"
+                  className="text-sm"
                   style={{
                     color: shadeColor(theme.textColor || '#123524', 30)
                   }}

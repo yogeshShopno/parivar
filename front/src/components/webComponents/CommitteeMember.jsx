@@ -194,7 +194,7 @@ export default function Members() {
                   {member.name}
                 </h3>
                 <span
-                  className="inline-flex items-center rounded-full border px-4 py-1.5 mt-2 text-xs font-semibold"
+                  className="inline-flex items-center rounded-full border px-4 py-1.5 mt-2 text-sm font-semibold"
                   style={{
                     borderColor: theme.primaryColor,
                     color: theme.primaryColor,

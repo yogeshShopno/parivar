@@ -98,7 +98,7 @@ export default function CommitteeMembers() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">Committee Members</h2>
-          <p className="text-text-secondary text-xs mt-0.5">Manage committee member roles and profile details</p>
+          <p className="text-text-secondary text-sm mt-0.5">Manage committee member roles and profile details</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button onClick={fetchUsers} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
@@ -106,22 +106,22 @@ export default function CommitteeMembers() {
           </button>
           <div className="relative flex-1 sm:w-64">
             <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-text-secondary/60" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search committee..." className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:border-primary/50" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search committee..." className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary/50" />
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-glow-primary">
+          <button onClick={openCreate} className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary">
             <Plus className="w-4 h-4" /> Add
           </button>
         </div>
       </div>
 
-      {error && <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-xs">{error}</div>}
-      {success && <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-xs">{success}</div>}
+      {error && <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-sm">{error}</div>}
+      {success && <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-sm">{success}</div>}
 
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-glass-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border bg-surface-secondary text-text-secondary text-[11px] font-bold uppercase tracking-wider">
+              <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold uppercase tracking-wider">
                 <th className="p-4">Member</th>
                 <th className="p-4">Contact</th>
                 <th className="p-4">Role</th>
@@ -131,21 +131,21 @@ export default function CommitteeMembers() {
             </thead>
             <tbody className="divide-y divide-border">
               {loading ? (
-                <tr><td colSpan="5" className="p-12 text-center text-xs text-text-secondary">Loading committee members...</td></tr>
+                <tr><td colSpan="5" className="p-12 text-center text-sm text-text-secondary">Loading committee members...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan="5" className="p-12 text-center text-xs text-text-secondary">No committee members found</td></tr>
+                <tr><td colSpan="5" className="p-12 text-center text-sm text-text-secondary">No committee members found</td></tr>
               ) : filtered.map((user) => (
-                <tr key={user.id} className="hover:bg-surface-secondary/40 text-xs text-text">
+                <tr key={user.id} className="hover:bg-surface-secondary/40 text-sm text-text">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       {user.image ? (
                         <img src={user.image} alt="" className="h-9 w-9 rounded-lg object-cover border border-border" />
                       ) : (
-                        <div className="h-9 w-9 rounded-lg bg-surface-secondary flex items-center justify-center text-[11px] font-bold text-text-secondary">{user.name?.slice(0, 2) || 'CM'}</div>
+                        <div className="h-9 w-9 rounded-lg bg-surface-secondary flex items-center justify-center text-sm font-bold text-text-secondary">{user.name?.slice(0, 2) || 'CM'}</div>
                       )}
                       <div>
                         <div className="font-semibold text-text">{user.name}</div>
-                        <div className="text-[10px] text-text-secondary">{user.designation || user.committee_role || '-'}</div>
+                        <div className="text-xs text-text-secondary">{user.designation || user.committee_role || '-'}</div>
                       </div>
                     </div>
                   </td>
@@ -157,7 +157,7 @@ export default function CommitteeMembers() {
                     </span>
                   </td>
                   <td className="p-4">
-                    <span className={`inline-flex px-2.5 py-1 rounded-lg border text-[10px] font-bold ${Number(user.status ?? 1) === 1 ? 'bg-success-bg border-success-border text-success-text' : 'bg-surface-secondary border-border text-text-secondary'}`}>
+                    <span className={`inline-flex px-2.5 py-1 rounded-lg border text-xs font-bold ${Number(user.status ?? 1) === 1 ? 'bg-success-bg border-success-border text-success-text' : 'bg-surface-secondary border-border text-text-secondary'}`}>
                       {Number(user.status ?? 1) === 1 ? 'Active' : 'Inactive'}
                     </span>
                   </td>

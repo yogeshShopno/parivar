@@ -41,7 +41,7 @@ const DetailCard = ({ icon: Icon, label, value }) => (
         <Icon className="h-4 w-4" aria-hidden="true" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase text-[#9CA3AF]">{label}</p>
+        <p className="text-sm font-semibold uppercase text-[#9CA3AF]">{label}</p>
         <p className="mt-1 break-words text-sm font-medium leading-6 text-[#000000] [overflow-wrap:anywhere]">{normalizeValue(value)}</p>
       </div>
     </div>
@@ -180,7 +180,7 @@ export default function BusinessProfile() {
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[#E5E5E5] bg-[#F9F9F9] px-3 py-1 text-xs font-semibold uppercase text-[#4B5563]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#E5E5E5] bg-[#F9F9F9] px-3 py-1 text-sm font-semibold uppercase text-[#4B5563]">
                   <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
                   {category}
                 </div>
@@ -220,7 +220,7 @@ export default function BusinessProfile() {
                 <MapPin className="h-4 w-4" aria-hidden="true" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase text-[#9CA3AF]">Location Link</p>
+                <p className="text-sm font-semibold uppercase text-[#9CA3AF]">Location Link</p>
                 <p className="mt-1 break-words text-sm font-medium text-[#000000]">{normalizeValue(business?.location_link)}</p>
               </div>
             </div>
@@ -265,15 +265,15 @@ export default function BusinessProfile() {
 
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E5E5E5] bg-[#FFFFFF] px-4 py-3 md:hidden">
         <div className="mx-auto grid max-w-md grid-cols-3 gap-3">
-          <a href={`tel:${normalizeValue(business?.number, '')}`} className="flex flex-col items-center justify-center gap-1 rounded-lg bg-[#FFFFFF] px-2 py-2 text-xs font-semibold text-[#000000]">
+          <a href={`tel:${normalizeValue(business?.number, '')}`} className="flex flex-col items-center justify-center gap-1 rounded-lg bg-[#FFFFFF] px-2 py-2 text-sm font-semibold text-[#000000]">
             <Phone className="h-4 w-4" aria-hidden="true" />
             Call
           </a>
-          <a href={toExternalHref(business?.whatsapp_number) || '#'} className="flex flex-col items-center justify-center gap-1 rounded-lg bg-[#FFFFFF] px-2 py-2 text-xs font-semibold text-[#000000]">
+          <a href={toExternalHref(business?.whatsapp_number) || '#'} className="flex flex-col items-center justify-center gap-1 rounded-lg bg-[#FFFFFF] px-2 py-2 text-sm font-semibold text-[#000000]">
             <MessageCircle className="h-4 w-4" aria-hidden="true" />
             WhatsApp
           </a>
-          <a href={toMailHref(business?.email) || '#'} className="flex flex-col items-center justify-center gap-1 rounded-lg bg-[#FFFFFF] px-2 py-2 text-xs font-semibold text-[#000000]">
+          <a href={toMailHref(business?.email) || '#'} className="flex flex-col items-center justify-center gap-1 rounded-lg bg-[#FFFFFF] px-2 py-2 text-sm font-semibold text-[#000000]">
             <Mail className="h-4 w-4" aria-hidden="true" />
             Email
           </a>

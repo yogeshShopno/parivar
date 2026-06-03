@@ -131,7 +131,7 @@ export default function Donations() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">Donations</h2>
-          <p className="text-text-secondary text-xs mt-0.5">Track and manage donation records</p>
+          <p className="text-text-secondary text-sm mt-0.5">Track and manage donation records</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
@@ -143,7 +143,7 @@ export default function Donations() {
           </button>
           <button
             onClick={handleCreate}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-glow-primary"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary"
           >
             <Plus className="w-4 h-4" /> Add Donation
           </button>
@@ -154,15 +154,15 @@ export default function Donations() {
       {donations.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <div className="bg-success-bg border border-success-border rounded-2xl p-4">
-            <p className="text-success-text text-[10px] font-bold uppercase tracking-wider mb-1">Total Collected</p>
+            <p className="text-success-text text-xs font-bold uppercase tracking-wider mb-1">Total Collected</p>
             <p className="text-text text-lg font-bold">{formatAmount(totalAmount)}</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4">
-            <p className="text-text-secondary text-[10px] font-bold uppercase tracking-wider mb-1">Total Donors</p>
+            <p className="text-text-secondary text-xs font-bold uppercase tracking-wider mb-1">Total Donors</p>
             <p className="text-text text-lg font-bold">{donations.length}</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4 col-span-2 sm:col-span-1">
-            <p className="text-text-secondary text-[10px] font-bold uppercase tracking-wider mb-1">Avg Donation</p>
+            <p className="text-text-secondary text-xs font-bold uppercase tracking-wider mb-1">Avg Donation</p>
             <p className="text-text text-lg font-bold">{formatAmount(totalAmount / donations.length)}</p>
           </div>
         </div>
@@ -172,49 +172,49 @@ export default function Donations() {
       <div className="bg-card border border-border rounded-2xl p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
-            <label className="text-xs text-text-secondary mb-1.5 block">Donator Name</label>
+            <label className="text-sm text-text-secondary mb-1.5 block">Donator Name</label>
             <input
               type="text"
               name="donator_name"
               value={filters.donator_name}
               onChange={handleFilterChange}
               placeholder="Search by donator name"
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
             />
           </div>
           <div>
-            <label className="text-xs text-text-secondary mb-1.5 block">Location</label>
+            <label className="text-sm text-text-secondary mb-1.5 block">Location</label>
             <input
               type="text"
               name="location"
               value={filters.location}
               onChange={handleFilterChange}
               placeholder="Search by location"
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
             />
           </div>
           <div>
-            <label className="text-xs text-text-secondary mb-1.5 block">Donation Purpose</label>
+            <label className="text-sm text-text-secondary mb-1.5 block">Donation Purpose</label>
             <input
               type="text"
               name="donation_purpose"
               value={filters.donation_purpose}
               onChange={handleFilterChange}
               placeholder="Search by purpose"
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
             />
           </div>
         </div>
         <div className="flex gap-3">
           <button
             onClick={applyFilters}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-glow-primary"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-glow-primary"
           >
             <Search className="w-3.5 h-3.5" /> Apply Filters
           </button>
           <button
             onClick={resetFilters}
-            className="flex items-center gap-2 bg-surface-secondary hover:bg-surface text-text px-4 py-2 rounded-xl text-xs font-semibold transition-all border border-border"
+            className="flex items-center gap-2 bg-surface-secondary hover:bg-surface text-text px-4 py-2 rounded-xl text-sm font-semibold transition-all border border-border"
           >
             Reset
           </button>
@@ -223,13 +223,13 @@ export default function Donations() {
 
       {/* Alerts */}
       {error && (
-        <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+        <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-sm flex items-center gap-2 animate-fade-in shadow-sm">
           <span className="w-2 h-2 rounded-full bg-error animate-ping"></span>
           {error}
         </div>
       )}
       {success && (
-        <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+        <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-sm flex items-center gap-2 animate-fade-in shadow-sm">
           <span className="w-2 h-2 rounded-full bg-success animate-ping"></span>
           {success}
         </div>
@@ -239,18 +239,18 @@ export default function Donations() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-primary/25 border-t-primary animate-spin"></div>
-          <span className="text-text-secondary text-xs">Loading donations...</span>
+          <span className="text-text-secondary text-sm">Loading donations...</span>
         </div>
       ) : donations.length === 0 ? (
         <div className="bg-card border border-border rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
           <HeartHandshake className="w-12 h-12 text-text-secondary/40 animate-pulse-slow" />
           <div>
             <h4 className="font-bold text-text">No donations found</h4>
-            <p className="text-text-secondary text-xs mt-1">There are no donation records matching your criteria</p>
+            <p className="text-text-secondary text-sm mt-1">There are no donation records matching your criteria</p>
           </div>
           <button
             onClick={handleCreate}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-glow-primary"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary"
           >
             <Plus className="w-4 h-4" /> Record First Donation
           </button>
@@ -274,7 +274,7 @@ export default function Donations() {
                         <IndianRupee className="w-3.5 h-3.5" />
                         {Number(donation.donate_amount || 0).toLocaleString('en-IN')}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${
                         Number(donation.status) === 1
                           ? 'bg-success-bg text-success-text border border-success-border'
                           : 'bg-surface-secondary text-text-secondary border border-border'
@@ -289,7 +289,7 @@ export default function Donations() {
                     </h3>
 
                     {/* Purpose */}
-                    <p className="text-xs text-text-secondary mt-0.5 italic">"{donation.donation_purpose}"</p>
+                    <p className="text-sm text-text-secondary mt-0.5 italic">"{donation.donation_purpose}"</p>
                   </div>
 
                   {/* Actions */}
@@ -312,7 +312,7 @@ export default function Donations() {
                 </div>
 
                 {/* Details */}
-                <div className="mt-4 grid grid-cols-1 gap-2 text-[11px]">
+                <div className="mt-4 grid grid-cols-1 gap-2 text-sm">
                   <div className="flex items-center gap-2 text-text-secondary">
                     <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
                     <span className="text-text">{donation.location}</span>
@@ -347,18 +347,18 @@ export default function Donations() {
         <form onSubmit={handleSubmit} className="space-y-4 text-text">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-text-secondary mb-1.5 block">Donator Name *</label>
+              <label className="text-sm text-text-secondary mb-1.5 block">Donator Name *</label>
               <input
                 type="text"
                 name="donator_name"
                 defaultValue={selectedDonation?.donator_name || ''}
                 required
                 placeholder="Enter donator's full name"
-                className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-xs outline-none"
+                className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
               />
             </div>
             <div>
-              <label className="text-xs text-text-secondary mb-1.5 block">Donation Amount (₹) *</label>
+              <label className="text-sm text-text-secondary mb-1.5 block">Donation Amount (₹) *</label>
               <input
                 type="number"
                 name="donate_amount"
@@ -367,48 +367,48 @@ export default function Donations() {
                 min="0"
                 step="1"
                 placeholder="Enter amount"
-                className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-xs outline-none"
+                className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="text-xs text-text-secondary mb-1.5 block">Location *</label>
+            <label className="text-sm text-text-secondary mb-1.5 block">Location *</label>
             <input
               type="text"
               name="location"
               defaultValue={selectedDonation?.location || ''}
               required
               placeholder="Enter donation location"
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-xs outline-none"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
             />
           </div>
 
           <div>
-            <label className="text-xs text-text-secondary mb-1.5 block">Donation Purpose *</label>
+            <label className="text-sm text-text-secondary mb-1.5 block">Donation Purpose *</label>
             <input
               type="text"
               name="donation_purpose"
               defaultValue={selectedDonation?.donation_purpose || ''}
               required
               placeholder="e.g. Temple renovation, Food drive..."
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-xs outline-none"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-text-secondary mb-1.5 block">Date *</label>
+              <label className="text-sm text-text-secondary mb-1.5 block">Date *</label>
               <input
                 type="date"
                 name="date"
                 defaultValue={selectedDonation?.date || new Date().toISOString().slice(0, 10)}
                 required
-                className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-xs outline-none"
+                className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
               />
             </div>
             <div>
-              <label className="text-xs text-text-secondary mb-1.5 block">
+              <label className="text-sm text-text-secondary mb-1.5 block">
                 Whose Possession
                 <span className="ml-1 text-text-secondary/60 normal-case font-normal">(blank = "direct")</span>
               </label>
@@ -419,7 +419,7 @@ export default function Donations() {
                   selectedDonation?.whose_possession === 'direct' ? '' : selectedDonation?.whose_possession || ''
                 }
                 placeholder="Leave blank for Direct"
-                className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-xs outline-none"
+                className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
               />
             </div>
           </div>
@@ -428,14 +428,14 @@ export default function Donations() {
             <button
               type="button"
               onClick={handleCloseModal}
-              className="flex-1 bg-surface-secondary hover:bg-surface text-text px-4 py-2.5 rounded-xl text-xs font-semibold transition-all border border-border"
+              className="flex-1 bg-surface-secondary hover:bg-surface text-text px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border border-border"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={formLoading}
-              className="flex-1 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 shadow-glow-primary"
+              className="flex-1 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 shadow-glow-primary"
             >
               {formLoading ? 'Saving...' : selectedDonation ? 'Update Donation' : 'Add Donation'}
             </button>

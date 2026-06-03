@@ -3,7 +3,7 @@ import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 } from 'luci
 import api, { assetUrl } from '../lib/api'
 import Modal from '../components/Modal'
 
-const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10'
+const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 
 export default function AdminCrudPage({ title, subtitle, endpoint, fields, columns, getRowTitle }) {
   const emptyForm = useMemo(() => {
@@ -159,7 +159,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">{title}</h2>
-          <p className="text-text-secondary text-xs mt-0.5">{subtitle}</p>
+          <p className="text-text-secondary text-sm mt-0.5">{subtitle}</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button onClick={fetchRows} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
@@ -172,36 +172,36 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
               placeholder="Search records..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:border-primary/50"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary/50"
             />
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-glow-primary">
+          <button onClick={openCreate} className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary">
             <Plus className="w-4 h-4" /> Add
           </button>
         </div>
       </div>
 
-      {error && <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-xs">{error}</div>}
-      {success && <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-xs">{success}</div>}
+      {error && <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-sm">{error}</div>}
+      {success && <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-sm">{success}</div>}
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-primary/25 border-t-primary animate-spin"></div>
-          <span className="text-text-secondary text-xs">Loading records...</span>
+          <span className="text-text-secondary text-sm">Loading records...</span>
         </div>
       ) : (
         <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-glass-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-[11px] font-bold uppercase tracking-wider">
+                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold uppercase tracking-wider">
                   {columns.map((column) => <th key={column.key} className="p-4">{column.label}</th>)}
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {filteredRows.map((row) => (
-                  <tr key={row.id} className="hover:bg-surface-secondary/40 text-xs text-text">
+                  <tr key={row.id} className="hover:bg-surface-secondary/40 text-sm text-text">
                     {columns.map((column) => (
                       <td key={column.key} className="p-4 max-w-md">
                         {column.type === 'image' && row[column.key] ? (
@@ -225,7 +225,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                 ))}
                 {filteredRows.length === 0 && (
                   <tr>
-                    <td colSpan={columns.length + 1} className="p-12 text-center text-xs text-text-secondary">No records found</td>
+                    <td colSpan={columns.length + 1} className="p-12 text-center text-sm text-text-secondary">No records found</td>
                   </tr>
                 )}
               </tbody>
@@ -239,7 +239,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fields.map((field) => (
               <div key={field.name}>
-                <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">{field.label}</label>
+                <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">{field.label}</label>
                 {field.type === 'textarea' ? (
                   <textarea rows="4" value={formData[field.name] || ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving} />
                 ) : field.type === 'select' ? (
@@ -261,11 +261,11 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                       accept={field.accept || 'image/*'}
                       multiple={field.multiple}
                       onChange={(e) => setFormData({ ...formData, [field.name]: field.multiple ? e.target.files : e.target.files?.[0] || '' })}
-                      className="w-full text-xs text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary hover:file:bg-primary/20"
+                      className="w-full text-sm text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
                       disabled={saving}
                     />
                     {selected?.image && !field.multiple && (
-                      <div className="flex items-center gap-2 text-[10px] text-text-secondary">
+                      <div className="flex items-center gap-2 text-xs text-text-secondary">
                         <ImageIcon className="h-3.5 w-3.5" />
                         <span>Current image will be kept unless a new file is selected.</span>
                       </div>
@@ -277,7 +277,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
               </div>
             ))}
           </div>
-          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-xs tracking-wider uppercase disabled:opacity-50 shadow-glow-primary">
+          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider uppercase disabled:opacity-50 shadow-glow-primary">
             {saving ? 'Saving...' : 'Save Record'}
           </button>
         </form>

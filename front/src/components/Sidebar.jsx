@@ -31,7 +31,7 @@ const LinkItem = ({ to, icon: Icon, label, end }) => (
 )
 
 const SectionLabel = ({ children }) => (
-  <div className="px-3 pb-2 pt-5 text-[11px] font-bold uppercase tracking-widest text-text-secondary/60 first:pt-0">
+  <div className="px-3 pb-2 pt-5 text-sm font-bold uppercase tracking-widest text-text-secondary/60 first:pt-0">
     {children}
   </div>
 )
@@ -52,7 +52,7 @@ export default function Sidebar() {
           <h2 className="font-bold text-base tracking-wide bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
             Parivar Admin
           </h2>
-          <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+          <span className="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-bold uppercase tracking-wider text-primary">
             Console HQ
           </span>
         </div>
@@ -76,7 +76,7 @@ export default function Sidebar() {
                   to={`/admin/masters/${type}`}
                   end
                   className={({ isActive }) =>
-                    `block min-h-8 w-full rounded-md px-3 py-2 text-xs transition-colors ${
+                    `block min-h-8 w-full rounded-md px-3 py-2 text-sm transition-colors ${
                       isActive ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:text-text hover:bg-surface-secondary'
                     }`
                   }
@@ -107,8 +107,8 @@ export default function Sidebar() {
             {user.name ? user.name.substring(0, 2) : user.email?.substring(0, 2) || 'AD'}
           </div>
           <div className="min-w-0">
-            <h4 className="truncate text-xs font-semibold text-text">{user.name || user.email || 'Administrator'}</h4>
-            <p className="text-[10px] text-text-secondary truncate capitalize">{user.role || 'Administrator'}</p>
+            <h4 className="truncate text-sm font-semibold text-text">{user.name || user.email || 'Administrator'}</h4>
+            <p className="text-xs text-text-secondary truncate capitalize">{user.role || 'Administrator'}</p>
           </div>
         </div>
       )}

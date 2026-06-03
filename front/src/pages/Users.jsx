@@ -161,7 +161,7 @@ export default function Users() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">Family Registry</h2>
-          <p className="text-text-secondary text-xs mt-0.5">View and manage all registered members</p>
+          <p className="text-text-secondary text-sm mt-0.5">View and manage all registered members</p>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -173,7 +173,7 @@ export default function Users() {
           </button>
           <button
             onClick={handleCreate}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover hover:shadow-glow-primary text-text px-4 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-300"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-hover hover:shadow-glow-primary text-text px-4 py-2.5 rounded-xl text-sm font-semibold tracking-wide transition-all duration-300"
           >
             <Plus className="w-4 h-4" /> Add Member
           </button>
@@ -182,13 +182,13 @@ export default function Users() {
 
       {/* Operation Status alerts */}
       {error && (
-        <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+        <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-sm flex items-center gap-2 animate-fade-in shadow-sm">
           <span className="w-2 h-2 rounded-full bg-error animate-ping"></span>
           {error}
         </div>
       )}
       {success && (
-        <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+        <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-sm flex items-center gap-2 animate-fade-in shadow-sm">
           <span className="w-2 h-2 rounded-full bg-success animate-ping"></span>
           {success}
         </div>
@@ -207,7 +207,7 @@ export default function Users() {
               placeholder="Search by name, phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-input-bg text-input-text placeholder-text-secondary border border-input-border hover:border-border focus:border-primary/50 rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
+              className="w-full bg-input-bg text-input-text placeholder-text-secondary border border-input-border hover:border-border focus:border-primary/50 rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
             />
           </div>
 
@@ -216,7 +216,7 @@ export default function Users() {
             <select
               value={filterGender}
               onChange={(e) => setFilterGender(e.target.value)}
-              className="w-full bg-input-bg text-text border border-input-border rounded-xl py-2.5 px-3.5 text-xs outline-none focus:border-primary/50 transition-all cursor-pointer"
+              className="w-full bg-input-bg text-text border border-input-border rounded-xl py-2.5 px-3.5 text-sm outline-none focus:border-primary/50 transition-all cursor-pointer"
             >
               <option value="" className="bg-surface text-text">All Genders</option>
               <option value="Male" className="bg-surface text-text">Male</option>
@@ -230,7 +230,7 @@ export default function Users() {
             <select
               value={filterBloodGroup}
               onChange={(e) => setFilterBloodGroup(e.target.value)}
-              className="w-full bg-input-bg text-text border border-input-border rounded-xl py-2.5 px-3.5 text-xs outline-none focus:border-primary/50 transition-all cursor-pointer"
+              className="w-full bg-input-bg text-text border border-input-border rounded-xl py-2.5 px-3.5 text-sm outline-none focus:border-primary/50 transition-all cursor-pointer"
             >
               <option value="" className="bg-surface text-text">All Blood Groups</option>
               {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
@@ -244,7 +244,7 @@ export default function Users() {
             <select
               value={filterCommittee}
               onChange={(e) => setFilterCommittee(e.target.value)}
-              className="w-full bg-input-bg text-text border border-input-border rounded-xl py-2.5 px-3.5 text-xs outline-none focus:border-primary/50 transition-all cursor-pointer"
+              className="w-full bg-input-bg text-text border border-input-border rounded-xl py-2.5 px-3.5 text-sm outline-none focus:border-primary/50 transition-all cursor-pointer"
             >
               <option value="" className="bg-surface text-text">All Roles</option>
               <option value="true" className="bg-surface text-text">Committee Only</option>
@@ -258,14 +258,14 @@ export default function Users() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-primary/25 border-t-primary animate-spin"></div>
-          <span className="text-text-secondary text-xs">Querying members data...</span>
+          <span className="text-text-secondary text-sm">Querying members data...</span>
         </div>
       ) : users.length === 0 ? (
         <div className="bg-surface border border-border rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
           <UsersIcon className="w-12 h-12 text-text-secondary" />
           <div>
             <h4 className="font-bold text-text">No registry matches found</h4>
-            <p className="text-text-secondary text-xs mt-1">Try expanding your search criteria or register a new member</p>
+            <p className="text-text-secondary text-sm mt-1">Try expanding your search criteria or register a new member</p>
           </div>
         </div>
       ) : (
@@ -273,7 +273,7 @@ export default function Users() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-[11px] font-bold uppercase tracking-wider">
+                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold uppercase tracking-wider">
                   <th className="p-4">Member ID</th>
                   <th className="p-4">Name</th>
                   <th className="p-4">Contact Info</th>
@@ -284,7 +284,7 @@ export default function Users() {
               </thead>
               <tbody className="divide-y divide-border">
                 {users.map(user => (
-                  <tr key={user.id} className="hover:bg-surface-secondary text-xs text-text-secondary transition-colors">
+                  <tr key={user.id} className="hover:bg-surface-secondary text-sm text-text-secondary transition-colors">
                     {/* ID */}
                     <td className="p-4 font-mono font-bold text-primary">{user.id}</td>
 
@@ -297,7 +297,7 @@ export default function Users() {
                         </div>
                         <div>
                           <div className="font-semibold text-text">{user.name}</div>
-                          <div className="text-[10px] text-text-secondary mt-0.5 capitalize">{user.relation || 'Self'}</div>
+                          <div className="text-xs text-text-secondary mt-0.5 capitalize">{user.relation || 'Self'}</div>
                         </div>
                       </div>
                     </td>
@@ -305,7 +305,7 @@ export default function Users() {
                     {/* Contact details */}
                     <td className="p-4">
                       <div>{user.email || <span className="text-text-secondary">No Email</span>}</div>
-                      <div className="text-[10px] text-text-secondary mt-0.5 font-mono">{user.phone}</div>
+                      <div className="text-xs text-text-secondary mt-0.5 font-mono">{user.phone}</div>
                     </td>
 
                     {/* Gender and Blood */}
@@ -329,7 +329,7 @@ export default function Users() {
                           <span>{user.committee_role || 'Committee'}</span>
                         </div>
                       ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded bg-surface-secondary text-text-secondary font-medium text-[10px]">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded bg-surface-secondary text-text-secondary font-medium text-xs">
                           Member
                         </span>
                       )}

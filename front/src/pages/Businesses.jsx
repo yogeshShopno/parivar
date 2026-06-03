@@ -146,7 +146,7 @@ export default function Businesses() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">Business Directory</h2>
-          <p className="text-text-secondary text-xs mt-0.5">Manage and moderate community businesses and enterprise registries</p>
+          <p className="text-text-secondary text-sm mt-0.5">Manage and moderate community businesses and enterprise registries</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
@@ -158,7 +158,7 @@ export default function Businesses() {
           </button>
           <button
             onClick={handleCreate}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-glow-primary"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary"
           >
             <Plus className="w-4 h-4" /> Add
           </button>
@@ -171,7 +171,7 @@ export default function Businesses() {
               placeholder="Search listings..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
             />
           </div>
         </div>
@@ -179,13 +179,13 @@ export default function Businesses() {
 
       {/* Alerts */}
       {error && (
-        <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+        <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-sm flex items-center gap-2 animate-fade-in shadow-sm">
           <span className="w-2 h-2 rounded-full bg-error animate-ping"></span>
           {error}
         </div>
       )}
       {success && (
-        <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+        <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-sm flex items-center gap-2 animate-fade-in shadow-sm">
           <span className="w-2 h-2 rounded-full bg-success animate-ping"></span>
           {success}
         </div>
@@ -195,14 +195,14 @@ export default function Businesses() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-primary/25 border-t-primary animate-spin"></div>
-          <span className="text-text-secondary text-xs">Querying businesses directory...</span>
+          <span className="text-text-secondary text-sm">Querying businesses directory...</span>
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-card border border-border rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
           <Briefcase className="w-12 h-12 text-text-secondary/40 animate-pulse-slow" />
           <div>
             <h4 className="font-bold text-text">No businesses found</h4>
-            <p className="text-text-secondary text-xs mt-1">There are no business directories registered under this search criteria</p>
+            <p className="text-text-secondary text-sm mt-1">There are no business directories registered under this search criteria</p>
           </div>
         </div>
       ) : (
@@ -228,10 +228,10 @@ export default function Businesses() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-[10px] uppercase tracking-wide">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-xs uppercase tracking-wide">
                         {biz.business_category_name || 'Community Enterprise'}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${Number(biz.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-surface-secondary text-text-secondary border border-border'}`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-bold ${Number(biz.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-surface-secondary text-text-secondary border border-border'}`}>
                         {Number(biz.status) === 1 ? 'Active' : 'Inactive'}
                       </span>
                     </div>
@@ -266,14 +266,14 @@ export default function Businesses() {
                 </div>
 
                 {/* About description */}
-                <p className="text-xs text-text-secondary leading-relaxed mt-4 line-clamp-3">
+                <p className="text-sm text-text-secondary leading-relaxed mt-4 line-clamp-3">
                   {biz.about_us || 'No business description provided by the enterprise owner. Contact the primary administrator for further details.'}
                 </p>
 
                 {/* Gallery Showcase */}
                 {biz.gallery_images && biz.gallery_images.length > 0 && (
                   <div className="mt-4">
-                    <label className="block text-[9px] uppercase font-bold text-text-secondary mb-1.5 tracking-wider">Showroom Gallery</label>
+                    <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5 tracking-wider">Showroom Gallery</label>
                     <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
                       {biz.gallery_images.map((img, idx) => (
                         <div key={idx} className="relative w-12 h-12 rounded-lg overflow-hidden border border-border shrink-0 bg-surface-secondary group/img">
@@ -290,7 +290,7 @@ export default function Businesses() {
               </div>
 
               {/* Action contacts and tags */}
-              <div className="mt-6 pt-4 border-t border-border space-y-2 text-[11px] text-text-secondary">
+              <div className="mt-6 pt-4 border-t border-border space-y-2 text-sm text-text-secondary">
                 <div className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-primary" />
                   <span>Primary: </span>

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react'
 import { AuthContext } from '../context/AuthContext'
 import { normalizeRoleId } from '../lib/roles'
 
-const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all'
+const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all'
 
 export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading }) {
   const { user: loggedInUser } = useContext(AuthContext)
@@ -112,33 +112,33 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
     <form onSubmit={handleSubmit} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 select-none text-text">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">First Name *</label>
+          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">First Name *</label>
           <input type="text" placeholder="Enter First Name" value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} className={fieldClass} disabled={isLoading} />
-          {errors.first_name && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.first_name}</p>}
+          {errors.first_name && <p className="text-error-text text-xs mt-1 font-semibold">{errors.first_name}</p>}
         </div>
         <div>
-          <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Middle Name</label>
+          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Middle Name</label>
           <input type="text" placeholder="Enter Middle Name" value={formData.middle_name} onChange={(e) => setFormData({ ...formData, middle_name: e.target.value })} className={fieldClass} disabled={isLoading} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Last Name *</label>
+          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Last Name *</label>
           <input type="text" placeholder="Enter Last Name" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} className={fieldClass} disabled={isLoading} />
-          {errors.last_name && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.last_name}</p>}
+          {errors.last_name && <p className="text-error-text text-xs mt-1 font-semibold">{errors.last_name}</p>}
         </div>
         <div>
-          <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">{member ? 'Strong Password' : 'Strong Password *'}</label>
+          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">{member ? 'Strong Password' : 'Strong Password *'}</label>
           <input type="password" placeholder="Strong Password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} className={fieldClass} disabled={isLoading} />
-          {errors.password && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.password}</p>}
+          {errors.password && <p className="text-error-text text-xs mt-1 font-semibold">{errors.password}</p>}
         </div>
       </div>
 
       {canManageRoleFields && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Role </label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Role </label>
             <select
               value={formData.role_id}
               onChange={(e) => setFormData({ ...formData, role_id: e.target.value })}
@@ -149,10 +149,10 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
               <option value="" className="bg-surface text-text">Select Role</option>
               {activeRoles.map((role) => <option key={role.id} value={role.id} className="bg-surface text-text">{role.name}</option>)}
             </select>
-            {errors.role_id && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.role_id}</p>}
+            {errors.role_id && <p className="text-error-text text-xs mt-1 font-semibold">{errors.role_id}</p>}
           </div>
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Designation *</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Designation *</label>
             <input
               type="text"
               placeholder="Enter Designation"
@@ -162,24 +162,24 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
               disabled={isLoading || isEditingSelf}
               title={isEditingSelf ? 'You cannot change your own role' : undefined}
             />
-            {errors.designation && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.designation}</p>}
+            {errors.designation && <p className="text-error-text text-xs mt-1 font-semibold">{errors.designation}</p>}
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Number *</label>
+          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Number *</label>
           <input type="text" placeholder="Enter number" value={formData.number} onChange={(e) => setFormData({ ...formData, number: e.target.value })} className={fieldClass} disabled={isLoading} />
         </div>
         <div>
-          <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Image (300*300 px, Max size 1 mb)</label>
-          <input type="file" accept="image/*" onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })} className="w-full text-xs text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary hover:file:bg-primary/20" disabled={isLoading} />
-          {errors.image && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.image}</p>}
+          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Image (300*300 px, Max size 1 mb)</label>
+          <input type="file" accept="image/*" onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })} className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20" disabled={isLoading} />
+          {errors.image && <p className="text-error-text text-xs mt-1 font-semibold">{errors.image}</p>}
         </div>
       </div>
 
-      <button type="submit" disabled={isLoading} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-xs tracking-wider uppercase transition-all disabled:opacity-50 shadow-glow-primary">
+      <button type="submit" disabled={isLoading} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider uppercase transition-all disabled:opacity-50 shadow-glow-primary">
         {isLoading ? 'Saving...' : member ? 'Save Committee Member' : 'Add Committee Member'}
       </button>
     </form>

@@ -225,7 +225,7 @@ export default function TopStudents() {
               <div className="p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold"
                     style={{
                       backgroundColor: shadeColor(theme.backgroundColor, 2),
                       color: theme.primaryColor,
@@ -235,7 +235,7 @@ export default function TopStudents() {
                     {student.rank}
                   </span>
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold"
                     style={{
                       backgroundColor: shadeColor(theme.backgroundColor, 4),
                       color: theme.textColor,
@@ -255,7 +255,7 @@ export default function TopStudents() {
                 >
                   <GraduationCap className="h-5 w-5 flex-shrink-0" style={{ color: theme.primaryColor }} />
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: shadeColor(theme.textColor, 25) }}>
+                    <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: shadeColor(theme.textColor, 25) }}>
                       Achievement
                     </p>
                     <p className="text-sm font-bold" style={{ color: theme.textColor }}>

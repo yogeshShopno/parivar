@@ -3,7 +3,7 @@ import { FileText, Calendar, Trash2, Clock, Search, RefreshCw, Plus, Edit2 } fro
 import api, { assetUrl } from '../lib/api'
 import Modal from '../components/Modal'
 
-const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10'
+const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 
 export default function Post() {
   const [posts, setPosts] = useState([])
@@ -110,7 +110,7 @@ export default function Post() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">Post Moderator</h2>
-          <p className="text-text-secondary text-xs mt-0.5">Moderate community posts, announcements, and timeline activities</p>
+          <p className="text-text-secondary text-sm mt-0.5">Moderate community posts, announcements, and timeline activities</p>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
@@ -122,7 +122,7 @@ export default function Post() {
           </button>
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-glow-primary"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary"
           >
             <Plus className="w-4 h-4" /> Add
           </button>
@@ -135,7 +135,7 @@ export default function Post() {
               placeholder="Search posts..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
             />
           </div>
         </div>
@@ -143,13 +143,13 @@ export default function Post() {
 
       {/* Alerts */}
       {error && (
-        <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+        <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-sm flex items-center gap-2 animate-fade-in shadow-sm">
           <span className="w-2 h-2 rounded-full bg-error animate-ping"></span>
           {error}
         </div>
       )}
       {success && (
-        <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+        <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-sm flex items-center gap-2 animate-fade-in shadow-sm">
           <span className="w-2 h-2 rounded-full bg-success animate-ping"></span>
           {success}
         </div>
@@ -159,14 +159,14 @@ export default function Post() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-primary/25 border-t-primary animate-spin"></div>
-          <span className="text-text-secondary text-xs">Querying announcements board...</span>
+          <span className="text-text-secondary text-sm">Querying announcements board...</span>
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-card border border-border rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
           <FileText className="w-12 h-12 text-text-secondary/40 animate-pulse-slow" />
           <div>
             <h4 className="font-bold text-text">No posts found</h4>
-            <p className="text-text-secondary text-xs mt-1">There are no announcements published under this search criteria</p>
+            <p className="text-text-secondary text-sm mt-1">There are no announcements published under this search criteria</p>
           </div>
         </div>
       ) : (
@@ -193,7 +193,7 @@ export default function Post() {
 
               <div className="p-5 flex-1 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center gap-2 text-[10px] text-text-secondary font-semibold mb-2">
+                  <div className="flex items-center gap-2 text-xs text-text-secondary font-semibold mb-2">
                     <Calendar className="w-3.5 h-3.5 text-primary" />
                     <span>{post.cdate || 'Recent Announcement'}</span>
                   </div>
@@ -202,13 +202,13 @@ export default function Post() {
                     {post.title}
                   </h3>
                   
-                  <p className="text-xs text-text-secondary leading-relaxed mt-2.5 line-clamp-3">
+                  <p className="text-sm text-text-secondary leading-relaxed mt-2.5 line-clamp-3">
                     {post.description}
                   </p>
                 </div>
 
                 <div className="mt-5 pt-3.5 border-t border-border flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase">
+                  <div className="flex items-center gap-1.5 text-xs font-bold uppercase">
                     <Clock className={`w-3.5 h-3.5 ${post.status === 0 ? 'text-warning' : 'text-text-secondary/60'}`} />
                     <span className={post.status === 0 ? 'text-warning' : 'text-text-secondary'}>
                       {post.status === 0 ? 'Pending Approval' : 'Active Post'}
@@ -218,14 +218,14 @@ export default function Post() {
                   <button
                     type="button"
                     onClick={() => openEdit(post)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 transition-all"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 transition-all"
                   >
                     <Edit2 className="w-3 h-3" /> Edit
                   </button>
 
                   <button
                     onClick={() => handleDelete(post.id)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider text-error-text bg-error-bg hover:bg-error/20 border border-error-border hover:border-error/40 transition-all"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider text-error-text bg-error-bg hover:bg-error/20 border border-error-border hover:border-error/40 transition-all"
                   >
                     <Trash2 className="w-3 h-3" /> Moderate
                   </button>
@@ -239,26 +239,26 @@ export default function Post() {
       <Modal isOpen={isModalOpen} title={selected ? 'Edit Post' : 'Add Post'} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 text-text">
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Title *</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Title *</label>
             <input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={fieldClass} disabled={saving} />
           </div>
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Description *</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Description *</label>
             <textarea rows="4" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className={fieldClass} disabled={saving} />
           </div>
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Status</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Status</label>
             <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className={fieldClass} disabled={saving}>
               <option value={1} className="bg-surface text-text">Active</option>
               <option value={0} className="bg-surface text-text">Pending (Inactive)</option>
             </select>
           </div>
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Image</label>
-            <input type="file" accept="image/*" onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })} className="w-full text-xs text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary hover:file:bg-primary/20" disabled={saving} />
-            {selected?.image && <p className="text-[10px] text-text-secondary mt-2">Current image will be kept unless a new file is selected.</p>}
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Image</label>
+            <input type="file" accept="image/*" onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })} className="w-full text-sm text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20" disabled={saving} />
+            {selected?.image && <p className="text-xs text-text-secondary mt-2">Current image will be kept unless a new file is selected.</p>}
           </div>
-          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-xs tracking-wider uppercase disabled:opacity-50 shadow-glow-primary">
+          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider uppercase disabled:opacity-50 shadow-glow-primary">
             {saving ? 'Saving...' : 'Save Post'}
           </button>
         </form>

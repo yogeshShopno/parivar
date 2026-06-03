@@ -117,38 +117,38 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
       
       {/* SECTION 1: Personal Name details */}
       <div>
-        <h4 className="text-[11px] font-bold uppercase tracking-widest text-primary mb-3">Primary Identity</h4>
+        <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Primary Identity</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">First Name *</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">First Name *</label>
             <input
               type="text"
               value={formData.first_name}
               onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
-              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               disabled={isLoading}
             />
-            {errors.first_name && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.first_name}</p>}
+            {errors.first_name && <p className="text-error-text text-xs mt-1 font-semibold">{errors.first_name}</p>}
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Middle Name</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Middle Name</label>
             <input
               type="text"
               value={formData.middle_name}
               onChange={(e) => setFormData({ ...formData, middle_name: e.target.value })}
-              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               disabled={isLoading}
             />
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Last Name</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Last Name</label>
             <input
               type="text"
               value={formData.last_name}
               onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               disabled={isLoading}
             />
           </div>
@@ -157,34 +157,34 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
 
       {/* SECTION 2: Contact & Authentication */}
       <div>
-        <h4 className="text-[11px] font-bold uppercase tracking-widest text-primary mb-3">Contact & Login Credentials</h4>
+        <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Contact & Login Credentials</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Email Address</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Email Address</label>
             <input
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               disabled={isLoading}
             />
-            {errors.email && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.email}</p>}
+            {errors.email && <p className="text-error-text text-xs mt-1 font-semibold">{errors.email}</p>}
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Mobile Number *</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Mobile Number *</label>
             <input
               type="tel"
               value={formData.number}
               onChange={(e) => setFormData({ ...formData, number: e.target.value })}
-              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               disabled={isLoading}
             />
-            {errors.number && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.number}</p>}
+            {errors.number && <p className="text-error-text text-xs mt-1 font-semibold">{errors.number}</p>}
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">
               {user ? 'Reset Password (optional)' : 'Password *'}
             </label>
             <input
@@ -192,24 +192,24 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
               placeholder={user ? 'Leave blank to keep' : '••••••••'}
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               disabled={isLoading}
             />
-            {errors.password && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.password}</p>}
+            {errors.password && <p className="text-error-text text-xs mt-1 font-semibold">{errors.password}</p>}
           </div>
         </div>
       </div>
 
       {/* SECTION 3: Bio Metrics & Relation */}
       <div>
-        <h4 className="text-[11px] font-bold uppercase tracking-widest text-primary mb-3">Family Metrics</h4>
+        <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Family Metrics</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Relationship</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Relationship</label>
             <select
               value={formData.relation}
               onChange={(e) => setFormData({ ...formData, relation: e.target.value })}
-              className="w-full bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-xs outline-none focus:border-primary/50 cursor-pointer"
+              className="w-full bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50 cursor-pointer"
               disabled={isLoading}
             >
               {['Self', 'Spouse', 'Father', 'Mother', 'Son', 'Daughter', 'Brother', 'Sister', 'Grandfather', 'Grandmother', 'Other'].map(rel => (
@@ -219,11 +219,11 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Gender</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Gender</label>
             <select
               value={formData.gender}
               onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-              className="w-full bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-xs outline-none focus:border-primary/50 cursor-pointer"
+              className="w-full bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50 cursor-pointer"
               disabled={isLoading}
             >
               <option value="" className="bg-surface text-text">Unspecified</option>
@@ -234,22 +234,22 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Date of Birth</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Date of Birth</label>
             <input
               type="date"
               value={formData.dob}
               onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-              className="w-full px-3 py-2 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer"
+              className="w-full px-3 py-2 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer"
               disabled={isLoading}
             />
           </div>
 
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Blood Group</label>
+            <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Blood Group</label>
             <select
               value={formData.blood_group}
               onChange={(e) => setFormData({ ...formData, blood_group: e.target.value })}
-              className="w-full bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-xs outline-none focus:border-primary/50 cursor-pointer"
+              className="w-full bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50 cursor-pointer"
               disabled={isLoading}
             >
               <option value="" className="bg-surface text-text">Unknown</option>
@@ -263,7 +263,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
 
       {canManageRoleFields && (
         <div>
-          <h4 className="text-[11px] font-bold uppercase tracking-widest text-primary mb-3">Roles & Committee Status</h4>
+          <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Roles & Committee Status</h4>
           <div className="bg-surface-secondary border border-border rounded-2xl p-4 flex flex-col md:flex-row items-center gap-6">
             <label className="flex items-center gap-3 cursor-pointer select-none">
               <input
@@ -274,20 +274,20 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
                 disabled={isLoading || isEditingSelf}
                 title={isEditingSelf ? 'You cannot change your own role' : undefined}
               />
-              <div className="text-xs">
+              <div className="text-sm">
                 <div className="font-semibold text-text">Flag as Committee Member</div>
-                <div className="text-[10px] text-text-secondary">Grants administrative privileges in core app</div>
+                <div className="text-xs text-text-secondary">Grants administrative privileges in core app</div>
               </div>
             </label>
 
             {formData.is_committee && (
               <div className="flex-1 w-full animate-fade-in grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Admin Role</label>
+                  <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Admin Role</label>
                   <select
                     value={formData.role_id}
                     onChange={(e) => setFormData({ ...formData, role_id: e.target.value })}
-                    className="w-full bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-xs outline-none focus:border-primary/50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
+                    className="w-full bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-70"
                     disabled={isLoading || isEditingSelf}
                     title={isEditingSelf ? 'You cannot change your own role' : undefined}
                   >
@@ -296,13 +296,13 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Committee Designation</label>
+                  <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Committee Designation</label>
                   <input
                     type="text"
                     placeholder="e.g. President, Vice President, Secretary"
                     value={formData.committee_role}
                     onChange={(e) => setFormData({ ...formData, committee_role: e.target.value })}
-                    className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all disabled:cursor-not-allowed disabled:opacity-70"
+                    className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all disabled:cursor-not-allowed disabled:opacity-70"
                     disabled={isLoading || isEditingSelf}
                     title={isEditingSelf ? 'You cannot change your own role' : undefined}
                   />
@@ -315,14 +315,14 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
 
       {/* SECTION 5: Address */}
       <div>
-        <h4 className="text-[11px] font-bold uppercase tracking-widest text-primary mb-3">Residential Location</h4>
+        <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Residential Location</h4>
         <div>
-          <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Home / Office Address</label>
+          <label className="block text-xs uppercase font-bold text-text-secondary mb-1.5">Home / Office Address</label>
           <textarea
             rows="3"
             value={formData.address}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-            className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+            className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
             disabled={isLoading}
           />
         </div>
@@ -332,7 +332,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full mt-4 bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-xs tracking-wider uppercase transition-all duration-300 disabled:opacity-50 shadow-glow-primary"
+        className="w-full mt-4 bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider uppercase transition-all duration-300 disabled:opacity-50 shadow-glow-primary"
       >
         {isLoading ? 'Processing registry update...' : user ? 'Save Changes' : 'Confirm Registry Entry'}
       </button>

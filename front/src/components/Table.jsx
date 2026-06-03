@@ -7,7 +7,7 @@ export default function Table({ columns, data }) {
         <thead className="bg-surface-secondary">
           <tr>
             {columns.map(col => (
-              <th key={col.key} className="p-3 font-semibold text-text-secondary text-xs uppercase tracking-wider">{col.title}</th>
+              <th key={col.key} className="p-3 font-semibold text-text-secondary text-sm uppercase tracking-wider">{col.title}</th>
             ))}
           </tr>
         </thead>
