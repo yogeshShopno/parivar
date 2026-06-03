@@ -288,6 +288,23 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
+    const isSelfUpdate = [
+      req.user?._id,
+      req.user?.id,
+      req.user?.member_id
+    ].some((value) => value && String(value) === String(id));
+    const isRoleUpdate = [
+      'role',
+      'role_id',
+      'committee_role',
+      'is_committee',
+      'permissions'
+    ].some((field) => req.body[field] !== undefined);
+
+    if (isSelfUpdate && isRoleUpdate) {
+      return res.status(403).json({ message: 'You cannot change your own role.' });
+    }
+
     const {
       first_name,
       middle_name,

@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useContext, useEffect, useMemo, useState } from 'react'
+import { AuthContext } from '../context/AuthContext'
 import { normalizeRoleId } from '../lib/roles'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all'
 
 export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading }) {
+  const { user: loggedInUser } = useContext(AuthContext)
   const [formData, setFormData] = useState({
     first_name: '',
     middle_name: '',
@@ -33,6 +35,16 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
   }, [member])
 
   const activeRoles = useMemo(() => roles.filter((role) => Number(role.status ?? 1) === 1), [roles])
+  const isEditingSelf = Boolean(member && loggedInUser && [
+    member._id,
+    member.id,
+    member.member_id
+  ].some((value) => value && [
+    loggedInUser._id,
+    loggedInUser.id,
+    loggedInUser.member_id
+  ].some((current) => current && String(current) === String(value))))
+  const canManageRoleFields = loggedInUser?.role === 'admin'
 
   const validateImage = (file) => new Promise((resolve) => {
     if (!file) return resolve('')
@@ -58,7 +70,7 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
     if (!formData.number) nextErrors.number = 'number is required'
     if (!member && !formData.password) nextErrors.password = 'Strong password is required'
     if (formData.password && formData.password.length < 8) nextErrors.password = 'Use at least 8 characters'
-    if (!formData.designation) nextErrors.designation = 'Designation is required'
+    if (canManageRoleFields && !isEditingSelf && !formData.designation) nextErrors.designation = 'Designation is required'
     if (formData.status === '') nextErrors.status = 'Status is required'
 
     const imageError = await validateImage(formData.image)
@@ -80,12 +92,15 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
     payload.append('middle_name', formData.middle_name)
     payload.append('last_name', formData.last_name)
     payload.append('number', formData.number)
-    payload.append('role_id', formData.role_id)
-    payload.append('designation', formData.designation)
-    payload.append('committee_role', formData.designation)
-    payload.append('status', formData.status)
-    payload.append('is_committee', 'true')
-    payload.append('relation', 'Self')
+
+    if (canManageRoleFields && !isEditingSelf) {
+      payload.append('role_id', formData.role_id)
+      payload.append('designation', formData.designation)
+      payload.append('committee_role', formData.designation)
+      payload.append('status', formData.status)
+      payload.append('is_committee', 'true')
+      payload.append('relation', 'Self')
+    }
     
     if (formData.password) payload.append('password', formData.password)
     if (formData.image) payload.append('image', formData.image)
@@ -120,21 +135,37 @@ export default function CommitteeMemberForm({ member, roles, onSubmit, isLoading
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Role </label>
-          <select value={formData.role_id} onChange={(e) => setFormData({ ...formData, role_id: e.target.value })} className={fieldClass} disabled={isLoading}>
-            <option value="" className="bg-surface text-text">Select Role</option>
-            {activeRoles.map((role) => <option key={role.id} value={role.id} className="bg-surface text-text">{role.name}</option>)}
-          </select>
-          {errors.role_id && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.role_id}</p>}
+      {canManageRoleFields && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Role </label>
+            <select
+              value={formData.role_id}
+              onChange={(e) => setFormData({ ...formData, role_id: e.target.value })}
+              className={`${fieldClass} disabled:cursor-not-allowed disabled:opacity-70`}
+              disabled={isLoading || isEditingSelf}
+              title={isEditingSelf ? 'You cannot change your own role' : undefined}
+            >
+              <option value="" className="bg-surface text-text">Select Role</option>
+              {activeRoles.map((role) => <option key={role.id} value={role.id} className="bg-surface text-text">{role.name}</option>)}
+            </select>
+            {errors.role_id && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.role_id}</p>}
+          </div>
+          <div>
+            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Designation *</label>
+            <input
+              type="text"
+              placeholder="Enter Designation"
+              value={formData.designation}
+              onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+              className={`${fieldClass} disabled:cursor-not-allowed disabled:opacity-70`}
+              disabled={isLoading || isEditingSelf}
+              title={isEditingSelf ? 'You cannot change your own role' : undefined}
+            />
+            {errors.designation && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.designation}</p>}
+          </div>
         </div>
-        <div>
-          <label className="block text-[10px] uppercase font-bold text-text-secondary mb-1.5">Designation *</label>
-          <input type="text" placeholder="Enter Designation" value={formData.designation} onChange={(e) => setFormData({ ...formData, designation: e.target.value })} className={fieldClass} disabled={isLoading} />
-          {errors.designation && <p className="text-error-text text-[10px] mt-1 font-semibold">{errors.designation}</p>}
-        </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
