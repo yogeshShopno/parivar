@@ -6,18 +6,30 @@ import Modal from '../components/Modal'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 const emptyRoleForm = { name: '', description: '', status: 1, permissions: [] }
+const limit = 10
 
 export default function Roles() {
   const [roles, setRoles] = useState([])
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0, limit })
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
   const [permissionConfig, setPermissionConfig] = useState({ actions: [], modules: [] })
   const [search, setSearch] = useState('')
-  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [selected, setSelected] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [formData, setFormData] = useState(emptyRoleForm)
+
+  const totalPages = Math.max(Number(pagination.totalPages) || 1, 1)
+  const currentPage = Math.min(Math.max(Number(pagination.page) || page || 1, 1), totalPages)
+  const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
+
+  const handleSearch = (value) => {
+    setSearch(value)
+    setPage(1)
+  }
 
   useEffect(() => {
     fetchAll()
@@ -27,18 +39,32 @@ export default function Roles() {
     setLoading(true)
     try {
       const [rolesRes, permissionsRes] = await Promise.all([
-        api.get('/roles'),
+        api.get('/roles', { params: { page, limit, search } }),
         api.get('/permissions')
       ])
-      setRoles(normalizeRoles(unwrapApiData(rolesRes)))
+      const data = rolesRes.data?.data || rolesRes.data || []
+      const pg = rolesRes.data?.pagination || {}
+      setRoles(normalizeRoles(Array.isArray(data) ? data : []))
+      setPagination({
+        page: Number(pg.page || page),
+        totalPages: Number(pg.totalPages || pg.total_pages || pg.last_page || 1),
+        total: Number(pg.total || 0),
+        limit: Number(pg.limit || limit)
+      })
       setPermissionConfig(buildPermissionGroups(unwrapApiData(permissionsRes, { actions: [], modules: [], permissions: [] })))
       setError('')
     } catch (err) {
+      setRoles([])
+      setPagination({ page, totalPages: 1, total: 0, limit })
       setError(err.response?.data?.message || 'Failed to load roles')
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchAll()
+  }, [page, search])
 
   const openCreate = () => {
     setSelected(null)
@@ -116,9 +142,14 @@ export default function Roles() {
     }
   }
 
-  const filteredRoles = useMemo(() => (
-    roles.filter((role) => JSON.stringify(role).toLowerCase().includes(search.toLowerCase()))
-  ), [roles, search])
+  const setSearchValue = (value) => {
+    setSearch(value)
+    setPage(1)
+  }
+
+  const filteredRoles = useMemo(() => {
+    return roles.filter((role) => JSON.stringify(role).toLowerCase().includes(search.toLowerCase()))
+  }, [roles, search])
   const permissionGridStyle = {
     gridTemplateColumns: `minmax(150px, 1fr) repeat(${permissionConfig.actions.length}, minmax(64px, 72px))`
   }
@@ -193,6 +224,36 @@ export default function Roles() {
             </tbody>
           </table>
         </div>
+        {pagination.totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-t border-border bg-surface-secondary/40 text-sm">
+            <span className="text-text-secondary">
+              Page {pagination.page} of {pagination.totalPages} {pagination.total ? `(${pagination.total} total)` : ''}
+            </span>
+            <div className="flex items-center gap-2">
+              <button type="button" disabled={loading || page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+                Previous
+              </button>
+              {pageNumbers.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  disabled={loading || item === currentPage}
+                  onClick={() => setPage(item)}
+                  className={`min-w-10 px-3 py-2 rounded-lg border transition-all ${
+                    item === currentPage
+                      ? 'border-primary bg-primary/10 text-primary font-semibold disabled:opacity-100 disabled:cursor-default'
+                      : 'border-border bg-card text-text hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed'
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+              <button type="button" disabled={loading || page >= pagination.totalPages} onClick={() => setPage((current) => Math.min(pagination.totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <Modal isOpen={isModalOpen} title={selected ? 'Edit Role' : 'Add Role'} onClose={() => setIsModalOpen(false)}>

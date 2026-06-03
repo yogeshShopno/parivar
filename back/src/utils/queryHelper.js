@@ -1,12 +1,6 @@
-const OPTION_KEYS = ['search', 'page', 'limit', 'sort_by', 'sort_order'];
-
 const escapeRegExp = (value = '') => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const hasValue = (value) => value !== undefined && value !== null && value !== '';
-
-const hasQueryOptions = (query = {}, filterFields = []) => {
-  return [...OPTION_KEYS, ...filterFields].some((key) => hasValue(query[key]));
-};
 
 const castValue = (value) => {
   if (value === 'true') return true;
@@ -25,6 +19,7 @@ const queryHelper = async (Model, query = {}, options = {}) => {
     baseQuery = {},
     filterFields = [],
     searchFields = [],
+    defaultLimit = 10,
     defaultSort = { _id: -1 },
     select,
     populate,
@@ -44,33 +39,35 @@ const queryHelper = async (Model, query = {}, options = {}) => {
     }
   });
 
-  const active = hasQueryOptions(query, filterFields);
-  const page = Math.max(parseInt(query.page, 10) || 1, 1);
-  const limit = Math.max(parseInt(query.limit, 10) || 0, 0);
+  const requestedPage = Math.max(parseInt(query.page, 10) || 1, 1);
+  const requestedLimit = parseInt(query.limit, 10);
+  const limit = Math.max(Number.isFinite(requestedLimit) ? requestedLimit : defaultLimit, 1);
   const sortField = query.sort_by || Object.keys(defaultSort)[0] || '_id';
   const sortDirection = String(query.sort_order || '').toLowerCase() === 'asc' ? 1 : -1;
   const sort = query.sort_by ? { [sortField]: sortDirection } : defaultSort;
   const finalQuery = mergeQuery(baseQuery, extraQuery);
+  const total = await Model.countDocuments(finalQuery);
+  const totalPages = Math.max(Math.ceil(total / limit), 1);
+  const page = Math.min(requestedPage, totalPages);
 
   let dbQuery = Model.find(finalQuery).sort(sort);
   if (select) dbQuery = dbQuery.select(select);
   if (populate) dbQuery = dbQuery.populate(populate);
-  if (limit) dbQuery = dbQuery.skip((page - 1) * limit).limit(limit);
+  dbQuery = dbQuery.skip((page - 1) * limit).limit(limit);
   if (lean) dbQuery = dbQuery.lean();
 
-  const [data, total] = await Promise.all([
-    dbQuery,
-    active ? Model.countDocuments(finalQuery) : Promise.resolve(null)
-  ]);
+  const data = await dbQuery;
 
   return {
     data,
-    pagination: active ? {
+    pagination: {
       total,
       page,
-      limit: limit || total,
-      totalPages: limit ? Math.ceil(total / limit) : 1
-    } : undefined
+      limit,
+      totalPages,
+      hasPrevPage: page > 1,
+      hasNextPage: page < totalPages
+    }
   };
 };
 

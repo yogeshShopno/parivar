@@ -1,30 +1,59 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Briefcase, MapPin, Phone, Globe, Trash2, Search, Edit2, RefreshCw, Plus, Eye } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import api, { assetUrl, getBusinessesList } from '../lib/api'
 import Modal from '../components/Modal'
 import BusinessForm from '../components/BusinessForm'
-import Pagination from '../components/Pagination'
-import usePaginatedApi from '../hooks/usePaginatedApi'
+
+const limit = 10
 
 export default function Businesses() {
   const navigate = useNavigate()
-  const {
-    data: businesses,
-    pagination,
-    loading,
-    page,
-    search,
-    setSearch,
-    setPage,
-    refetch: fetchBusinesses
-  } = usePaginatedApi(getBusinessesList, { initialLimit: 10 })
-
+  const [businesses, setBusinesses] = useState([])
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0, limit })
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
+  const [search, setSearchValue] = useState('')
   const [formLoading, setFormLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [selectedBusiness, setSelectedBusiness] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const totalPages = Math.max(Number(pagination.totalPages) || 1, 1)
+  const currentPage = Math.min(Math.max(Number(pagination.page) || page || 1, 1), totalPages)
+  const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
+
+  const fetchBusinesses = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await getBusinessesList({ page, limit, search })
+      const rows = res.data?.data || res.data || []
+      const pg = res.data?.pagination || {}
+      setBusinesses(Array.isArray(rows) ? rows : [])
+      setPagination({
+        page: Number(pg.page || page),
+        totalPages: Number(pg.totalPages || pg.total_pages || pg.last_page || 1),
+        total: Number(pg.total || 0),
+        limit: Number(pg.limit || limit)
+      })
+    } catch (err) {
+      setBusinesses([])
+      setPagination({ page, totalPages: 1, total: 0, limit })
+      setError(err.response?.data?.message || 'Failed to load businesses')
+    } finally {
+      setLoading(false)
+    }
+  }, [page, search])
+
+  useEffect(() => {
+    fetchBusinesses()
+  }, [fetchBusinesses])
+
+  const setSearch = (value) => {
+    setSearchValue(value)
+    setPage(1)
+  }
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this business listing?')) return
@@ -300,7 +329,36 @@ export default function Businesses() {
         </div>
       )}
 
-      <Pagination pagination={pagination} currentPage={page} onPageChange={setPage} loading={loading} />
+      {pagination.totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border border-border bg-surface-secondary/40 rounded-xl text-sm">
+          <span className="text-text-secondary">
+            Page {pagination.page} of {pagination.totalPages} {pagination.total ? `(${pagination.total} total)` : ''}
+          </span>
+          <div className="flex items-center gap-2">
+            <button type="button" disabled={loading || page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+              Previous
+            </button>
+            {pageNumbers.map((item) => (
+              <button
+                key={item}
+                type="button"
+                disabled={loading || item === currentPage}
+                onClick={() => setPage(item)}
+                className={`min-w-10 px-3 py-2 rounded-lg border transition-all ${
+                  item === currentPage
+                    ? 'border-primary bg-primary/10 text-primary font-semibold disabled:opacity-100 disabled:cursor-default'
+                    : 'border-border bg-card text-text hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed'
+                }`}
+              >
+                {item}
+              </button>
+            ))}
+            <button type="button" disabled={loading || page >= pagination.totalPages} onClick={() => setPage((current) => Math.min(pagination.totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       <Modal
         isOpen={isModalOpen}

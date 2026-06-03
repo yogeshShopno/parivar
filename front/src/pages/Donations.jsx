@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   HeartHandshake,
   Trash2,
@@ -14,26 +14,19 @@ import {
 import api from '../lib/api'
 import { getDonationsList } from '../lib/api'
 import Modal from '../components/Modal'
-import Pagination from '../components/Pagination'
-import usePaginatedApi from '../hooks/usePaginatedApi'
+
+const limit = 10
 
 export default function Donations() {
-  const {
-    data: donations,
-    pagination,
-    loading,
-    setFilters: setActiveFilters,
-    setPage,
-    refetch: fetchDonations
-  } = usePaginatedApi(getDonationsList, {
-    initialLimit: 10,
-    initialFilters: {
-      donator_name: '',
-      location: '',
-      donation_purpose: ''
-    }
+  const [donations, setDonations] = useState([])
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0, limit })
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
+  const [activeFilters, setActiveFilters] = useState({
+    donator_name: '',
+    location: '',
+    donation_purpose: ''
   })
-
   const [formLoading, setFormLoading] = useState(false)
   const [filters, setFilters] = useState({
     donator_name: '',
@@ -44,6 +37,32 @@ export default function Donations() {
   const [success, setSuccess] = useState('')
   const [selectedDonation, setSelectedDonation] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const fetchDonations = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await getDonationsList({ page, limit, ...activeFilters })
+      const rows = res.data?.data || res.data || []
+      const pg = res.data?.pagination || {}
+      setDonations(Array.isArray(rows) ? rows : [])
+      setPagination({
+        page: Number(pg.page || page),
+        totalPages: Number(pg.totalPages || pg.total_pages || pg.last_page || 1),
+        total: Number(pg.total || 0),
+        limit: Number(pg.limit || limit)
+      })
+    } catch (err) {
+      setDonations([])
+      setPagination({ page, totalPages: 1, total: 0, limit })
+      setError(err.response?.data?.message || 'Failed to load donations')
+    } finally {
+      setLoading(false)
+    }
+  }, [activeFilters, page])
+
+  useEffect(() => {
+    fetchDonations()
+  }, [fetchDonations])
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this donation?')) return
@@ -109,12 +128,14 @@ export default function Donations() {
 
   const applyFilters = () => {
     setActiveFilters({ ...filters })
+    setPage(1)
   }
 
   const resetFilters = () => {
     const reset = { donator_name: '', location: '', donation_purpose: '' }
     setFilters(reset)
     setActiveFilters(reset)
+    setPage(1)
   }
 
   const formatAmount = (amount) =>
@@ -335,9 +356,38 @@ export default function Donations() {
         </div>
       )}
 
-      <Pagination pagination={pagination} onPageChange={setPage} loading={loading} />
+      {pagination.totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border border-border bg-surface-secondary/40 rounded-xl text-sm">
+          <span className="text-text-secondary">
+            Page {pagination.page} of {pagination.totalPages} {pagination.total ? `(${pagination.total} total)` : ''}
+          </span>
+          <div className="flex items-center gap-2">
+            <button type="button" disabled={loading || page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+              Previous
+            </button>
+            {pageNumbers.map((item) => (
+              <button
+                key={item}
+                type="button"
+                disabled={loading || item === currentPage}
+                onClick={() => setPage(item)}
+                className={`min-w-10 px-3 py-2 rounded-lg border transition-all ${
+                  item === currentPage
+                    ? 'border-primary bg-primary/10 text-primary font-semibold disabled:opacity-100 disabled:cursor-default'
+                    : 'border-border bg-card text-text hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed'
+                }`}
+              >
+                {item}
+              </button>
+            ))}
+            <button type="button" disabled={loading || page >= pagination.totalPages} onClick={() => setPage((current) => Math.min(pagination.totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
-      {/* Add/Edit Modal */}
+      {/* Add/Edit Modal */}}
       <Modal
         isOpen={isModalOpen}
         title={selectedDonation ? 'Edit Donation' : 'Add Donation'}

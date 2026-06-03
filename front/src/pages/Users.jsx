@@ -4,27 +4,19 @@ import api, { getUsersList } from '../lib/api'
 import { normalizeRoles, unwrapApiData } from '../lib/roles'
 import Modal from '../components/Modal'
 import UserForm from '../components/UserForm'
-import Pagination from '../components/Pagination'
-import usePaginatedApi from '../hooks/usePaginatedApi'
+
+const limit = 10
 
 export default function Users() {
-  const {
-    data: users,
-    pagination,
-    loading,
-    search: searchQuery,
-    setSearch: setSearchQuery,
-    filters,
-    setFilters,
-    setPage,
-    refetch: fetchUsers
-  } = usePaginatedApi(getUsersList, {
-    initialLimit: 10,
-    initialFilters: {
-      gender: '',
-      blood_group: '',
-      is_committee: ''
-    }
+  const [users, setUsers] = useState([])
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0, limit })
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
+  const [searchQuery, setSearchValue] = useState('')
+  const [filters, setFiltersValue] = useState({
+    gender: '',
+    blood_group: '',
+    is_committee: ''
   })
 
   const filterGender = filters.gender || ''
@@ -38,6 +30,52 @@ export default function Users() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  const totalPages = Math.max(Number(pagination.totalPages) || 1, 1)
+  const currentPage = Math.min(Math.max(Number(pagination.page) || page || 1, 1), totalPages)
+  const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
+
+  const fetchUsers = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await getUsersList({ page, limit, search: searchQuery, ...filters })
+      const rows = res.data?.data || res.data || []
+      const pg = res.data?.pagination || {}
+      const total = Number(pg.total || 0)
+      const pageLimit = Number(pg.limit || limit)
+      const totalPages = Number(
+        pg.totalPages ||
+        pg.total_pages ||
+        pg.last_page ||
+        (pageLimit > 0 ? Math.ceil(total / pageLimit) : 1)
+      )
+      const currentPage = Number(pg.page || pg.current_page || page)
+
+      setUsers(Array.isArray(rows) ? rows : [])
+      setPagination({
+        page: currentPage,
+        totalPages: Number.isFinite(totalPages) && totalPages > 0 ? totalPages : 1,
+        total,
+        limit: pageLimit,
+        hasPrevPage: Boolean(pg.hasPrevPage ?? currentPage > 1),
+        hasNextPage: Boolean(pg.hasNextPage ?? currentPage < totalPages)
+      })
+
+      if (currentPage !== page) {
+        setPage(currentPage)
+      }
+    } catch (err) {
+      setUsers([])
+      setPagination({ page, totalPages: 1, total: 0, limit, hasPrevPage: false, hasNextPage: false })
+      setError(err.response?.data?.message || 'Failed to load users')
+    } finally {
+      setLoading(false)
+    }
+  }, [filters, page, searchQuery])
+
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
+
   useEffect(() => {
     const fetchRoles = async () => {
       try {
@@ -50,6 +88,16 @@ export default function Users() {
 
     fetchRoles()
   }, [])
+
+  const setSearchQuery = (value) => {
+    setSearchValue(value)
+    setPage(1)
+  }
+
+  const setFilters = (value) => {
+    setFiltersValue((current) => (typeof value === 'function' ? value(current) : value))
+    setPage(1)
+  }
 
   // Handle Search submit
   const handleSearchSubmit = (e) => {
@@ -123,11 +171,7 @@ export default function Users() {
     })
   }
 
-  const handlePageChange = (pageNumber) => {
-    console.log('Changing to page:', pageNumber)
-    const nextPage = Number(pageNumber) || 1
-    setPage(nextPage)
-  }
+  
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -234,106 +278,116 @@ export default function Users() {
           <div className="w-8 h-8 rounded-full border-2 border-primary/25 border-t-primary animate-spin"></div>
           <span className="text-text-secondary text-sm">Querying members data...</span>
         </div>
-      ) : users.length === 0 ? (
-        <div className="bg-surface border border-border rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
-          <UsersIcon className="w-12 h-12 text-text-secondary" />
-          <div>
-            <h4 className="font-bold text-text">No registry matches found</h4>
-            <p className="text-text-secondary text-sm mt-1">Try expanding your search criteria or register a new member</p>
-          </div>
-        </div>
       ) : (
         <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-glass-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold uppercase tracking-wider">
-                  <th className="p-4">Member ID</th>
-                  <th className="p-4">Name</th>
-                  <th className="p-4">Contact Info</th>
-                  <th className="p-4">Bio Metrics</th>
-                  <th className="p-4">Status &amp; Role</th>
-                  <th className="p-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {users.map(user => (
-                  <tr key={user.id} className="hover:bg-surface-secondary text-sm text-text-secondary transition-colors">
-                    {/* ID */}
-                    <td className="p-4 font-mono font-bold text-primary">{user.id}</td>
-
-                    {/* Name details */}
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary border border-primary/20 uppercase">
-                          {user.first_name ? user.first_name.substring(0, 1) : '-'}
-                          {user.last_name ? user.last_name.substring(0, 1) : ''}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-text">{user.name}</div>
-                          <div className="text-sm text-text-secondary mt-0.5 capitalize">{user.relation || 'Self'}</div>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Contact details */}
-                    <td className="p-4">
-                      <div>{user.email || <span className="text-text-secondary">No Email</span>}</div>
-                      <div className="text-sm text-text-secondary mt-0.5 font-mono">{user.phone}</div>
-                    </td>
-
-                    {/* Gender and Blood */}
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-text-secondary">{user.gender || '-'}</span>
-                        {user.blood_group && (
-                          <>
-                            <span className="w-1.5 h-1.5 rounded-full bg-error"></span>
-                            <span className="font-bold text-error-text">{user.blood_group}</span>
-                          </>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Role / Committee */}
-                    <td className="p-4">
-                      {user.is_committee ? (
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary font-medium">
-                          <Sparkles className="w-3.5 h-3.5 text-primary" />
-                          <span>{user.committee_role || 'Committee'}</span>
-                        </div>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded bg-surface-secondary text-text-secondary font-medium text-sm">
-                          Member
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleEdit(user)}
-                          className="p-2 text-primary hover:text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl transition-all"
-                          title="Edit Profile"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(user.id)}
-                          className="p-2 text-error-text hover:text-error bg-error-bg hover:bg-error/20 border border-error-border rounded-xl transition-all"
-                          title="Delete Member"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
+          {users.length === 0 ? (
+            <div className="p-16 text-center flex flex-col items-center justify-center gap-4">
+              <UsersIcon className="w-12 h-12 text-text-secondary" />
+              <div>
+                <h4 className="font-bold text-text">No registry matches found</h4>
+                <p className="text-text-secondary text-sm mt-1">Try expanding your search criteria or register a new member</p>
+              </div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold uppercase tracking-wider">
+                    <th className="p-4">Member ID</th>
+                    <th className="p-4">Name</th>
+                    <th className="p-4">Contact Info</th>
+                    <th className="p-4">Bio Metrics</th>
+                    <th className="p-4">Status &amp; Role</th>
+                    <th className="p-4 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {users.map(user => (
+                    <tr key={user.id} className="hover:bg-surface-secondary text-sm text-text-secondary transition-colors">
+                      <td className="p-4 font-mono font-bold text-primary">{user.id}</td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary border border-primary/20 uppercase">
+                            {user.first_name ? user.first_name.substring(0, 1) : '-'}
+                            {user.last_name ? user.last_name.substring(0, 1) : ''}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-text">{user.name}</div>
+                            <div className="text-sm text-text-secondary mt-0.5 capitalize">{user.relation || 'Self'}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div>{user.email || <span className="text-text-secondary">No Email</span>}</div>
+                        <div className="text-sm text-text-secondary mt-0.5 font-mono">{user.phone || user.number}</div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-text-secondary">{user.gender || '-'}</span>
+                          {user.blood_group && (
+                            <>
+                              <span className="w-1.5 h-1.5 rounded-full bg-error"></span>
+                              <span className="font-bold text-error-text">{user.blood_group}</span>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        {user.is_committee ? (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary font-medium">
+                            <Sparkles className="w-3.5 h-3.5 text-primary" />
+                            <span>{user.committee_role || 'Committee'}</span>
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded bg-surface-secondary text-text-secondary font-medium text-sm">
+                            Member
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={() => handleEdit(user)} className="p-2 text-primary hover:text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl transition-all" title="Edit Profile">
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => handleDelete(user.id)} className="p-2 text-error-text hover:text-error bg-error-bg hover:bg-error/20 border border-error-border rounded-xl transition-all" title="Delete Member">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-t border-border bg-surface-secondary/40 text-sm">
+            <span className="text-text-secondary">
+              Page {currentPage} of {totalPages} {pagination.total ? `(${pagination.total} total)` : ''}
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <button type="button" disabled={loading || currentPage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+                Previous
+              </button>
+              {pageNumbers.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  disabled={loading || item === currentPage}
+                  onClick={() => setPage(item)}
+                  className={`min-w-10 px-3 py-2 rounded-lg border ${
+                    item === currentPage
+                      ? 'border-primary bg-primary/10 text-primary font-semibold'
+                      : 'border-border bg-card text-text hover:bg-surface-secondary'
+                  } disabled:cursor-not-allowed`}
+                >
+                  {item}
+                </button>
+              ))}
+              <button type="button" disabled={loading || currentPage >= totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+                Next
+              </button>
+            </div>
           </div>
-        <Pagination  pagination={pagination}  onPageChange={handlePageChange} loading={loading} />
       </div>
       )}
 

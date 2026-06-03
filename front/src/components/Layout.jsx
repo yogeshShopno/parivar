@@ -7,8 +7,8 @@ export default function Layout() {
   return (
     <div className="min-h-screen flex bg-background text-text overflow-x-hidden font-sans">
       {/* Decorative dynamic ambient background glows */}
-      <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary-glow blur-[120px] animate-pulse-slow"></div>
-      <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-primary-glow blur-[120px] animate-pulse-slow" style={{ animationDelay: '1.5s' }}></div>
+      <div className="fixed top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary-glow blur-[120px] animate-pulse-slow pointer-events-none"></div>
+      <div className="fixed bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-primary-glow blur-[120px] animate-pulse-slow pointer-events-none" style={{ animationDelay: '1.5s' }}></div>
 
       {/* Sidebar - fixed and styled */}
       <Sidebar />

@@ -4,26 +4,51 @@ import api, { getCommitteeMembersList } from '../lib/api'
 import { normalizeRoles, unwrapApiData } from '../lib/roles'
 import Modal from '../components/Modal'
 import CommitteeMemberForm from '../components/CommitteeMemberForm'
-import Pagination from '../components/Pagination'
-import usePaginatedApi from '../hooks/usePaginatedApi'
+
+const limit = 10
 
 export default function CommitteeMembers() {
-  const {
-    data: users,
-    pagination,
-    loading,
-    search,
-    setSearch,
-    setPage,
-    refetch: fetchUsers
-  } = usePaginatedApi(getCommitteeMembersList, { initialLimit: 10 })
-
+  const [users, setUsers] = useState([])
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0, limit })
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
+  const [search, setSearchValue] = useState('')
   const [roles, setRoles] = useState([])
   const [saving, setSaving] = useState(false)
   const [selected, setSelected] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+
+  const totalPages = Math.max(Number(pagination.totalPages) || 1, 1)
+  const currentPage = Math.min(Math.max(Number(pagination.page) || page || 1, 1), totalPages)
+  const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
+
+  const fetchUsers = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await getCommitteeMembersList({ page, limit, search })
+      const rows = res.data?.data || res.data || []
+      const pg = res.data?.pagination || {}
+      setUsers(Array.isArray(rows) ? rows : [])
+      setPagination({
+        page: Number(pg.page || page),
+        totalPages: Number(pg.totalPages || pg.total_pages || pg.last_page || 1),
+        total: Number(pg.total || 0),
+        limit: Number(pg.limit || limit)
+      })
+    } catch (err) {
+      setUsers([])
+      setPagination({ page, totalPages: 1, total: 0, limit })
+      setError(err.response?.data?.message || 'Failed to load committee members')
+    } finally {
+      setLoading(false)
+    }
+  }, [page, search])
+
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -36,6 +61,11 @@ export default function CommitteeMembers() {
     }
     fetchRoles()
   }, [])
+
+  const setSearch = (value) => {
+    setSearchValue(value)
+    setPage(1)
+  }
 
   const handleSubmit = async (formData) => {
     setSaving(true)
@@ -69,10 +99,7 @@ export default function CommitteeMembers() {
     setIsModalOpen(true)
   }
 
-  const handlePageChange = (pageNumber) => {
-    const nextPage = Number(pageNumber) || 1
-    setPage(nextPage)
-  }
+
 
   return (
     <div className="space-y-6 animate-slide-up select-none text-text">
@@ -151,7 +178,36 @@ export default function CommitteeMembers() {
             </tbody>
           </table>
         </div>
-        <Pagination pagination={pagination} onPageChange={handlePageChange} loading={loading} />
+        {pagination.totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-t border-border bg-surface-secondary/40 text-sm">
+            <span className="text-text-secondary">
+              Page {pagination.page} of {pagination.totalPages} {pagination.total ? `(${pagination.total} total)` : ''}
+            </span>
+            <div className="flex items-center gap-2">
+              <button type="button" disabled={loading || page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+                Previous
+              </button>
+              {pageNumbers.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  disabled={loading || item === currentPage}
+                  onClick={() => setPage(item)}
+                  className={`min-w-10 px-3 py-2 rounded-lg border transition-all ${
+                    item === currentPage
+                      ? 'border-primary bg-primary/10 text-primary font-semibold disabled:opacity-100 disabled:cursor-default'
+                      : 'border-border bg-card text-text hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed'
+                  }`}
+                >
+                  {item}
+                </button>
+              ))}
+              <button type="button" disabled={loading || page >= pagination.totalPages} onClick={() => setPage((current) => Math.min(pagination.totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <Modal isOpen={isModalOpen} title={selected ? 'Edit Committee Member' : 'Add Committee Member'} onClose={() => setIsModalOpen(false)}>

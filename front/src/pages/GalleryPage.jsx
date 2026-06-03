@@ -1,25 +1,19 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
 import api, { assetUrl, getGalleryList } from '../lib/api'
 import Modal from '../components/Modal'
-import Pagination from '../components/Pagination'
-import usePaginatedApi from '../hooks/usePaginatedApi'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
+const limit = 12
 
 const createPreviewUrl = (file) => URL.createObjectURL(file)
 
 export default function GalleryPage() {
-  const {
-    data: rows,
-    pagination,
-    loading,
-    search,
-    setSearch,
-    setPage,
-    refetch: fetchGallery
-  } = usePaginatedApi(getGalleryList, { initialLimit: 12 })
-
+  const [rows, setRows] = useState([])
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0, limit })
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
+  const [search, setSearchValue] = useState('')
   const [categories, setCategories] = useState([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -34,6 +28,10 @@ export default function GalleryPage() {
   const [newFiles, setNewFiles] = useState([])
   const [filePreviews, setFilePreviews] = useState([])
 
+  const totalPages = Math.max(Number(pagination.totalPages) || 1, 1)
+  const currentPage = Math.min(Math.max(Number(pagination.page) || page || 1, 1), totalPages)
+  const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
+
   const emptyState = useMemo(() => ({
     categoryId: '',
     categoryName: '',
@@ -44,10 +42,40 @@ export default function GalleryPage() {
     filePreviews: []
   }), [])
 
+  const fetchGallery = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await getGalleryList({ page, limit, search })
+      const data = res.data?.data || res.data || []
+      const pg = res.data?.pagination || {}
+      setRows(Array.isArray(data) ? data : [])
+      setPagination({
+        page: Number(pg.page || page),
+        totalPages: Number(pg.totalPages || pg.total_pages || pg.last_page || 1),
+        total: Number(pg.total || 0),
+        limit: Number(pg.limit || limit)
+      })
+    } catch (err) {
+      setRows([])
+      setPagination({ page, totalPages: 1, total: 0, limit })
+      setError(err.response?.data?.message || 'Failed to load gallery')
+    } finally {
+      setLoading(false)
+    }
+  }, [page, search])
+
   useEffect(() => {
     fetchGallery()
+  }, [fetchGallery])
+
+  useEffect(() => {
     fetchCategories()
   }, [])
+
+  const setSearch = (value) => {
+    setSearchValue(value)
+    setPage(1)
+  }
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -274,7 +302,36 @@ export default function GalleryPage() {
               </tbody>
             </table>
           </div>
-          <Pagination pagination={pagination} onPageChange={setPage} loading={loading} />
+          {pagination.totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-t border-border bg-surface-secondary/40 text-sm">
+              <span className="text-text-secondary">
+                Page {pagination.page} of {pagination.totalPages} {pagination.total ? `(${pagination.total} total)` : ''}
+              </span>
+              <div className="flex items-center gap-2">
+                <button type="button" disabled={loading || page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+                  Previous
+                </button>
+                {pageNumbers.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    disabled={loading || item === currentPage}
+                    onClick={() => setPage(item)}
+                    className={`min-w-10 px-3 py-2 rounded-lg border transition-all ${
+                      item === currentPage
+                        ? 'border-primary bg-primary/10 text-primary font-semibold disabled:opacity-100 disabled:cursor-default'
+                        : 'border-border bg-card text-text hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed'
+                    }`}
+                  >
+                    {item}
+                  </button>
+                ))}
+                <button type="button" disabled={loading || page >= pagination.totalPages} onClick={() => setPage((current) => Math.min(pagination.totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
