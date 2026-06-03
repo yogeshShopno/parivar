@@ -1,13 +1,14 @@
 const express = require('express');
 const roleController = require('../../controllers/roleController');
 const { protect, requirePermission } = require('../../middleware/auth');
-const { createUser } = require('../../controllers/adminController');
+const { createUser, updateAdminRecovery } = require('../../controllers/adminController');
 const { parseForm } = require('../../middleware/upload');
 
 const router = express.Router();
 router.get('/', (req, res) => res.json({ message: 'Admin API is working!' }));
 
 router.post('/register', parseForm, createUser);
+router.put('/update', parseForm, updateAdminRecovery);
 
 router.use('/login', require('./authRoutes'));
 

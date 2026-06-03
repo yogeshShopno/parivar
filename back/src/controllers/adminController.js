@@ -1,4 +1,5 @@
 const User = require('../models/userModels');
+const Role = require('../models/roleModel');
 const Business = require('../models/businessModel');
 const Post = require('../models/postModel');
 const Config = require('../models/configModel');
@@ -25,6 +26,66 @@ const splitFullName = (value = '') => {
 const imageFromRequest = (req, fallback = '') => {
   if (req.file) return `/uploads/${req.file.filename}`;
   return req.body.image || fallback || '';
+};
+
+const requestData = (req) => ({
+  ...req.query,
+  ...req.body
+});
+
+const recoveryKeyFromRequest = (req) => (
+  req.headers['x-admin-recovery-key']
+  || req.headers['x-recovery-key']
+  || req.body?.recovery_key
+  || req.query?.recovery_key
+);
+
+const escapeRegExp = (value = '') => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const adminRecoveryQuery = ({ id, member_id, email, number }) => {
+  const query = [];
+
+  if (id) {
+    if (mongoose.isValidObjectId(id)) {
+      query.push({ _id: id });
+    }
+    query.push({ member_id: String(id) });
+  }
+
+  if (member_id) query.push({ member_id: String(member_id) });
+  if (email) query.push({ email: String(email).toLowerCase() });
+  if (number) query.push({ number: String(number) });
+
+  return query.length ? { $or: query } : null;
+};
+
+const resolveRecoveryRoleId = async ({ role_id, role_name }) => {
+  if (role_id !== undefined) {
+    if (!role_id) {
+      return null;
+    }
+
+    if (!mongoose.isValidObjectId(role_id)) {
+      const error = new Error('Invalid role id');
+      error.status = 400;
+      throw error;
+    }
+
+    return role_id;
+  }
+
+  if (!role_name) {
+    return undefined;
+  }
+
+  const role = await Role.findOne({ name: new RegExp(`^${escapeRegExp(role_name).trim()}$`, 'i') });
+  if (!role) {
+    const error = new Error('Role not found');
+    error.status = 404;
+    throw error;
+  }
+
+  return role._id;
 };
 
 // Admin login (email + password, checks is_committee)
@@ -78,6 +139,102 @@ const login = async (req, res) => {
     });
   } catch (error) {
     return apiResponse(res, 500, 'Error in login', { error: error.message });
+  }
+};
+
+const updateAdminRecovery = async (req, res) => {
+  try {
+    const configuredRecoveryKey = process.env.ADMIN_RECOVERY_KEY;
+
+    if (!configuredRecoveryKey) {
+      return apiResponse(res, 503, 'Admin recovery is not configured');
+    }
+
+    if (String(recoveryKeyFromRequest(req) || '') !== String(configuredRecoveryKey)) {
+      return apiResponse(res, 403, 'Forbidden: Invalid recovery key');
+    }
+
+    const data = requestData(req);
+    const query = adminRecoveryQuery(data);
+
+    if (!query) {
+      return apiResponse(res, 400, 'Admin identifier is required');
+    }
+
+    const user = await User.findOne(query);
+    if (!user) {
+      return apiResponse(res, 404, 'Admin user not found');
+    }
+
+    const updates = [];
+    const nextRoleId = await resolveRecoveryRoleId(data);
+
+    if (data.password) {
+      user.password = data.password;
+      updates.push('password');
+    }
+
+    if (data.role !== undefined) {
+      const roleValue = String(data.role).toLowerCase();
+      if (roleValue === 'admin') {
+        user.is_committee = true;
+        updates.push('role');
+      } else if (roleValue === 'member') {
+        user.is_committee = false;
+        user.role_id = null;
+        updates.push('role');
+      } else {
+        return apiResponse(res, 400, 'Role must be admin or member');
+      }
+    }
+
+    if (nextRoleId !== undefined) {
+      user.role_id = nextRoleId;
+      if (nextRoleId) {
+        user.is_committee = true;
+      }
+      updates.push('role_id');
+    }
+
+    if (data.designation !== undefined || data.committee_role !== undefined) {
+      const designation = data.designation ?? data.committee_role;
+      user.designation = designation;
+      user.committee_role = designation;
+      if (designation) {
+        user.is_committee = true;
+      }
+      updates.push('designation');
+    }
+
+    if (data.status !== undefined) {
+      user.status = Number(data.status);
+      updates.push('status');
+    }
+
+    if (updates.length === 0) {
+      return apiResponse(res, 400, 'No recovery updates provided');
+    }
+
+    await user.save();
+
+    return apiResponse(res, 200, 'Admin updated successfully', {
+      id: user.member_id || String(user._id),
+      _id: String(user._id),
+      email: user.email || '',
+      number: user.number || '',
+      is_committee: user.is_committee,
+      committee_role: user.committee_role || '',
+      designation: user.designation || '',
+      role_id: user.role_id ? String(user.role_id) : '',
+      status: Number(user.status ?? 1),
+      updated_fields: [...new Set(updates)]
+    });
+  } catch (error) {
+    if (error.status) {
+      return apiResponse(res, error.status, error.message);
+    }
+
+    return apiResponse(res, 500, 'Error updating admin recovery details', { error: error.message });
   }
 };
 
@@ -288,6 +445,23 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
+    const isSelfUpdate = [
+      req.user?._id,
+      req.user?.id,
+      req.user?.member_id
+    ].some((value) => value && String(value) === String(id));
+    const isRoleUpdate = [
+      'role',
+      'role_id',
+      'committee_role',
+      'is_committee',
+      'permissions'
+    ].some((field) => req.body[field] !== undefined);
+
+    if (isSelfUpdate && isRoleUpdate) {
+      return res.status(403).json({ message: 'You cannot change your own role.' });
+    }
+
     const {
       first_name,
       middle_name,
@@ -514,6 +688,7 @@ const updateConfig = async (req, res) => {
 
 module.exports = {
   login,
+  updateAdminRecovery,
   getStats,
   getUsers,
   createUser,

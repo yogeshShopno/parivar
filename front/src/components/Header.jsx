@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { LogOut, Search, Bell, Sparkles } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext'
 import { masterLabels, routeTitles } from '../config/navigation'
+import GoogleTranslate from './GoogleTranslate'
 
 export default function Header() {
   const { logout, user } = useContext(AuthContext)
@@ -55,6 +56,9 @@ export default function Header() {
           <Bell className="w-4 h-4" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error animate-pulse"></span>
         </button>
+
+        {/* Google Translate Widget */}
+        <GoogleTranslate />
 
         {/* Vertical divider */}
         <span className="w-px h-6 bg-border"></span>

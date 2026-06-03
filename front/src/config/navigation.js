@@ -15,25 +15,25 @@ import {
 } from 'lucide-react'
 
 export const coreNavigation = [
-  { to: '/', label: 'Dashboard', icon: Home, end: true, title: 'System Overview', permission: 'dashboard.view' },
-  { to: '/committee', label: 'Committee Members', icon: UserCog, title: 'Committee Members', permission: 'committee.list' },
-  { to: '/roles', label: 'Roles', icon: ShieldCheck, title: 'Roles & Permissions', permission: 'roles.list' },
-  { to: '/users', label: 'Members', icon: Users, title: 'Member Directory', permission: 'members.list' },
-  { to: '/festivals', label: 'Festivals', icon: CalendarDays, title: 'Festivals', permission: 'festivals.list' },
-  { to: '/events', label: 'Events', icon: CalendarDays, title: 'Events', permission: 'events.list' },
-  { to: '/gallery', label: 'Gallery', icon: Image, title: 'Gallery', permission: 'gallery.list' },
-  { to: '/banners', label: 'Banners', icon: Megaphone, title: 'Banner Manager', permission: 'banners.list' },
-  { to: '/matrimonies', label: 'Matrimonies', icon: Users, title: 'Matrimony Profiles', permission: 'matrimonies.list' },
-  { to: '/businesses', label: 'Businesses', icon: Briefcase, title: 'Business Index', permission: 'businesses.list' },
-  { to: '/students', label: 'Students', icon: GraduationCap, title: 'Students', permission: 'students.list' },
-  { to: '/donations', label: 'Donations', icon: HeartHandshake, title: 'Donations', permission: 'donations.list' },
-  { to: '/posts', label: 'Posts', icon: FileText, title: 'Post Moderator', permission: 'posts.list' },
-  { to: '/news', label: 'News', icon: FileText, title: 'News Moderator', permission: 'news.list' },
+  { to: '/admin', label: 'Dashboard', icon: Home, end: true, title: 'System Overview', permission: 'dashboard.view' },
+  { to: '/admin/committee', label: 'Committee Members', icon: UserCog, title: 'Committee Members', permission: 'committee.list' },
+  { to: '/admin/roles', label: 'Roles', icon: ShieldCheck, title: 'Roles & Permissions', permission: 'roles.list' },
+  { to: '/admin/users', label: 'Members', icon: Users, title: 'Member Directory', permission: 'members.list' },
+  { to: '/admin/festivals', label: 'Festivals', icon: CalendarDays, title: 'Festivals', permission: 'festivals.list' },
+  { to: '/admin/events', label: 'Events', icon: CalendarDays, title: 'Events', permission: 'events.list' },
+  { to: '/admin/gallery', label: 'Gallery', icon: Image, title: 'Gallery', permission: 'gallery.list' },
+  { to: '/admin/banners', label: 'Banners', icon: Megaphone, title: 'Banner Manager', permission: 'banners.list' },
+  { to: '/admin/matrimonies', label: 'Matrimonies', icon: Users, title: 'Matrimony Profiles', permission: 'matrimonies.list' },
+  { to: '/admin/businesses', label: 'Businesses', icon: Briefcase, title: 'Business Index', permission: 'businesses.list' },
+  { to: '/admin/students', label: 'Students', icon: GraduationCap, title: 'Students', permission: 'students.list' },
+  { to: '/admin/donations', label: 'Donations', icon: HeartHandshake, title: 'Donations', permission: 'donations.list' },
+  { to: '/admin/posts', label: 'Posts', icon: FileText, title: 'Post Moderator', permission: 'posts.list' },
+  { to: '/admin/news', label: 'News', icon: FileText, title: 'News Moderator', permission: 'news.list' },
 
-  { to: '/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries', permission: 'contact-inquiries.list' },
-  { to: '/feedback', label: 'Feedback', icon: FileText, title: 'Feedback', permission: 'feedback.list' },
-  { to: '/birthday', label: 'Birthdays', icon: CalendarDays, title: 'Member Birthdays', permission: 'birthday.list' },
-  { to: '/job-vacancy', label: 'Job Vacancies', icon: Briefcase, title: 'Job Vacancies', permission: 'job-vacancy.list' }
+  { to: '/admin/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries', permission: 'contact-inquiries.list' },
+  { to: '/admin/feedback', label: 'Feedback', icon: FileText, title: 'Feedback', permission: 'feedback.list' },
+  { to: '/admin/birthday', label: 'Birthdays', icon: CalendarDays, title: 'Member Birthdays', permission: 'birthday.list' },
+  { to: '/admin/job-vacancy', label: 'Job Vacancies', icon: Briefcase, title: 'Job Vacancies', permission: 'job-vacancy.list' }
 ]
 
 export const masterNavigation = [
@@ -51,7 +51,7 @@ export const masterNavigation = [
 ]
 
 export const configurationNavigation = [
-  { to: '/settings', label: 'Theme Config', icon: Settings, title: 'Theme Customizer', permission: 'settings.edit' }
+  { to: '/admin/settings', label: 'Theme Config', icon: Settings, title: 'Theme Customizer', permission: 'settings.edit' }
 ]
 
 export const routeTitles = [

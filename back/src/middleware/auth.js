@@ -143,6 +143,64 @@ const getRolePermissions = (user = {}) => {
   return [];
 };
 
+const ADMIN_CONTROLLED_USER_FIELDS = [
+  'role',
+  'role_id',
+  'permissions',
+  'is_committee',
+  'committee_role',
+  'status'
+];
+
+const isSameUser = (user = {}, id = '') => {
+  const normalizedId = String(id || '');
+
+  return [
+    user._id,
+    user.id,
+    user.member_id
+  ].some((value) => value && String(value) === normalizedId);
+};
+
+const isAdminUser = (user = {}) => (
+  user.role === 'admin'
+  || user.committee_role === 'President'
+  || getRolePermissions(user).includes('members.edit')
+);
+
+const authorizeUserUpdate = (req, res, next) => {
+  const targetId = req.params.id || req.body?.id || req.body?.member_id;
+  const isAdmin = isAdminUser(req.user);
+  const isSelfUpdate = targetId && isSameUser(req.user, targetId);
+  const isRoleUpdate = ADMIN_CONTROLLED_USER_FIELDS.some((field) => (
+    req.body && Object.prototype.hasOwnProperty.call(req.body, field)
+  ));
+
+  if (isAdmin && isSelfUpdate && isRoleUpdate) {
+    return res.status(403).json({ message: 'You cannot change your own role.' });
+  }
+
+  if (isAdmin) {
+    return next();
+  }
+
+  if (!targetId || !isSelfUpdate) {
+    return res.status(403).json({
+      status: 403,
+      message: 'Forbidden: You do not have permission for this action',
+      data: []
+    });
+  }
+
+  ADMIN_CONTROLLED_USER_FIELDS.forEach((field) => {
+    if (req.body && Object.prototype.hasOwnProperty.call(req.body, field)) {
+      delete req.body[field];
+    }
+  });
+
+  return next();
+};
+
 const legacyPermissionFor = (permission) => {
   const legacyMap = {
     'members.': 'users.manage',
@@ -198,4 +256,4 @@ const requirePermission = (permission) => async (req, res, next) => {
   });
 };
 
-module.exports = { getRolePermissions, protect, getTokenFromRequest, requirePermission };
+module.exports = { authorizeUserUpdate, getRolePermissions, protect, getTokenFromRequest, requirePermission };
