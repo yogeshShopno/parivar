@@ -13,7 +13,7 @@ export default function SettingsPage() {
     borderColor: '#E8D9C8',
     gradientStart: '#E65100',
     gradientEnd: '#7B0D1C',
-   
+
   })
   const [loading, setLoading] = useState(false)
   const [saveLoading, setSaveLoading] = useState(false)
@@ -41,10 +41,10 @@ export default function SettingsPage() {
         borderColor: data.borderColor || '#E8D9C8',
         gradientStart: data.gradientStart || '#E65100',
         gradientEnd: data.gradientEnd || '#7B0D1C',
-      
+
       }
       setConfig(cleaned)
-      
+
     } catch (err) {
       setError('Failed to fetch platform configurations')
       console.error(err)
@@ -63,7 +63,7 @@ export default function SettingsPage() {
       Object.entries(config).forEach(([key, value]) => {
         payload.append(key, value ?? '')
       })
-     
+
       await api.put('/update_app_theme', payload)
       setSuccess('Platform theme branding updated successfully! Changes will reflect across mobile & web environments.')
       setTimeout(() => setSuccess(''), 4000)
@@ -125,19 +125,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 animate-slide-up select-none text-text">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-text">Platform Branding</h2>
-          <p className="text-text-secondary text-xs mt-0.5">Customize global styles, theme variables, and brand aesthetics</p>
-        </div>
-        <button
-          onClick={handleResetDefaults}
-          className="flex items-center gap-2 bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
-        >
-          <RefreshCw className="w-3.5 h-3.5" /> Defaults
-        </button>
-      </div>
+
 
       {/* Alerts */}
       {error && (
@@ -155,22 +143,34 @@ export default function SettingsPage() {
 
       {/* Main Designer Config Panel */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* Core Inputs Form */}
         <form onSubmit={handleSubmit} className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-glass-sm space-y-5">
           <div className="flex items-center justify-between border-b border-border pb-4">
             <h3 className="text-sm font-bold text-text flex items-center gap-2">
               <Settings className="w-4 h-4 text-primary" />
-              Branding Tokens Configurator
+              Theme Settings
             </h3>
+
+            <div className="flex items-center gap-2">
+                      <button
+              onClick={handleResetDefaults}
+              className="flex items-center gap-2 bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
+            >
+              <RefreshCw className="w-3.5 h-3.5" /> Defaults
+            </button>
             <button
               type="submit"
               disabled={saveLoading}
               className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl text-xs font-bold shadow-glow-primary transition-all duration-300"
             >
               <Save className="w-4 h-4" />
-              {saveLoading ? 'Saving Tokens...' : 'Commit Theme'}
+              {saveLoading ? 'Saving Tokens...' : 'Save'}
             </button>
+
+            </div>
+
+    
           </div>
 
           <div className="space-y-4">
@@ -229,7 +229,7 @@ export default function SettingsPage() {
               keyName="gradientEnd"
             />
 
-            
+
           </div>
         </form>
 
@@ -240,14 +240,14 @@ export default function SettingsPage() {
               <Sparkles className="w-4 h-4 text-primary" />
               <h3 className="text-sm font-bold text-text">Live Brand Palette Preview</h3>
             </div>
-            
+
             <p className="text-[10px] text-text-secondary leading-relaxed mb-6">
               Preview represents the layout of the mobile application dashboard using current theme tokens.
             </p>
 
             {/* Mobile layout container mockup */}
             <div className="w-full rounded-2xl border-4 border-text overflow-hidden shadow-glass-lg relative select-none" style={{ backgroundColor: config.backgroundColor }}>
-              
+
               {/* Header Gradient mockup */}
               <div className="h-28 p-4 flex flex-col justify-between relative" style={{ backgroundImage: `linear-gradient(to bottom right, ${config.gradientStart}, ${config.gradientEnd})` }}>
                 <div className="flex items-center justify-between">

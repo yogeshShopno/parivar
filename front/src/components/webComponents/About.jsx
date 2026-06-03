@@ -73,7 +73,7 @@ export default function About() {
         <div className="flex justify-center lg:justify-start">
           <img
             src="/mobile.png"
-            alt="Paneliya Parivar mobile app"
+            alt="Vala Parivar mobile app"
             className="w-full max-w-md lg:max-w-lg object-contain"
             loading="lazy"
           />
@@ -85,7 +85,7 @@ export default function About() {
             style={{ color: theme.primaryColor }}
           >
             <Home className="h-4 w-4" />
-            About Paneliya Parivar
+            About Vala  Parivar
           </p>
 
           <h2
@@ -99,7 +99,7 @@ export default function About() {
             className="mt-5 text-base leading-7"
             style={{ color: shadeColor(theme.textColor, 25) }}
           >
-            Paneliya Parivar is a warm, modern community platform that helps families and groups stay beautifully connected, combining elegant design with the joy of being together across every generation.
+            Vala Parivar is a warm, modern community platform that helps families and groups stay beautifully connected, combining elegant design with the joy of being together across every generation.
           </p>
 
           <div className="mt-7 divide-y" style={{ borderColor: theme.borderColor }}>

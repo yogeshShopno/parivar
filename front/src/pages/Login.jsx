@@ -45,9 +45,8 @@ export default function Login() {
             <Shield className="w-6 h-6 text-white" />
           </div>
           <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
-            Parivar Console
+            Parivar
           </h1>
-          <p className="text-[10px] text-primary font-bold uppercase tracking-widest mt-1">Platform Control Room</p>
         </div>
 
         {/* Error Alert */}
@@ -100,7 +99,7 @@ export default function Login() {
             disabled={loading}
             className="w-full mt-2 bg-primary hover:bg-primary-hover hover:shadow-glow-primary text-white py-3.5 rounded-2xl font-bold text-xs tracking-wider uppercase transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? 'Verifying authority keys...' : 'Establish Secure Connection'}
+            {loading ? 'Login...' : 'Login'}
           </button>
         </form>
 
@@ -108,13 +107,13 @@ export default function Login() {
         <div className="mt-8 p-4 rounded-2xl bg-surface-secondary border border-border text-[10px] text-text-secondary flex gap-3 items-start animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <Key className="w-4 h-4 text-primary mt-0.5 shrink-0" />
           <div>
-            <div className="font-bold text-text">Onboarding Quick Connect:</div>
+            <div className="font-bold text-text">Admin Connect:</div>
             <div className="mt-1 font-mono text-[9px] text-text-secondary">
               <span className="text-primary font-semibold">User:</span> bhavikwala@gmail.com
               <br />
               <span className="text-primary font-semibold">Pass:</span> Bhavik@123
             </div>
-            <div className="mt-1 text-[9px] leading-snug">Ramesh is flagged as a committee President in seeds, granting full administration access.</div>
+    
           </div>
         </div>
 
