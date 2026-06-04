@@ -29,8 +29,7 @@ router.use('/events', require('../eventRoutes'));
 router.use('/businesses', require('../businessRoutes'))
 router.use('/feedback', require('../feedbackRoutes'));
 router.use('/job-vacancy', require('../jobVacancyRoutes'));
-
-
+router.use('/committee-members', require('../committeeMemberRoutes'));
 
 
 module.exports = router;

@@ -4,7 +4,6 @@ const { parseForm } = require('../middleware/upload');
 const {
   getMembers,
   getFamilyMembers,
-  getcommitteeMembers,
   getCountryList,
   getStateList,
   getCityList
@@ -20,8 +19,7 @@ router.get('/members/:member_id', protect, (req, res, next) => {
 });
 router.post('/family_members', protect, parseForm, getFamilyMembers);
 router.get('/family_members', protect, getFamilyMembers);
-router.post('/committee_members', protect, parseForm, getcommitteeMembers);
-router.get('/committee_members',  getcommitteeMembers);
+
 router.post('/country_list', protect, parseForm, getCountryList);
 router.get('/country_list',  getCountryList);
 router.post('/state_list', protect, parseForm, getStateList);

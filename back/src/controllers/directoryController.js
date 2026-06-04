@@ -140,40 +140,6 @@ const getFamilyMembers = async (req, res) => {
   }
 };
 
-const getcommitteeMembers = async (req, res) => {
-  try {
-    const { data: committee, pagination } = await queryHelper(User, req.query, {
-      baseQuery: {
-        $and: [
-          {
-            $or: [
-              { is_committee: true },
-              { role_id: { $ne: null }, status: 1 }
-            ]
-          }
-        ]
-      },
-      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email', 'committee_role', 'designation'],
-      filterFields: ['committee_role', 'designation', 'role_id', 'status'],
-      select: '-password'
-    });
-
-    const data = committee.map((member) => ({
-      id: memberPublicId(member),
-      first_name: member.first_name || '',
-      middle_name: member.middle_name || '',
-      last_name: member.last_name || '',
-      number: member.number || '',
-      role: member.username || member.committee_role || '',
-      designation: member.designation || '',
-      image: publicUrl(req, member.signature || member.image || member.profile_image || '')
-    }));
-
-    return apiResponse(res, 200, 'committee Memeber Data fetch successful', data, pagination);
-  } catch (error) {
-    return apiResponse(res, 500, 'Error retrieving committee', { error: error.message });
-  }
-};
 
 const getCountryList = async (req, res) => {
   try {
@@ -237,7 +203,6 @@ const getCityList = async (req, res) => {
 module.exports = {
   getMembers,
   getFamilyMembers,
-  getcommitteeMembers,
   getCountryList,
   getStateList,
   getCityList
