@@ -270,7 +270,7 @@ export default function Students() {
                           )}
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-sm uppercase tracking-wide">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-sm  tracking-wide">
                                 Standard {student.standard}
                               </span>
                               <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-bold ${Number(student.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-warning/10 text-warning border border-warning/20'}`}>

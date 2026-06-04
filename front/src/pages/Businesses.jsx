@@ -246,7 +246,7 @@ export default function Businesses() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-sm uppercase tracking-wide">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-sm  tracking-wide">
                         {biz.business_category_name || 'Community Enterprise'}
                       </span>
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-bold ${Number(biz.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-surface-secondary text-text-secondary border border-border'}`}>
@@ -291,7 +291,7 @@ export default function Businesses() {
                 {/* Gallery Showcase */}
                 {biz.gallery_images && biz.gallery_images.length > 0 && (
                   <div className="mt-4">
-                    <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5 tracking-wider">Showroom Gallery</label>
+                    <label className="block text-sm  font-bold text-text-secondary mb-1.5 tracking-wider">Showroom Gallery</label>
                     <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
                       {biz.gallery_images.map((img, idx) => (
                         <div key={idx} className="relative w-12 h-12 rounded-lg overflow-hidden border border-border shrink-0 bg-surface-secondary group/img">

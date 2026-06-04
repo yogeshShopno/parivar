@@ -60,7 +60,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Email input */}
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-2 tracking-wider">Email Address</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-2 tracking-wider">Email Address</label>
             <input
               type="email"
               value={email}
@@ -73,7 +73,7 @@ export default function Login() {
 
           {/* Password Input */}
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-2 tracking-wider">Password</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-2 tracking-wider">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -97,7 +97,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 bg-primary hover:bg-primary-hover hover:shadow-glow-primary text-white py-3.5 rounded-2xl font-bold text-sm tracking-wider uppercase transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full mt-2 bg-primary hover:bg-primary-hover hover:shadow-glow-primary text-white py-3.5 rounded-2xl font-bold text-sm tracking-wider  transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? 'Login...' : 'Login'}
           </button>

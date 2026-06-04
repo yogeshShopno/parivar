@@ -222,7 +222,7 @@ export default function Post() {
                 </div>
 
                 <div className="mt-5 pt-3.5 border-t border-border flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-1.5 text-sm font-bold uppercase">
+                  <div className="flex items-center gap-1.5 text-sm font-bold ">
                     <Clock className={`w-3.5 h-3.5 ${post.status === 0 ? 'text-warning' : 'text-text-secondary/60'}`} />
                     <span className={post.status === 0 ? 'text-warning' : 'text-text-secondary'}>
                       {post.status === 0 ? 'Pending Approval' : 'Active Post'}
@@ -232,14 +232,14 @@ export default function Post() {
                   <button
                     type="button"
                     onClick={() => openEdit(post)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold uppercase tracking-wider text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 transition-all"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold  tracking-wider text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 transition-all"
                   >
                     <Edit2 className="w-3 h-3" /> Edit
                   </button>
 
                   <button
                     onClick={() => handleDelete(post.id)}
-                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold uppercase tracking-wider text-error-text bg-error-bg hover:bg-error/20 border border-error-border hover:border-error/40 transition-all"
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold  tracking-wider text-error-text bg-error-bg hover:bg-error/20 border border-error-border hover:border-error/40 transition-all"
                   >
                     <Trash2 className="w-3 h-3" /> Moderate
                   </button>
@@ -284,26 +284,26 @@ export default function Post() {
       <Modal isOpen={isModalOpen} title={selected ? 'Edit Post' : 'Add Post'} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 text-text">
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Title *</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Title *</label>
             <input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={fieldClass} disabled={saving} />
           </div>
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Description *</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Description *</label>
             <textarea rows="4" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className={fieldClass} disabled={saving} />
           </div>
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Status</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Status</label>
             <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className={fieldClass} disabled={saving}>
               <option value={1} className="bg-surface text-text">Active</option>
               <option value={0} className="bg-surface text-text">Pending (Inactive)</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Image</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Image</label>
             <input type="file" accept="image/*" onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })} className="w-full text-sm text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20" disabled={saving} />
             {selected?.image && <p className="text-sm text-text-secondary mt-2">Current image will be kept unless a new file is selected.</p>}
           </div>
-          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider uppercase disabled:opacity-50 shadow-glow-primary">
+          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider  disabled:opacity-50 shadow-glow-primary">
             {saving ? 'Saving...' : 'Save Post'}
           </button>
         </form>

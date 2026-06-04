@@ -176,15 +176,15 @@ export default function Donations() {
       {donations.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <div className="bg-success-bg border border-success-border rounded-2xl p-4">
-            <p className="text-success-text text-sm font-bold uppercase tracking-wider mb-1">Total Collected</p>
+            <p className="text-success-text text-sm font-bold  tracking-wider mb-1">Total Collected</p>
             <p className="text-text text-lg font-bold">{formatAmount(totalAmount)}</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4">
-            <p className="text-text-secondary text-sm font-bold uppercase tracking-wider mb-1">Total Donors</p>
+            <p className="text-text-secondary text-sm font-bold  tracking-wider mb-1">Total Donors</p>
             <p className="text-text text-lg font-bold">{donations.length}</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4 col-span-2 sm:col-span-1">
-            <p className="text-text-secondary text-sm font-bold uppercase tracking-wider mb-1">Avg Donation</p>
+            <p className="text-text-secondary text-sm font-bold  tracking-wider mb-1">Avg Donation</p>
             <p className="text-text text-lg font-bold">{formatAmount(totalAmount / donations.length)}</p>
           </div>
         </div>

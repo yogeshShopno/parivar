@@ -22,7 +22,6 @@ export default function GalleryPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [categoryId, setCategoryId] = useState('')
   const [categoryName, setCategoryName] = useState('')
-  const [newCategoryName, setNewCategoryName] = useState('')
   const [year, setYear] = useState('')
   const [existingImages, setExistingImages] = useState([])
   const [newFiles, setNewFiles] = useState([])
@@ -35,7 +34,6 @@ export default function GalleryPage() {
   const emptyState = useMemo(() => ({
     categoryId: '',
     categoryName: '',
-    newCategoryName: '',
     year: '',
     existingImages: [],
     newFiles: [],
@@ -81,7 +79,6 @@ export default function GalleryPage() {
     if (!isModalOpen) {
       setCategoryId('')
       setCategoryName('')
-      setNewCategoryName('')
       setYear('')
       setExistingImages([])
       setNewFiles([])
@@ -108,7 +105,6 @@ export default function GalleryPage() {
     setSelected(null)
     setCategoryId('')
     setCategoryName('')
-    setNewCategoryName('')
     setYear('')
     setExistingImages([])
     setNewFiles([])
@@ -120,7 +116,6 @@ export default function GalleryPage() {
     setSelected(row)
     setCategoryId(row.gallery_category_id || '')
     setCategoryName(row.category || '')
-    setNewCategoryName('')
     setYear(row.year || '')
     setExistingImages(Array.isArray(row.images) ? row.images : [])
     setNewFiles([])
@@ -149,7 +144,6 @@ export default function GalleryPage() {
   const handleCategorySelect = (event) => {
     const selectedId = event.target.value
     setCategoryId(selectedId)
-    setNewCategoryName('')
     const category = categories.find((item) => item.id === selectedId)
     setCategoryName(category?.category || '')
   }
@@ -160,19 +154,12 @@ export default function GalleryPage() {
     setError('')
     try {
       let categoryIdToSave = categoryId
-      let titleCategory = categoryName || newCategoryName.trim()
+      let titleCategory = categoryName
 
       if (!titleCategory) {
         titleCategory = 'General'
       }
 
-      if (!categoryIdToSave && newCategoryName.trim()) {
-        const categoryRes = await api.post('/gallery-categories', { category: newCategoryName.trim() })
-        const newCategory = categoryRes.data?.data
-        categoryIdToSave = newCategory?.id || ''
-        titleCategory = newCategory?.category || newCategoryName.trim()
-        await fetchCategories()
-      }
 
       const payload = new FormData()
       payload.append('category', titleCategory)
@@ -181,6 +168,11 @@ export default function GalleryPage() {
 
       existingImages.forEach((image) => payload.append('existing_images', image))
       newFiles.forEach((file) => payload.append('images', file))
+      if (newFiles.length === 0 && existingImages.length === 0) {
+        return setSaving(false)
+
+
+      }
 
       if (selected) {
         await api.put(`/gallery/${selected.id}`, payload)
@@ -212,21 +204,13 @@ export default function GalleryPage() {
     }
   }
 
-  // const fetchCategories = async () => {
-  //   try {
-  //     const res = await api.get('/gallery-categories')
-  //     setCategories(res.data?.data || [])
-  //   } catch (err) {
-  //     setError('Failed to load gallery categories')
-  //   }
-  // }
 
   return (
     <div className="space-y-6 animate-slide-up select-none text-text">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-text">Gallery</h2>
-          
+
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button onClick={() => { fetchGallery(); fetchCategories() }} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
@@ -261,11 +245,10 @@ export default function GalleryPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold uppercase tracking-wider">
+                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold  tracking-wider">
                   <th className="p-4">Preview</th>
                   <th className="p-4">Category</th>
                   <th className="p-4">Year</th>
-                  <th className="p-4">Images</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
@@ -274,14 +257,20 @@ export default function GalleryPage() {
                   <tr key={row.id} className="hover:bg-surface-secondary/40 text-sm text-text">
                     <td className="p-4 max-w-[100px]">
                       {row.images?.[0] ? (
-                        <img src={assetUrl(row.images[0])} alt={row.category || 'Gallery'} className="h-12 w-16 rounded-lg object-cover border border-border" />
+                        <>
+                          <div className="relative inline-block">
+                            <img src={assetUrl(row.images[0])} alt={row.category || 'Gallery'} className="h-12 w-16 rounded-lg object-cover border border-border" />
+                            <span className="absolute -top-1.5 -right-2.5 bg-primary text-white text-xs font-bold rounded-full p-1 w-5 h-5 flex items-center justify-center">
+                              {row.images.length}
+                            </span>
+                          </div>
+                        </>
                       ) : (
                         <span className="text-text-secondary">No image</span>
                       )}
                     </td>
                     <td className="p-4 max-w-xs line-clamp-1">{row.category || 'General'}</td>
                     <td className="p-4">{row.year || '-'}</td>
-                    <td className="p-4 text-sm text-text-secondary">{row.images?.length ?? 0} image(s)</td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => openEdit(row)} className="p-2 text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl" title="Edit">
@@ -317,11 +306,10 @@ export default function GalleryPage() {
                     type="button"
                     disabled={loading || item === currentPage}
                     onClick={() => setPage(item)}
-                    className={`min-w-10 px-3 py-2 rounded-lg border transition-all ${
-                      item === currentPage
-                        ? 'border-primary bg-primary/10 text-primary font-semibold disabled:opacity-100 disabled:cursor-default'
-                        : 'border-border bg-card text-text hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed'
-                    }`}
+                    className={`min-w-10 px-3 py-2 rounded-lg border transition-all ${item === currentPage
+                      ? 'border-primary bg-primary/10 text-primary font-semibold disabled:opacity-100 disabled:cursor-default'
+                      : 'border-border bg-card text-text hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed'
+                      }`}
                   >
                     {item}
                   </button>
@@ -335,72 +323,62 @@ export default function GalleryPage() {
         </div>
       )}
 
-      <Modal isOpen={isModalOpen} title={selected ? 'Edit Gallery Item' : 'Add Gallery Item'} onClose={() => setIsModalOpen(false)}>
+      <Modal isOpen={isModalOpen} title={selected ? 'Edit Images' : 'Add Images'} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 text-text">
-          <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Category</label>
-            <select value={categoryId} onChange={handleCategorySelect} className={fieldClass} disabled={saving}>
-              <option value="" className="bg-surface text-text">Choose existing category</option>
-              {categories.map((item) => (
-                <option key={item.id} value={item.id} className="bg-surface text-text">{item.category}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Or add new category</label>
-            <input
-              type="text"
-              value={newCategoryName}
-              onChange={(e) => {
-                setNewCategoryName(e.target.value)
-                setCategoryId('')
-                setCategoryName(e.target.value)
-              }}
-              placeholder="Type new category name"
-              className={fieldClass}
-              disabled={saving}
-            />
-          </div>
-          <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Year</label>
-            <input type="text" value={year} onChange={(e) => setYear(e.target.value)} className={fieldClass} disabled={saving} />
-          </div>
-
-          <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Gallery Images</label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileChange}
-              className="w-full text-sm text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
-              disabled={saving}
-            />
-            <p className="mt-2 text-sm text-text-secondary">Upload multiple images. Existing images stay unless removed below.</p>
-          </div>
-
-          {(existingImages.length > 0 || filePreviews.length > 0) && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {existingImages.map((image, index) => (
-                <div key={`existing-${index}`} className="relative rounded-2xl overflow-hidden border border-border bg-surface-secondary">
-                  <img src={assetUrl(image)} alt={`Existing ${index + 1}`} className="h-28 w-full object-cover" />
-                  <button type="button" onClick={() => removeExistingImage(index)} className="absolute top-2 right-2 rounded-full bg-black/50 p-1 text-white">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
-              {filePreviews.map((preview, index) => (
-                <div key={`new-${index}`} className="relative rounded-2xl overflow-hidden border border-border bg-surface-secondary">
-                  <img src={preview.url} alt={`New ${index + 1}`} className="h-28 w-full object-cover" />
-                  <button type="button" onClick={() => removeNewImage(index)} className="absolute top-2 right-2 rounded-full bg-black/50 p-1 text-white">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div>
+              <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Category <span className='text-red-500'>*</span></label>
+              <select value={categoryId} onChange={handleCategorySelect} className={fieldClass} disabled={saving}>
+                <option value="" className="bg-surface text-text">Select Category</option>
+                {categories.map((item) => (
+                  <option key={item.id} value={item.id} className="bg-surface text-text">{item.category}</option>
+                ))}
+              </select>
             </div>
-          )}
 
-          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider uppercase disabled:opacity-50 shadow-glow-primary">
+            <div>
+              <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Year</label>
+              <input type="text" value={year} onChange={(e) => setYear(e.target.value)} className={fieldClass} disabled={saving} />
+            </div>
+          </div>
+        <div className="flex flex-col bg-input-bg border border-border rounded-xl p-3">
+
+            <div>
+              <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Gallery Images</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileChange}
+                className="w-full text-sm text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
+                disabled={saving}
+              />
+              <p className="my-2 text-sm text-text-secondary">Upload multiple images. Existing images stay unless removed below.</p>
+            </div>
+
+            {(existingImages.length > 0 || filePreviews.length > 0) && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-10 gap-2 sm:gap-3 [&>div]:max-w-[100px]">
+                {existingImages.map((image, index) => (
+                  <div key={`existing-${index}`} className="relative aspect-square rounded-2xl overflow-hidden border border-border bg-surface-secondary">
+                    <img src={assetUrl(image)} alt={`Existing ${index + 1}`} className="h-full w-full object-cover" />
+                    <button type="button" onClick={() => removeExistingImage(index)} className="absolute top-2 right-2 rounded-full bg-black/50 p-1 text-white">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+                {filePreviews.map((preview, index) => (
+                  <div key={`new-${index}`} className="relative aspect-square rounded-2xl overflow-hidden border border-border bg-surface-secondary">
+                    <img src={preview.url} alt={`New ${index + 1}`} className="h-full w-full object-cover" />
+                    <button type="button" onClick={() => removeNewImage(index)} className="absolute top-2 right-2 rounded-full bg-black/50 p-1 text-white">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button type="submit" disabled={saving} className="flex justify-self-end bg-primary hover:bg-primary-hover text-white py-3 px-3 rounded-xl font-semibold text-sm tracking-wider  disabled:opacity-50 shadow-glow-primary">
             {saving ? 'Saving...' : 'Save Gallery'}
           </button>
         </form>

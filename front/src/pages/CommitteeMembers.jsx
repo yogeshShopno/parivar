@@ -146,7 +146,7 @@ export default function CommitteeMembers() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold uppercase tracking-wider">
+              <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold  tracking-wider">
                 <th className="p-4">Name</th>
                 <th className="p-4">Contact</th>
                 <th className="p-4">Designation</th>

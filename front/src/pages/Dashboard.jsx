@@ -148,7 +148,7 @@ export default function Dashboard() {
             >
               {/* Card Header */}
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-text-secondary tracking-wider uppercase group-hover:text-text transition-colors">
+                <span className="text-sm font-semibold text-text-secondary tracking-wider  group-hover:text-text transition-colors">
                   {card.title}
                 </span>
                 <div className={`p-2.5 rounded-xl bg-gradient-to-tr ${card.color} ${card.shadow} text-white transition-transform duration-300 group-hover:scale-105`}>

@@ -63,7 +63,7 @@ const ImageUploadField = ({ label, icon: Icon, value, onChange, onDelete, accept
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-xs font-bold uppercase tracking-wide text-text-secondary flex items-center gap-1.5">
+      <label className="text-xs font-bold  tracking-wide text-text-secondary flex items-center gap-1.5">
         {Icon && <Icon className="w-3.5 h-3.5" />} {label}
       </label>
       <div
@@ -111,7 +111,7 @@ const BannerImagesField = ({ bannerImages, bannerFiles, onAdd, onDelete }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-xs font-bold uppercase tracking-wide text-text-secondary flex items-center gap-1.5">
+      <label className="text-xs font-bold  tracking-wide text-text-secondary flex items-center gap-1.5">
         <ImageIcon className="w-3.5 h-3.5" /> Banner Images
       </label>
       <div className="grid grid-cols-3 gap-2">
@@ -154,7 +154,7 @@ const BannerImagesField = ({ bannerImages, bannerFiles, onAdd, onDelete }) => {
 const ColorInput = ({ label, value, keyName, desc, onChange }) => (
   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-surface-secondary border border-border hover:bg-surface transition-colors text-text">
     <div className="max-w-md">
-      <h4 className="text-sm font-bold text-text uppercase tracking-wide">{label}</h4>
+      <h4 className="text-sm font-bold text-text  tracking-wide">{label}</h4>
       {desc && <p className="text-sm text-text-secondary mt-1 leading-relaxed">{desc}</p>}
     </div>
     <div className="flex items-center gap-3">
@@ -177,7 +177,7 @@ const ColorInput = ({ label, value, keyName, desc, onChange }) => (
 // ─── Text Input ───────────────────────────────────────────────────────────────
 const TextInput = ({ label, icon: Icon, value, keyName, placeholder, type = 'text', onChange }) => (
   <div className="flex flex-col gap-1.5">
-    <label className="text-xs font-bold uppercase tracking-wide text-text-secondary flex items-center gap-1.5">
+    <label className="text-xs font-bold  tracking-wide text-text-secondary flex items-center gap-1.5">
       {Icon && <Icon className="w-3.5 h-3.5" />} {label}
     </label>
     <input
@@ -544,7 +544,7 @@ export default function SettingsPage() {
                       </div>
                       <span style={{ color: config.textColor }}>→</span>
                     </div>
-                    <button className="w-full text-center py-1.5 rounded-lg text-sm font-bold uppercase tracking-wider" style={{ backgroundColor: config.buttonColor, color: config.fontColor }}>
+                    <button className="w-full text-center py-1.5 rounded-lg text-sm font-bold  tracking-wider" style={{ backgroundColor: config.buttonColor, color: config.fontColor }}>
                       Add Member
                     </button>
                   </div>

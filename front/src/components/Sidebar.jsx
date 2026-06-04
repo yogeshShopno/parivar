@@ -31,7 +31,7 @@ const LinkItem = ({ to, icon: Icon, label, end }) => (
 )
 
 const SectionLabel = ({ children }) => (
-  <div className="px-3 pb-2 pt-5 text-sm font-bold uppercase tracking-widest text-text-secondary/60 first:pt-0">
+  <div className="px-3 pb-2 pt-5 text-sm font-bold  tracking-widest text-text-secondary/60 first:pt-0">
     {children}
   </div>
 )
@@ -100,7 +100,7 @@ export default function Sidebar() {
 
       {user && (
         <div className="mt-5 flex shrink-0 items-center gap-3 rounded-xl border border-border bg-surface-secondary p-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 text-sm font-bold uppercase text-primary shadow-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 text-sm font-bold  text-primary shadow-sm">
             {user.name ? user.name.substring(0, 2) : user.email?.substring(0, 2) || 'AD'}
           </div>
           <div className="min-w-0">

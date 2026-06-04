@@ -209,7 +209,7 @@ console.log(visibleStudents)
                 >
                   <GraduationCap className="h-5 w-5 flex-shrink-0" style={{ color: theme.primaryColor }} />
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-wide" style={{ color: shadeColor(theme.textColor, 25) }}>
+                    <p className="text-sm font-semibold  tracking-wide" style={{ color: shadeColor(theme.textColor, 25) }}>
                       Achievement
                     </p>
                     <p className="text-sm font-bold" style={{ color: theme.textColor }}>

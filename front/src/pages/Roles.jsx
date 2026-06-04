@@ -182,7 +182,7 @@ export default function Roles() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold uppercase tracking-wider">
+              <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold  tracking-wider">
                 <th className="p-4">Role Name</th>
                 <th className="p-4">Permissions</th>
                 <th className="p-4">Status</th>
@@ -260,15 +260,15 @@ export default function Roles() {
         <form onSubmit={handleSave} className="space-y-5 max-h-[78vh] overflow-y-auto pr-1 text-text">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Role Name *</label>
+              <label className="block text-sm  font-bold text-text-secondary mb-1.5">Role Name *</label>
               <input type="text" placeholder="Enter Role Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={fieldClass} disabled={saving} />
             </div>
             <div>
-              <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Description</label>
+              <label className="block text-sm  font-bold text-text-secondary mb-1.5">Description</label>
               <input type="text" placeholder="Short role description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className={fieldClass} disabled={saving} />
             </div>
             <div>
-              <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Status</label>
+              <label className="block text-sm  font-bold text-text-secondary mb-1.5">Status</label>
               <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className={fieldClass} disabled={saving}>
                 <option value={1} className="bg-surface text-text">Active</option>
                 <option value={0} className="bg-surface text-text">Inactive</option>
@@ -277,7 +277,7 @@ export default function Roles() {
           </div>
 
           <div>
-            <div className="grid gap-2 border-b border-border pb-2 text-sm uppercase font-bold text-text-secondary" style={permissionGridStyle}>
+            <div className="grid gap-2 border-b border-border pb-2 text-sm  font-bold text-text-secondary" style={permissionGridStyle}>
               <div>Permission</div>
               {permissionConfig.actions.map((action) => <div key={action.key} className="text-center">{action.label}</div>)}
             </div>
@@ -303,7 +303,7 @@ export default function Roles() {
             </div>
           </div>
 
-          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider uppercase disabled:opacity-50 shadow-glow-primary">
+          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider  disabled:opacity-50 shadow-glow-primary">
             {saving ? 'Saving...' : 'Save Role'}
           </button>
         </form>

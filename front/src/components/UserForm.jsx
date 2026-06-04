@@ -117,10 +117,10 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
       
       {/* SECTION 1: Personal Name details */}
       <div>
-        <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Primary Identity</h4>
+        <h4 className="text-sm font-bold  tracking-widest text-primary mb-3">Primary Identity</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">First Name *</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">First Name *</label>
             <input
               type="text"
               value={formData.first_name}
@@ -132,7 +132,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Middle Name</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Middle Name</label>
             <input
               type="text"
               value={formData.middle_name}
@@ -143,7 +143,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Last Name</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Last Name</label>
             <input
               type="text"
               value={formData.last_name}
@@ -157,10 +157,10 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
 
       {/* SECTION 2: Contact & Authentication */}
       <div>
-        <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Contact & Login Credentials</h4>
+        <h4 className="text-sm font-bold  tracking-widest text-primary mb-3">Contact & Login Credentials</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Email Address</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Email Address</label>
             <input
               type="email"
               value={formData.email}
@@ -172,7 +172,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Mobile Number *</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Mobile Number *</label>
             <input
               type="tel"
               value={formData.number}
@@ -184,7 +184,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">
               {user ? 'Reset Password (optional)' : 'Password *'}
             </label>
             <input
@@ -202,10 +202,10 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
 
       {/* SECTION 3: Bio Metrics & Relation */}
       <div>
-        <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Family Metrics</h4>
+        <h4 className="text-sm font-bold  tracking-widest text-primary mb-3">Family Metrics</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Relationship</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Relationship</label>
             <select
               value={formData.relation}
               onChange={(e) => setFormData({ ...formData, relation: e.target.value })}
@@ -219,7 +219,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Gender</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Gender</label>
             <select
               value={formData.gender}
               onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
@@ -234,7 +234,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Date of Birth</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Date of Birth</label>
             <input
               type="date"
               value={formData.dob}
@@ -245,7 +245,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
           </div>
 
           <div>
-            <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Blood Group</label>
+            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Blood Group</label>
             <select
               value={formData.blood_group}
               onChange={(e) => setFormData({ ...formData, blood_group: e.target.value })}
@@ -263,7 +263,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
 
       {canManageRoleFields && (
         <div>
-          <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Roles & Committee Status</h4>
+          <h4 className="text-sm font-bold  tracking-widest text-primary mb-3">Roles & Committee Status</h4>
           <div className="bg-surface-secondary border border-border rounded-2xl p-4 flex flex-col md:flex-row items-center gap-6">
             <label className="flex items-center gap-3 cursor-pointer select-none">
               <input
@@ -283,7 +283,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
             {formData.is_committee && (
               <div className="flex-1 w-full animate-fade-in grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Admin Role</label>
+                  <label className="block text-sm  font-bold text-text-secondary mb-1.5">Admin Role</label>
                   <select
                     value={formData.role_id}
                     onChange={(e) => setFormData({ ...formData, role_id: e.target.value })}
@@ -296,7 +296,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Committee Designation</label>
+                  <label className="block text-sm  font-bold text-text-secondary mb-1.5">Committee Designation</label>
                   <input
                     type="text"
                     placeholder="e.g. President, Vice President, Secretary"
@@ -315,9 +315,9 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
 
       {/* SECTION 5: Address */}
       <div>
-        <h4 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Residential Location</h4>
+        <h4 className="text-sm font-bold  tracking-widest text-primary mb-3">Residential Location</h4>
         <div>
-          <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">Home / Office Address</label>
+          <label className="block text-sm  font-bold text-text-secondary mb-1.5">Home / Office Address</label>
           <textarea
             rows="3"
             value={formData.address}
@@ -332,7 +332,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full mt-4 bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider uppercase transition-all duration-300 disabled:opacity-50 shadow-glow-primary"
+        className="w-full mt-4 bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider  transition-all duration-300 disabled:opacity-50 shadow-glow-primary"
       >
         {isLoading ? 'Processing registry update...' : user ? 'Save Changes' : 'Confirm Registry Entry'}
       </button>

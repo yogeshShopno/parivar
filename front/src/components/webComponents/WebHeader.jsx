@@ -193,7 +193,7 @@ export default function WebHeader() {
           
                 {theme?.webLogo ? (
                   <img src={theme.webLogo} alt={`${theme.name} logo`} className="h-12  object-contain" />
-                ) : (theme.name ? theme.name.charAt(0).toUpperCase() : 'P')}
+                ) : (theme.name ? theme.name.charAt(0).to() : 'P')}
               
               <div className="hidden sm:block">
                 <h1

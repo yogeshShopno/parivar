@@ -215,7 +215,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold uppercase tracking-wider">
+                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold  tracking-wider">
                   {columns.map((column) => <th key={column.key} className="p-4">{column.label}</th>)}
                   <th className="p-4 text-right">Actions</th>
                 </tr>
@@ -290,7 +290,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fields.map((field) => (
               <div key={field.name}>
-                <label className="block text-sm uppercase font-bold text-text-secondary mb-1.5">{field.label}</label>
+                <label className="block text-sm  font-bold text-text-secondary mb-1.5">{field.label}</label>
                 {field.type === 'textarea' ? (
                   <textarea rows="4" value={formData[field.name] || ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving} />
                 ) : field.type === 'select' ? (
@@ -333,7 +333,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
               </div>
             ))}
           </div>
-          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider uppercase disabled:opacity-50 shadow-glow-primary">
+          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider  disabled:opacity-50 shadow-glow-primary">
             {saving ? 'Saving...' : 'Save Record'}
           </button>
         </form>

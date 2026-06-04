@@ -292,7 +292,7 @@ export default function Users() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold uppercase tracking-wider">
+                  <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold  tracking-wider">
                     <th className="p-4">Member ID</th>
                     <th className="p-4">Name</th>
                     <th className="p-4">Contact Info</th>
@@ -307,7 +307,7 @@ export default function Users() {
                       <td className="p-4 font-mono font-bold text-primary">{user.id}</td>
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary border border-primary/20 uppercase">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary border border-primary/20 ">
                             {user.first_name ? user.first_name.substring(0, 1) : '-'}
                             {user.last_name ? user.last_name.substring(0, 1) : ''}
                           </div>
