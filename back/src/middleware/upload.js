@@ -7,14 +7,14 @@ const storage = multer.memoryStorage();
 
 // Image type validation
 const fileFilter = (req, file, cb) => {
-  const allowedExtensions = /jpeg|jpg|png|webp|gif/;
-  const isExtensionAllowed = allowedExtensions.test(path.extname(file.originalname).toLowerCase());
-  const isMimetypeAllowed = allowedExtensions.test(file.mimetype);
+  const allowedExtensions = /jpeg|jpg|png|webp|gif|pdf/i;
+  const isExtensionAllowed = allowedExtensions.test(path.extname(file.originalname)) || !path.extname(file.originalname);
+  const isMimetypeAllowed = allowedExtensions.test(file.mimetype) || file.mimetype.includes('pdf');
 
-  if (isExtensionAllowed && isMimetypeAllowed) {
+  if (isMimetypeAllowed) {
     cb(null, true);
   } else {
-    cb(new Error('Error: Only images of type jpeg, jpg, png, webp, or gif are allowed!'), false);
+    cb(new Error('Error: Only images and PDFs are allowed!'), false);
   }
 };
 
@@ -94,7 +94,11 @@ const parseForm = (req, res, next) => {
     { name: 'gallery_image_3', maxCount: 1 },
     { name: 'gallery_image_4', maxCount: 1 },
     { name: 'gallery_image_5', maxCount: 1 },
-    { name: 'result_image', maxCount: 1 }
+    { name: 'result_image', maxCount: 1 },
+    { name: 'biodata', maxCount: 1 },
+    { name: 'person_image', maxCount: 1 },
+    { name: 'qr_code', maxCount: 1 },
+    { name: 'student_image', maxCount: 1 }
   ])(req, res, async (error) => {
     if (error) return next(error);
 

@@ -23,7 +23,7 @@ const initialState = {
   website: '',
   image: '',
   gallery_images: [],
-  status: 1
+  status: 0
 }
 
 export default function BusinessForm({ business, onSubmit, isLoading }) {
@@ -146,7 +146,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
       youtube: business?.youtube || '',
       image: business?.image || '',
       gallery_images: business?.gallery_images || [],
-      status: Number(business?.status ?? 1)
+      status: Number(business?.status ?? 0)
     })
     setGalleryPreviews([])  
     setProfilePreview(null)    

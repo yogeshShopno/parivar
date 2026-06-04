@@ -13,8 +13,8 @@ const requestData = (req) => ({
 const getDonations = async (req, res) => {
   try {
     const { data: donations, pagination } = await queryHelper(Donation, requestData(req), {
-      searchFields: ['donator_name', 'location', 'donation_purpose', 'whose_possession'],
-      filterFields: ['donator_name', 'location', 'donation_purpose', 'whose_possession', 'status']
+      searchFields: ['donator_name', 'donation_purpose'],
+      filterFields: ['donator_name', 'donation_purpose', 'status', 'bank_detail_id']
     });
 
     return res.status(200).json({
@@ -24,10 +24,8 @@ const getDonations = async (req, res) => {
         id: d.id || String(d._id),
         donator_name: d.donator_name || '',
         donate_amount: Number(d.donate_amount || 0),
-        location: d.location || '',
         donation_purpose: d.donation_purpose || '',
         date: d.date || '',
-        whose_possession: d.whose_possession || 'direct',
         status: Number(d.status ?? 1)
       })),
       ...(pagination ? { pagination } : {})
@@ -47,17 +45,15 @@ const addDonation = async (req, res) => {
     const {
       donator_name,
       donate_amount,
-      location,
       donation_purpose,
       date,
-      whose_possession,
       status
     } = requestData(req);
 
-    if (!donator_name || !donate_amount || !location || !donation_purpose || !date) {
+    if (!donator_name || !donate_amount || !donation_purpose || !date) {
       return res.status(400).json({
         status: 400,
-        message: 'All fields except Whose possession are mandatory',
+        message: 'All fields are mandatory',
         data: []
       });
     }
@@ -66,10 +62,8 @@ const addDonation = async (req, res) => {
       id: `DON${Date.now()}`,
       donator_name,
       donate_amount: Number(donate_amount),
-      location,
       donation_purpose,
       date,
-      whose_possession: whose_possession && whose_possession.trim() !== '' ? whose_possession.trim() : 'direct',
       status: status === undefined ? 1 : Number(status),
       cdate: new Date().toISOString().slice(0, 10)
     };
@@ -82,10 +76,8 @@ const addDonation = async (req, res) => {
         id: donation.id || String(donation._id),
         donator_name: donation.donator_name || '',
         donate_amount: Number(donation.donate_amount || 0),
-        location: donation.location || '',
         donation_purpose: donation.donation_purpose || '',
         date: donation.date || '',
-        whose_possession: donation.whose_possession || 'direct',
         status: Number(donation.status ?? 1)
       }
     });
@@ -122,21 +114,15 @@ const updateDonation = async (req, res) => {
     const {
       donator_name,
       donate_amount,
-      location,
       donation_purpose,
       date,
-      whose_possession,
       status
     } = requestData(req);
 
     if (donator_name) donation.donator_name = donator_name;
     if (donate_amount !== undefined) donation.donate_amount = Number(donate_amount);
-    if (location) donation.location = location;
-    if (donation_purpose) donation.donation_purpose = donation_purpose;
-    if (date) donation.date = date;
-    if (whose_possession !== undefined) {
-      donation.whose_possession = whose_possession && whose_possession.trim() !== '' ? whose_possession.trim() : 'direct';
-    }
+    if (donation_purpose !== undefined) donation.donation_purpose = donation_purpose;
+    if (date !== undefined) donation.date = date;
     if (status !== undefined) donation.status = Number(status);
 
     await donation.save();
@@ -147,10 +133,8 @@ const updateDonation = async (req, res) => {
         id: donation.id || String(donation._id),
         donator_name: donation.donator_name || '',
         donate_amount: Number(donation.donate_amount || 0),
-        location: donation.location || '',
         donation_purpose: donation.donation_purpose || '',
         date: donation.date || '',
-        whose_possession: donation.whose_possession || 'direct',
         status: Number(donation.status ?? 1)
       }
     });
@@ -204,8 +188,8 @@ const deleteDonation = async (req, res) => {
 const adminGetDonations = async (req, res) => {
   try {
     const { data: donations, pagination } = await queryHelper(Donation, req.query, {
-      searchFields: ['donator_name', 'location', 'donation_purpose', 'whose_possession'],
-      filterFields: ['donator_name', 'location', 'donation_purpose', 'whose_possession', 'status']
+      searchFields: ['donator_name', 'donation_purpose'],
+      filterFields: ['donator_name', 'donation_purpose', 'status', 'bank_detail_id']
     });
 
     return res.status(200).json({
@@ -215,10 +199,8 @@ const adminGetDonations = async (req, res) => {
         id: d.id || String(d._id),
         donator_name: d.donator_name || '',
         donate_amount: Number(d.donate_amount || 0),
-        location: d.location || '',
         donation_purpose: d.donation_purpose || '',
         date: d.date || '',
-        whose_possession: d.whose_possession || 'direct',
         status: Number(d.status ?? 1)
       })),
       ...(pagination ? { pagination } : {})
@@ -258,18 +240,16 @@ const adminSaveDonation = async (req, res) => {
     const {
       donator_name,
       donate_amount,
-      location,
       donation_purpose,
       date,
-      whose_possession,
       status
     } = requestData(req);
 
     // For new donation, check mandatory fields
-    if (!existing && (!donator_name || !donate_amount || !location || !donation_purpose || !date)) {
+    if (!existing && (!donator_name || !donate_amount || !donation_purpose || !date)) {
       return res.status(400).json({
         status: 400,
-        message: 'All fields except Whose possession are mandatory',
+        message: 'All fields are mandatory',
         data: []
       });
     }
@@ -282,14 +262,8 @@ const adminSaveDonation = async (req, res) => {
     const updateFields = {};
     if (donator_name !== undefined) updateFields.donator_name = donator_name;
     if (donate_amount !== undefined) updateFields.donate_amount = Number(donate_amount);
-    if (location !== undefined) updateFields.location = location;
     if (donation_purpose !== undefined) updateFields.donation_purpose = donation_purpose;
     if (date !== undefined) updateFields.date = date;
-    if (whose_possession !== undefined) {
-      updateFields.whose_possession = whose_possession && whose_possession.trim() !== '' ? whose_possession.trim() : 'direct';
-    } else if (!existing) {
-      updateFields.whose_possession = 'direct';
-    }
     if (status !== undefined) updateFields.status = Number(status);
 
     donation.set(updateFields);
@@ -302,10 +276,8 @@ const adminSaveDonation = async (req, res) => {
         id: donation.id || String(donation._id),
         donator_name: donation.donator_name || '',
         donate_amount: Number(donation.donate_amount || 0),
-        location: donation.location || '',
         donation_purpose: donation.donation_purpose || '',
         date: donation.date || '',
-        whose_possession: donation.whose_possession || 'direct',
         status: Number(donation.status ?? 1)
       }
     });

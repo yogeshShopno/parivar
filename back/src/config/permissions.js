@@ -27,7 +27,8 @@ const PERMISSION_MODULES = [
   { key: 'gallery-category', label: 'Gallery Category', masterType: 'gallery-category' },
   { key: 'gallery', label: 'Gallery' },
   { key: 'banners', label: 'Banner' },
-  { key: 'donations', label: 'Donations' }
+  { key: 'donations', label: 'Donations' },
+  { key: 'bank-details', label: 'Bank Details', masterType: 'bank-details' }
 ];
 
 const PERMISSIONS = [

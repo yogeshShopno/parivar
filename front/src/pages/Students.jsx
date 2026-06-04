@@ -2,50 +2,46 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { GraduationCap, Phone, Trash2, Search, Edit2, RefreshCw, Plus, Image as ImageIcon } from 'lucide-react'
 import api, { assetUrl, getStudentsList } from '../lib/api'
 import Modal from '../components/Modal'
+import usePagination from '../hooks/usePagination'
 
 const limit = 10
 
 export default function Students() {
   const [students, setStudents] = useState([])
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0, limit })
+  const { page, totalPages, total, setPage, setPaginationData, getParams, resetPage } = usePagination(limit)
   const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
   const [activeFilters, setActiveFilters] = useState({
     student_name: '',
     school_name: '',
-    standard: ''
+    standard: '',
+    status: '1'
   })
   const [formLoading, setFormLoading] = useState(false)
   const [localFilters, setLocalFilters] = useState({
     student_name: '',
     school_name: '',
-    standard: ''
+    standard: '',
+    status: '1'
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const totalPages = Math.max(Number(pagination.totalPages) || 1, 1)
-  const currentPage = Math.min(Math.max(Number(pagination.page) || page || 1, 1), totalPages)
+  const currentPage = Math.min(Math.max(page || 1, 1), totalPages)
   const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
 
   const fetchStudents = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await getStudentsList({ page, limit, ...activeFilters })
+      const res = await getStudentsList(getParams(activeFilters))
       const rows = res.data?.data || res.data || []
       const pg = res.data?.pagination || {}
       setStudents(Array.isArray(rows) ? rows : [])
-      setPagination({
-        page: Number(pg.page || page),
-        totalPages: Number(pg.totalPages || pg.total_pages || pg.last_page || 1),
-        total: Number(pg.total || 0),
-        limit: Number(pg.limit || limit)
-      })
+      setPaginationData(pg)
     } catch (err) {
       setStudents([])
-      setPagination({ page, totalPages: 1, total: 0, limit })
+      setPaginationData({ page: 1, totalPages: 1, total: 0 })
       setError(err.response?.data?.message || 'Failed to load students')
     } finally {
       setLoading(false)
@@ -113,14 +109,25 @@ export default function Students() {
 
   const applyFilters = () => {
     setActiveFilters({ ...localFilters })
-    setPage(1)
+    resetPage()
   }
 
   const resetFilters = () => {
-    setLocalFilters({ student_name: '', school_name: '', standard: '' })
-    setActiveFilters({ student_name: '', school_name: '', standard: '' })
-    setPage(1)
+    setLocalFilters({ student_name: '', school_name: '', standard: '', status: '' })
+    setActiveFilters({ student_name: '', school_name: '', standard: '', status: '' })
+    resetPage()
   }
+
+  const groupedStudents = React.useMemo(() => {
+    return students.reduce((acc, student) => {
+      const year = student.createdAt ? new Date(student.createdAt).getFullYear() : (student.cdate ? new Date(student.cdate).getFullYear() : 'Unknown');
+      if (!acc[year]) acc[year] = [];
+      acc[year].push(student);
+      return acc;
+    }, {});
+  }, [students]);
+
+  const sortedYears = Object.keys(groupedStudents).sort((a, b) => b === 'Unknown' ? 1 : a === 'Unknown' ? -1 : b - a);
 
   return (
     <div className="space-y-6 animate-slide-up select-none text-text">
@@ -183,6 +190,19 @@ export default function Students() {
               className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
             />
           </div>
+          <div>
+            <label className="text-sm text-text-secondary mb-1.5 block">Status</label>
+            <select
+              name="status"
+              value={localFilters.status}
+              onChange={handleFilterChange}
+              className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
+            >
+              <option value="">All</option>
+              <option value="1">Active</option>
+              <option value="0">Pending</option>
+            </select>
+          </div>
         </div>
         <div className="flex gap-3">
           <button
@@ -229,81 +249,99 @@ export default function Students() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {students.map(student => (
-            <div key={student.id} className="relative overflow-hidden bg-card border border-border hover:border-text-secondary/20 rounded-2xl p-6 shadow-glass-sm hover:shadow-glass-md transition-all duration-300 flex flex-col justify-between group">
-              <div>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-sm uppercase tracking-wide">
-                        Standard {student.standard}
-                      </span>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-bold ${Number(student.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-surface-secondary text-text-secondary border border-border'}`}>
-                        {Number(student.status) === 1 ? 'Active' : 'Inactive'}
-                      </span>
-                    </div>
-                    <h3 className="text-base font-bold text-text mt-2.5 tracking-tight group-hover:text-primary transition-colors">
-                      {student.surname} {student.student_name}
-                    </h3>
-                    <p className="text-sm text-text-secondary mt-1">Father: {student.father_name}</p>
-                  </div>
+        <div className="space-y-10">
+          {sortedYears.map(year => (
+            <div key={year}>
+              <h3 className="text-xl font-bold text-text mb-4 border-b border-border pb-2 inline-block">
+                {year === 'Unknown' ? 'Unknown Year' : `Year ${year}`}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {groupedStudents[year].map(student => (
+                  <div key={student.id} className="relative overflow-hidden bg-card border border-border hover:border-text-secondary/20 rounded-2xl p-6 shadow-glass-sm hover:shadow-glass-md transition-all duration-300 flex flex-col justify-between group">
+                    <div>
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          {student.student_image ? (
+                            <img src={assetUrl(student.student_image)} alt={student.student_name} className="w-16 h-16 rounded-full object-cover border border-border" />
+                          ) : (
+                            <div className="w-16 h-16 rounded-full bg-surface-secondary border border-border flex items-center justify-center text-text-secondary">
+                              <GraduationCap className="w-8 h-8" />
+                            </div>
+                          )}
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-sm uppercase tracking-wide">
+                                Standard {student.standard}
+                              </span>
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-bold ${Number(student.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-warning/10 text-warning border border-warning/20'}`}>
+                                {Number(student.status) === 1 ? 'Active' : 'Pending'}
+                              </span>
+                            </div>
+                            <h3 className="text-base font-bold text-text mt-2.5 tracking-tight group-hover:text-primary transition-colors">
+                              {student.surname} {student.student_name}
+                            </h3>
+                            <p className="text-sm text-text-secondary mt-1">Father: {student.father_name}</p>
+                          </div>
+                        </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleEdit(student)}
-                      className="p-2.5 text-primary hover:text-primary-hover bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl transition-all"
-                      title="Edit"
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(student.id)}
-                      className="p-2.5 text-error-text hover:text-error bg-error-bg hover:bg-error/20 border border-error-border rounded-xl transition-all"
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEdit(student)}
+                            className="p-2.5 text-primary hover:text-primary-hover bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl transition-all"
+                            title="Edit"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(student.id)}
+                            className="p-2.5 text-error-text hover:text-error bg-error-bg hover:bg-error/20 border border-error-border rounded-xl transition-all"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
 
-                <div className="mt-4 space-y-2 text-sm text-text-secondary">
-                  <div className="flex items-center gap-2">
-                    <span className="text-text-secondary/70">School:</span>
-                    <span className="text-text">{student.school_name}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-text-secondary/70">Percentage:</span>
-                    <span className="text-text">{student.percentage}%</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-primary" />
-                    <span className="font-semibold text-text font-mono">{student.mobile_number}</span>
-                    {student.mobile_number_2 && (
-                      <span className="text-text-secondary/70">/ {student.mobile_number_2}</span>
-                    )}
-                  </div>
-                  {student.result_image && (
-                    <div className="mt-3">
-                      <img
-                        src={assetUrl(student.result_image)}
-                        alt="Result"
-                        className="w-full h-32 object-cover rounded-xl border border-border"
-                      />
+                      <div className="mt-4 space-y-2 text-sm text-text-secondary">
+                        <div className="flex items-center gap-2">
+                          <span className="text-text-secondary/70">School:</span>
+                          <span className="text-text">{student.school_name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-text-secondary/70">Percentage:</span>
+                          <span className="text-text">{student.percentage}%</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-3.5 h-3.5 text-primary" />
+                          <span className="font-semibold text-text font-mono">{student.mobile_number}</span>
+                          {student.mobile_number_2 && (
+                            <span className="text-text-secondary/70">/ {student.mobile_number_2}</span>
+                          )}
+                        </div>
+                        {student.result_image && (
+                          <div className="mt-3">
+                            <img
+                              src={assetUrl(student.result_image)}
+                              alt="Result"
+                              className="w-full h-32 object-cover rounded-xl border border-border"
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-success opacity-25 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </div>
+                ))}
               </div>
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-success opacity-25 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
           ))}
         </div>
       )}
 
-      {pagination.totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border border-border bg-surface-secondary/40 rounded-xl text-sm">
           <span className="text-text-secondary">
-            Page {pagination.page} of {pagination.totalPages} {pagination.total ? `(${pagination.total} total)` : ''}
+            Page {page} of {totalPages} {total ? `(${total} total)` : ''}
           </span>
           <div className="flex items-center gap-2">
             <button type="button" disabled={loading || page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
@@ -324,7 +362,7 @@ export default function Students() {
                 {item}
               </button>
             ))}
-            <button type="button" disabled={loading || page >= pagination.totalPages} onClick={() => setPage((current) => Math.min(pagination.totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="button" disabled={loading || page >= totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
               Next
             </button>
           </div>
@@ -422,17 +460,42 @@ export default function Students() {
               />
             </div>
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm text-text-secondary mb-1.5 block">Result Image</label>
+              <input
+                type="file"
+                name="result_image"
+                accept="image/*"
+                className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
+              />
+              {selectedStudent?.result_image && (
+                <p className="text-sm text-text-secondary mt-2">Current result image exists</p>
+              )}
+            </div>
+            <div>
+              <label className="text-sm text-text-secondary mb-1.5 block">Student Image</label>
+              <input
+                type="file"
+                name="student_image"
+                accept="image/*"
+                className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
+              />
+              {selectedStudent?.student_image && (
+                <p className="text-sm text-text-secondary mt-2">Current student image exists</p>
+              )}
+            </div>
+          </div>
           <div>
-            <label className="text-sm text-text-secondary mb-1.5 block">Result Image</label>
-            <input
-              type="file"
-              name="result_image"
-              accept="image/*"
+            <label className="text-sm text-text-secondary mb-1.5 block">Status</label>
+            <select
+              name="status"
+              defaultValue={selectedStudent?.status ?? 0}
               className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
-            />
-            {selectedStudent?.result_image && (
-              <p className="text-sm text-text-secondary mt-2">Current image exists</p>
-            )}
+            >
+              <option value={1}>Active</option>
+              <option value={0}>Pending</option>
+            </select>
           </div>
           <div className="flex gap-3 pt-2">
             <button

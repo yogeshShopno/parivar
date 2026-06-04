@@ -67,19 +67,19 @@ export default function Sidebar() {
           <>
             <SectionLabel>Masters</SectionLabel>
             <div className="ml-4 space-y-1 border-l border-primary/40 pl-3">
-              {visibleMasterNavigation.map(({ type, label }) => (
+              {visibleMasterNavigation.map((item) => (
                 <NavLink
-                  key={type}
-                  to={`/admin/masters/${type}`}
+                  key={item.type}
+                  to={item.to || `/admin/masters/${item.type}`}
                   end
                   className={({ isActive }) =>
                     `block min-h-8 w-full rounded-md px-3 py-2 text-sm transition-colors ${
                       isActive ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:text-text hover:bg-surface-secondary'
                     }`
                   }
-                  title={`${label} Master`}
+                  title={`${item.label} Master`}
                 >
-                  {label}
+                  {item.label}
                 </NavLink>
               ))}
             </div>

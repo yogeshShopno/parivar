@@ -563,7 +563,9 @@ const getStudents = async (req, res) => {
       mobile_number: s.mobile_number || '',
       mobile_number_2: s.mobile_number_2 || '',
       result_image: publicUrl(req, s.result_image || ''),
-      status: Number(s.status ?? 1)
+      student_image: publicUrl(req, s.student_image || ''),
+      status: Number(s.status ?? 0),
+      createdAt: s.createdAt || s.cdate || ''
     })), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving students', { error: error.message });
@@ -581,7 +583,8 @@ const studentPayload = (req, existing = {}) => ({
   mobile_number: req.body.mobile_number || existing.mobile_number || '',
   mobile_number_2: req.body.mobile_number_2 || existing.mobile_number_2 || '',
   result_image: req.body.result_image || existing.result_image || '',
-  status: req.body.status === undefined ? Number(existing.status ?? 1) : Number(req.body.status)
+  student_image: req.body.student_image || existing.student_image || '',
+  status: req.body.status === undefined ? Number(existing.status ?? 0) : Number(req.body.status)
 });
 
 const saveStudent = async (req, res) => {
@@ -625,7 +628,9 @@ const saveStudent = async (req, res) => {
       mobile_number: student.mobile_number || '',
       mobile_number_2: student.mobile_number_2 || '',
       result_image: publicUrl(req, student.result_image || ''),
-      status: Number(student.status ?? 1)
+      student_image: publicUrl(req, student.student_image || ''),
+      status: Number(student.status ?? 0),
+      createdAt: student.createdAt || student.cdate || ''
     });
   } catch (error) {
     return apiResponse(res, 500, 'Error saving student', { error: error.message });
