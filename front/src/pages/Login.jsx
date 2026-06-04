@@ -102,21 +102,6 @@ export default function Login() {
             {loading ? 'Login...' : 'Login'}
           </button>
         </form>
-
-        {/* Credentials helper card */}
-        <div className="mt-8 p-4 rounded-2xl bg-surface-secondary border border-border text-sm text-text-secondary flex gap-3 items-start animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <Key className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-          <div>
-            <div className="font-bold text-text">Admin Connect:</div>
-            <div className="mt-1 font-mono text-sm text-text-secondary">
-              <span className="text-primary font-semibold">User:</span> bhavikwala@gmail.com
-              <br />
-              <span className="text-primary font-semibold">Pass:</span> Bhavik@123
-            </div>
-    
-          </div>
-        </div>
-
       </div>
     </div>
   )

@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all'
 
-export default function CommitteeMemberForm({ member,  onSubmit, isLoading }) {
+export default function CommitteeMemberForm({ member, onSubmit, isLoading }) {
   const { user: loggedInUser } = useContext(AuthContext)
   const [formData, setFormData] = useState({
     first_name: '',
@@ -13,6 +13,7 @@ export default function CommitteeMemberForm({ member,  onSubmit, isLoading }) {
     number: '',
     password: '',
     designation: '',
+    remove_image: false,
     status: 1,
     image: null
   })
@@ -27,7 +28,7 @@ export default function CommitteeMemberForm({ member,  onSubmit, isLoading }) {
       password: '',
       designation: member?.designation || '',
       status: Number(member?.status ?? 1),
-      image: null
+      image: member?.image
     })
     setErrors({})
   }, [member])
@@ -89,34 +90,39 @@ export default function CommitteeMemberForm({ member,  onSubmit, isLoading }) {
     payload.append('number', formData.number)
     payload.append('designation', formData.designation)
     payload.append('status', formData.status)
-    if (formData.image) payload.append('image', formData.image)
+    payload.append('remove_image', formData.remove_image ? 'true' : 'false')
 
+    if (formData.image instanceof File) {
+      payload.append('image', formData.image)
+    }
     onSubmit(payload)
   }
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 select-none text-text">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm uppercase font-semibold text-text-secondary mb-1.5">First Name *</label>
+          <label className="block text-sm  font-semibold text-text-secondary mb-1.5">First Name *</label>
           <input type="text" placeholder="Enter First Name" value={formData.first_name} onChange={(e) => setFormData({ ...formData, first_name: e.target.value })} className={fieldClass} disabled={isLoading} />
           {errors.first_name && <p className="text-error-text text-sm mt-1 font-semibold">{errors.first_name}</p>}
         </div>
         <div>
-          <label className="block text-sm uppercase font-semibold text-text-secondary mb-1.5">Middle Name</label>
+          <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Middle Name</label>
           <input type="text" placeholder="Enter Middle Name" value={formData.middle_name} onChange={(e) => setFormData({ ...formData, middle_name: e.target.value })} className={fieldClass} disabled={isLoading} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm uppercase font-semibold text-text-secondary mb-1.5">Last Name *</label>
+          <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Last Name *</label>
           <input type="text" placeholder="Enter Last Name" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} className={fieldClass} disabled={isLoading} />
           {errors.last_name && <p className="text-error-text text-sm mt-1 font-semibold">{errors.last_name}</p>}
         </div>
 
-             <div>
-            <label className="block text-sm uppercase font-semibold text-text-secondary mb-1.5">Designation *</label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col justify-between mb-1.5 ">
+            <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Designation *</label>
             <input
               type="text"
               placeholder="Enter Designation"
@@ -128,28 +134,51 @@ export default function CommitteeMemberForm({ member,  onSubmit, isLoading }) {
             />
             {errors.designation && <p className="text-error-text text-sm mt-1 font-semibold">{errors.designation}</p>}
           </div>
-   
+
+          <div>
+            <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Status *</label>
+            <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className={fieldClass} disabled={isLoading}>
+              <option value={1}>Active</option>
+              <option value={0}>Inactive</option>
+            </select>
+            {errors.status && <p className="text-error-text text-sm mt-1 font-semibold">{errors.status}</p>}
+          </div>
+        </div>
+
       </div>
 
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm uppercase font-semibold text-text-secondary mb-1.5">Number *</label>
+          <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Number *</label>
           <input type="text" placeholder="Enter number" maxLength={10} value={formData.number} onChange={(e) => setFormData({ ...formData, number: e.target.value })} className={fieldClass} disabled={isLoading} />
         </div>
-        <div>
-          <label className="block text-sm uppercase font-semibold text-text-secondary mb-1.5">Image (300*300 px, Max size 1 mb)</label>
-          <input type="file" accept="image/*" onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })} className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20" disabled={isLoading} />
+        <div className="flex flex-col bg-input-bg border border-border rounded-xl p-3">
+          <label className="block text-sm font-semibold text-text-secondary mb-1.5">Image (300*300 px, Max size 1 mb)</label>
+
+          {(formData.image && typeof formData.image === 'string') || (formData.image instanceof File) ? (
+            <div className="relative w-20 h-20 mb-2">
+              <img
+                src={formData.image instanceof File ? URL.createObjectURL(formData.image) : formData.image}
+                alt="preview"
+                className="w-20 h-20 rounded-lg object-cover border border-border"
+              />
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, image: null, remove_image: true })}
+                className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
+                disabled={isLoading}
+              >×</button>
+            </div>
+          ) : null}
+
+          <input type="file" accept="image/*"
+            onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null, remove_image: false })}
+            className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
+            disabled={isLoading} />
           {errors.image && <p className="text-error-text text-sm mt-1 font-semibold">{errors.image}</p>}
         </div>
-        <div>
-          <label className="block text-sm uppercase font-semibold text-text-secondary mb-1.5">Status *</label>
-          <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className={fieldClass} disabled={isLoading}>
-            <option value={1}>Active</option>
-            <option value={0}>Inactive</option>
-          </select>
-          {errors.status && <p className="text-error-text text-sm mt-1 font-semibold">{errors.status}</p>}
-        </div>
+
       </div>
 
       <button type="submit" disabled={isLoading} className="justify-self-end flex bg-primary hover:bg-primary-hover text-white px-3 py-3 rounded-xl font-semibold text-sm tracking-wider uppercase transition-all disabled:opacity-50 shadow-glow-primary">

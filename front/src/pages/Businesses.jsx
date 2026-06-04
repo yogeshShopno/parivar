@@ -4,47 +4,42 @@ import { useNavigate } from 'react-router-dom'
 import api, { assetUrl, getBusinessesList } from '../lib/api'
 import Modal from '../components/Modal'
 import BusinessForm from '../components/BusinessForm'
+import usePagination from '../hooks/usePagination'
 
 const limit = 10
 
 export default function Businesses() {
   const navigate = useNavigate()
   const [businesses, setBusinesses] = useState([])
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0, limit })
+  const { page, totalPages, total, setPage, setPaginationData, getParams, resetPage } = usePagination(limit)
   const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
   const [search, setSearchValue] = useState('')
+  const [isOwn, setIsOwn] = useState(false)
   const [formLoading, setFormLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [selectedBusiness, setSelectedBusiness] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const totalPages = Math.max(Number(pagination.totalPages) || 1, 1)
-  const currentPage = Math.min(Math.max(Number(pagination.page) || page || 1, 1), totalPages)
+  const currentPage = Math.min(Math.max(page || 1, 1), totalPages)
   const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
 
   const fetchBusinesses = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await getBusinessesList({ page, limit, search })
+      const res = await getBusinessesList(getParams({ search, is_own: isOwn }))
       const rows = res.data?.data || res.data || []
       const pg = res.data?.pagination || {}
       setBusinesses(Array.isArray(rows) ? rows : [])
-      setPagination({
-        page: Number(pg.page || page),
-        totalPages: Number(pg.totalPages || pg.total_pages || pg.last_page || 1),
-        total: Number(pg.total || 0),
-        limit: Number(pg.limit || limit)
-      })
+      setPaginationData(pg)
     } catch (err) {
       setBusinesses([])
-      setPagination({ page, totalPages: 1, total: 0, limit })
+      setPaginationData({ page: 1, totalPages: 1, total: 0 })
       setError(err.response?.data?.message || 'Failed to load businesses')
     } finally {
       setLoading(false)
     }
-  }, [page, search])
+  }, [page, search, isOwn, getParams, setPaginationData])
 
   useEffect(() => {
     fetchBusinesses()
@@ -52,7 +47,7 @@ export default function Businesses() {
 
   const setSearch = (value) => {
     setSearchValue(value)
-    setPage(1)
+    resetPage()
   }
 
   const handleDelete = async (id) => {
@@ -173,6 +168,18 @@ export default function Businesses() {
           >
             <Plus className="w-4 h-4" /> Add
           </button>
+          <label className="flex items-center gap-2 cursor-pointer bg-surface border border-border px-4 py-2.5 rounded-xl">
+            <input
+              type="checkbox"
+              checked={isOwn}
+              onChange={(e) => {
+                setIsOwn(e.target.checked)
+                resetPage()
+              }}
+              className="rounded text-primary focus:ring-primary/20 bg-input-bg border-border"
+            />
+            <span className="text-sm font-medium text-text-secondary select-none">My Businesses</span>
+          </label>
           <div className="relative group flex-1 sm:w-64">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-text-secondary/60">
               <Search className="w-4 h-4" />
@@ -329,10 +336,10 @@ export default function Businesses() {
         </div>
       )}
 
-      {pagination.totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border border-border bg-surface-secondary/40 rounded-xl text-sm">
           <span className="text-text-secondary">
-            Page {pagination.page} of {pagination.totalPages} {pagination.total ? `(${pagination.total} total)` : ''}
+            Page {page} of {totalPages} {total ? `(${total} total)` : ''}
           </span>
           <div className="flex items-center gap-2">
             <button type="button" disabled={loading || page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
@@ -353,7 +360,7 @@ export default function Businesses() {
                 {item}
               </button>
             ))}
-            <button type="button" disabled={loading || page >= pagination.totalPages} onClick={() => setPage((current) => Math.min(pagination.totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="button" disabled={loading || page >= totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
               Next
             </button>
           </div>

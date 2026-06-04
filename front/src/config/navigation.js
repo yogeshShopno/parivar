@@ -38,6 +38,7 @@ export const coreNavigation = [
 
 export const masterNavigation = [
   { type: 'business', label: 'Business', permission: 'businesses.list' },
+  { type: 'bank-details', label: 'Bank Details', permission: 'bank-details.list', to: '/admin/bank-details' },
   { type: 'country', label: 'Country', permission: 'country.list' },
   { type: 'state', label: 'State', permission: 'state.list' },
   { type: 'district', label: 'District', permission: 'district.list' },

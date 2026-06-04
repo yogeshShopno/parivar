@@ -29,7 +29,9 @@ const getStudents = async (req, res) => {
         mobile_number: s.mobile_number || '',
         mobile_number_2: s.mobile_number_2 || '',
         result_image: publicUrl(req, s.result_image || ''),
-        status: Number(s.status ?? 1)
+        student_image: publicUrl(req, s.student_image || ''),
+        status: Number(s.status ?? 0),
+        createdAt: s.createdAt || s.cdate || ''
       })),
       ...(pagination ? { pagination } : {})
     });
@@ -55,6 +57,7 @@ const addStudent = async (req, res) => {
       mobile_number,
       mobile_number_2,
       result_image,
+      student_image,
       status
     } = requestData(req);
 
@@ -77,7 +80,8 @@ const addStudent = async (req, res) => {
       mobile_number,
       mobile_number_2: mobile_number_2 || '',
       result_image: result_image || '',
-      status: status === undefined ? 1 : Number(status),
+      student_image: student_image || '',
+      status: status === undefined ? 0 : Number(status),
       cdate: new Date().toISOString().slice(0, 10)
     };
 
@@ -96,7 +100,9 @@ const addStudent = async (req, res) => {
         mobile_number: student.mobile_number || '',
         mobile_number_2: student.mobile_number_2 || '',
         result_image: publicUrl(req, student.result_image || ''),
-        status: Number(student.status ?? 1)
+        student_image: publicUrl(req, student.student_image || ''),
+        status: Number(student.status ?? 0),
+        createdAt: student.createdAt || student.cdate || ''
       }
     });
   } catch (error) {
@@ -140,6 +146,7 @@ const updateStudent = async (req, res) => {
       mobile_number,
       mobile_number_2,
       result_image,
+      student_image,
       status
     } = requestData(req);
 
@@ -152,6 +159,7 @@ const updateStudent = async (req, res) => {
     if (mobile_number) student.mobile_number = mobile_number;
     if (mobile_number_2 !== undefined) student.mobile_number_2 = mobile_number_2;
     if (result_image) student.result_image = result_image;
+    if (student_image) student.student_image = student_image;
     if (status !== undefined) student.status = Number(status);
 
     await student.save();
@@ -169,7 +177,9 @@ const updateStudent = async (req, res) => {
         mobile_number: student.mobile_number || '',
         mobile_number_2: student.mobile_number_2 || '',
         result_image: publicUrl(req, student.result_image || ''),
-        status: Number(student.status ?? 1)
+        student_image: publicUrl(req, student.student_image || ''),
+        status: Number(student.status ?? 0),
+        createdAt: student.createdAt || student.cdate || ''
       }
     });
   } catch (error) {

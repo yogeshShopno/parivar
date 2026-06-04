@@ -1,36 +1,45 @@
 const mongoose = require('mongoose');
 
-const donationSchema = new mongoose.Schema({
+const bankDetailSchema = new mongoose.Schema({
   id: {
     type: String,
     unique: true,
     sparse: true,
     index: true
   },
-  donator_name: {
+  bank_name: {
     type: String,
     required: true,
     trim: true
   },
-  donate_amount: {
-    type: Number,
-    required: true
+  account_name: {
+    type: String,
+    trim: true
   },
-  bank_detail_id: {
+  account_number: {
     type: String,
     required: true,
     trim: true
   },
-  donation_purpose: {
+  ifsc_code: {
     type: String,
     required: true,
     trim: true
   },
-  date: {
+  branch: {
     type: String,
-    required: true
+    trim: true
   },
-
+  upi_link: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  qr_code: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   status: {
     type: Number,
     default: 1,
@@ -45,4 +54,4 @@ const donationSchema = new mongoose.Schema({
   strict: false
 });
 
-module.exports = mongoose.model('Donation', donationSchema);
+module.exports = mongoose.model('BankDetail', bankDetailSchema);

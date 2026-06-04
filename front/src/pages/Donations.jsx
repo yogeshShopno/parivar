@@ -9,28 +9,27 @@ import {
   IndianRupee,
   MapPin,
   CalendarDays,
-  User2
+  User2,
+  Copy
 } from 'lucide-react'
-import api from '../lib/api'
-import { getDonationsList } from '../lib/api'
+import { getDonationsList, getBankDetailsList } from '../lib/api'
+import usePagination from '../hooks/usePagination'
 import Modal from '../components/Modal'
 
 const limit = 10
 
 export default function Donations() {
   const [donations, setDonations] = useState([])
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0, limit })
+  const { page, totalPages, total, setPage, setPaginationData, getParams, resetPage } = usePagination(limit)
   const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
+  const [bankDetails, setBankDetails] = useState([])
   const [activeFilters, setActiveFilters] = useState({
     donator_name: '',
-    location: '',
     donation_purpose: ''
   })
   const [formLoading, setFormLoading] = useState(false)
   const [filters, setFilters] = useState({
     donator_name: '',
-    location: '',
     donation_purpose: ''
   })
   const [error, setError] = useState('')
@@ -41,19 +40,14 @@ export default function Donations() {
   const fetchDonations = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await getDonationsList({ page, limit, ...activeFilters })
+      const res = await getDonationsList(getParams(activeFilters))
       const rows = res.data?.data || res.data || []
       const pg = res.data?.pagination || {}
       setDonations(Array.isArray(rows) ? rows : [])
-      setPagination({
-        page: Number(pg.page || page),
-        totalPages: Number(pg.totalPages || pg.total_pages || pg.last_page || 1),
-        total: Number(pg.total || 0),
-        limit: Number(pg.limit || limit)
-      })
+      setPaginationData(pg)
     } catch (err) {
       setDonations([])
-      setPagination({ page, totalPages: 1, total: 0, limit })
+      setPaginationData({ page: 1, totalPages: 1, total: 0 })
       setError(err.response?.data?.message || 'Failed to load donations')
     } finally {
       setLoading(false)
@@ -63,6 +57,18 @@ export default function Donations() {
   useEffect(() => {
     fetchDonations()
   }, [fetchDonations])
+
+  useEffect(() => {
+    const fetchBankDetails = async () => {
+      try {
+        const res = await getBankDetailsList({ limit: 100 })
+        setBankDetails(res.data?.data || res.data || [])
+      } catch (err) {
+        console.error('Failed to load bank details', err)
+      }
+    }
+    fetchBankDetails()
+  }, [])
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this donation?')) return
@@ -98,11 +104,6 @@ export default function Donations() {
     const formData = new FormData(e.target)
     const payload = Object.fromEntries(formData.entries())
 
-    // If whose_possession is empty, set to 'direct'
-    if (!payload.whose_possession || payload.whose_possession.trim() === '') {
-      payload.whose_possession = 'direct'
-    }
-
     try {
       if (selectedDonation) {
         await api.put(`/donations/${selectedDonation.id}`, payload)
@@ -128,15 +129,18 @@ export default function Donations() {
 
   const applyFilters = () => {
     setActiveFilters({ ...filters })
-    setPage(1)
+    resetPage()
   }
 
   const resetFilters = () => {
-    const reset = { donator_name: '', location: '', donation_purpose: '' }
+    const reset = { donator_name: '', donation_purpose: '' }
     setFilters(reset)
     setActiveFilters(reset)
-    setPage(1)
+    resetPage()
   }
+
+  const currentPage = Math.min(Math.max(page || 1, 1), totalPages)
+  const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
 
   const formatAmount = (amount) =>
     new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount || 0)
@@ -186,10 +190,57 @@ export default function Donations() {
         </div>
       )}
 
-      {/* Filters */}
-      <div className="bg-card border border-border rounded-2xl p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {/* Bank Details Display */}
+        {bankDetails.length > 0 && (
+          <div className="bg-card border border-border rounded-2xl p-6 relative overflow-hidden group">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-info opacity-40"></div>
+            <h3 className="font-bold text-text mb-4 flex items-center gap-2">
+              <span className="w-1.5 h-6 bg-primary rounded-full inline-block"></span>
+              Donation Bank Details
+            </h3>
+            <div className="grid grid-cols-1 gap-4">
+              {bankDetails.map((bank) => (
+              <div key={bank.id} className="p-4 rounded-xl bg-surface-secondary border border-border flex gap-4 items-start">
+                <div className="flex-1 text-sm text-text-secondary space-y-1">
+                  <p className="font-bold text-primary mb-1">{bank.bank_name}</p>
+                  {bank.account_name && <p><span className="font-medium text-text">Name:</span> {bank.account_name}</p>}
+                  <p><span className="font-medium text-text">A/c No:</span> {bank.account_number}</p>
+                  <p><span className="font-medium text-text">IFSC:</span> {bank.ifsc_code}</p>
+                  <p><span className="font-medium text-text">Branch:</span> {bank.branch}</p>
+                  {bank.upi_link && (
+                    <div className="flex items-center gap-2 mt-2 pt-1">
+                      <span className="font-medium text-text">UPI:</span>
+                      <span className="truncate max-w-[120px] font-medium">{bank.upi_link}</span>
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(bank.upi_link)
+                          setSuccess('UPI link copied!')
+                          setTimeout(() => setSuccess(''), 3000)
+                        }}
+                        className="p-1 hover:bg-surface rounded bg-surface border border-border text-primary transition-colors ml-1"
+                        title="Copy UPI Link"
+                      >
+                        <Copy className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {bank.qr_code && (
+                  <div className="w-24 h-24 shrink-0 bg-white rounded-lg p-1 border border-border shadow-sm flex items-center justify-center">
+                    <img src={bank.qr_code.startsWith('http') ? bank.qr_code : `http://localhost:5000${bank.qr_code}`} alt="QR" className="w-full h-full object-contain" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+        )}
+
+        {/* Filters */}
+        <div className={`bg-card border border-border rounded-2xl p-6 h-fit ${bankDetails.length === 0 ? 'xl:col-span-2' : ''}`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
             <label className="text-sm text-text-secondary mb-1.5 block">Donator Name</label>
             <input
               type="text"
@@ -200,17 +251,7 @@ export default function Donations() {
               className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
             />
           </div>
-          <div>
-            <label className="text-sm text-text-secondary mb-1.5 block">Location</label>
-            <input
-              type="text"
-              name="location"
-              value={filters.location}
-              onChange={handleFilterChange}
-              placeholder="Search by location"
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
-            />
-          </div>
+
           <div>
             <label className="text-sm text-text-secondary mb-1.5 block">Donation Purpose</label>
             <input
@@ -237,6 +278,7 @@ export default function Donations() {
             Reset
           </button>
         </div>
+      </div>
       </div>
 
       {/* Alerts */}
@@ -332,20 +374,10 @@ export default function Donations() {
                 {/* Details */}
                 <div className="mt-4 grid grid-cols-1 gap-2 text-sm">
                   <div className="flex items-center gap-2 text-text-secondary">
-                    <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span className="text-text">{donation.location}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-text-secondary">
                     <CalendarDays className="w-3.5 h-3.5 text-primary shrink-0" />
                     <span className="text-text">{donation.date}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-text-secondary">
-                    <User2 className="w-3.5 h-3.5 text-success shrink-0" />
-                    <span className="text-text-secondary">Possession:</span>
-                    <span className={`font-semibold ${donation.whose_possession === 'direct' ? 'text-text-secondary' : 'text-success-text'}`}>
-                      {donation.whose_possession || 'direct'}
-                    </span>
-                  </div>
+
                 </div>
               </div>
 
@@ -356,10 +388,10 @@ export default function Donations() {
         </div>
       )}
 
-      {pagination.totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border border-border bg-surface-secondary/40 rounded-xl text-sm">
           <span className="text-text-secondary">
-            Page {pagination.page} of {pagination.totalPages} {pagination.total ? `(${pagination.total} total)` : ''}
+            Page {page} of {totalPages} {total ? `(${total} total)` : ''}
           </span>
           <div className="flex items-center gap-2">
             <button type="button" disabled={loading || page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
@@ -380,14 +412,14 @@ export default function Donations() {
                 {item}
               </button>
             ))}
-            <button type="button" disabled={loading || page >= pagination.totalPages} onClick={() => setPage((current) => Math.min(pagination.totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="button" disabled={loading || page >= totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
               Next
             </button>
           </div>
         </div>
       )}
 
-     
+      {/* Add/Edit Modal */}
       <Modal
         isOpen={isModalOpen}
         title={selectedDonation ? 'Edit Donation' : 'Add Donation'}
@@ -421,18 +453,9 @@ export default function Donations() {
             </div>
           </div>
 
-          <div>
-            <label className="text-sm text-text-secondary mb-1.5 block">Location *</label>
-            <input
-              type="text"
-              name="location"
-              defaultValue={selectedDonation?.location || ''}
-              required
-              placeholder="Enter donation location"
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
-            />
-          </div>
 
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm text-text-secondary mb-1.5 block">Donation Purpose *</label>
             <input
@@ -443,9 +466,8 @@ export default function Donations() {
               placeholder="e.g. Temple renovation, Food drive..."
               className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
             />
-          </div>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm text-text-secondary mb-1.5 block">Date *</label>
               <input
@@ -456,21 +478,7 @@ export default function Donations() {
                 className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
               />
             </div>
-            <div>
-              <label className="text-sm text-text-secondary mb-1.5 block">
-                Whose Possession
-                <span className="ml-1 text-text-secondary/60 normal-case font-normal">(blank = "direct")</span>
-              </label>
-              <input
-                type="text"
-                name="whose_possession"
-                defaultValue={
-                  selectedDonation?.whose_possession === 'direct' ? '' : selectedDonation?.whose_possession || ''
-                }
-                placeholder="Leave blank for Direct"
-                className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
-              />
-            </div>
+
           </div>
 
           <div className="flex gap-3 pt-2">

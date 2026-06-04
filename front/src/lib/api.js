@@ -66,6 +66,7 @@ export const getBusinessesList = (params = {}) => api.get('/businesses', { param
 export const getPostsList = (params = {}) => api.get('/posts', { params })
 export const getNewsList = (params = {}) => api.get('/news', { params })
 export const getDonationsList = (params = {}) => api.get('/donations', { params })
+export const getBankDetailsList = (params = {}) => api.get('/bank-details', { params })
 export const getCommitteeMembersList = (params = {}) => api.get('/committee-members', { params })
 export const getGalleryList = (params = {}) => api.get('/gallery', { params })
 

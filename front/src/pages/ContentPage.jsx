@@ -46,6 +46,7 @@ const definitions = {
     title: 'Matrimonies',
     subtitle: 'Create and manage matrimony profiles',
     endpoint: '/matrimonies',
+    supportIsOwn: true,
     fields: [
       { name: 'full_name', label: 'Full Name' },
       { name: 'gender', label: 'Gender' },
@@ -66,15 +67,18 @@ const definitions = {
         name: 'status',
         label: 'Status',
         type: 'select',
-        defaultValue: 1,
+        defaultValue: 0,
         options: [
           { value: 1, label: 'Active' },
           { value: 0, label: 'Inactive' }
         ]
       },
-      { name: 'about', label: 'About', type: 'textarea' }
+      { name: 'about', label: 'About', type: 'textarea' },
+      { name: 'biodata', label: 'Biodata (PDF/Image)', type: 'file', accept: 'image/*,application/pdf' },
+      { name: 'person_image', label: 'Person Image', type: 'file' }
     ],
     columns: [
+      { key: 'person_image', label: 'Photo', type: 'image' },
       { key: 'full_name', label: 'Name' },
       { key: 'gender', label: 'Gender' },
       { key: 'marital_status', label: 'Status' },
@@ -180,6 +184,27 @@ const definitions = {
       { key: 'company_name', label: 'Company Name' },
       { key: 'location', label: 'Location' },
       { key: 'job_type', label: 'Job Type' },
+      { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
+    ]
+  },
+  'bank-details': {
+    title: 'Bank Details',
+    subtitle: 'Manage bank accounts for donations',
+    endpoint: '/bank-details',
+    fields: [
+      { name: 'bank_name', label: 'Bank Name' },
+      { name: 'account_name', label: 'Account Name' },
+      { name: 'account_number', label: 'Account Number' },
+      { name: 'ifsc_code', label: 'IFSC Code' },
+      { name: 'branch', label: 'Branch' },
+      { name: 'upi_link', label: 'UPI Link' },
+      { name: 'qr_code', label: 'QR Code', type: 'file' },
+      { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Active' }, { value: 0, label: 'Inactive' }] }
+    ],
+    columns: [
+      { key: 'bank_name', label: 'Bank Name' },
+      { key: 'account_name', label: 'Account Name' },
+      { key: 'account_number', label: 'Account Number' },
       { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
     ]
   }
