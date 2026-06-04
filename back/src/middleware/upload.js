@@ -89,6 +89,7 @@ const parseForm = (req, res, next) => {
   return upload.fields([
     { name: 'image', maxCount: 1 },
     { name: 'images', maxCount: 20 },
+
     { name: 'gallery_image_1', maxCount: 1 },
     { name: 'gallery_image_2', maxCount: 1 },
     { name: 'gallery_image_3', maxCount: 1 },
@@ -98,7 +99,13 @@ const parseForm = (req, res, next) => {
     { name: 'biodata', maxCount: 1 },
     { name: 'person_image', maxCount: 1 },
     { name: 'qr_code', maxCount: 1 },
-    { name: 'student_image', maxCount: 1 }
+    { name: 'student_image', maxCount: 1 },
+
+    { name: 'bannerImages', maxCount: 5 },
+    { name: 'appLogo', maxCount: 1 },
+    { name: 'webLogo', maxCount: 1 },
+    { name: 'favicon', maxCount: 1 },
+
   ])(req, res, async (error) => {
     if (error) return next(error);
 
@@ -129,7 +136,7 @@ const parseForm = (req, res, next) => {
           const filesArray = req.files[fieldName];
           for (const file of filesArray) {
             const imagePath = await uploadToExternalService(file, fieldName);
-            
+
             if (fieldName === 'images') {
               if (!Array.isArray(req.body.images)) {
                 req.body.images = [];
@@ -151,7 +158,7 @@ const parseForm = (req, res, next) => {
         const imagePath = await uploadToExternalService(req.file, req.file.fieldname);
         req.body[req.file.fieldname] = imagePath;
       }
-      
+
       // Clear req.file and req.files so controllers don't prepend /uploads/
       if (req.file) delete req.file;
       if (req.files) delete req.files;

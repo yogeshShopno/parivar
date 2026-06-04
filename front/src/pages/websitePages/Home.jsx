@@ -26,6 +26,7 @@ export default function Home() {
               showArrows={true}
               showDots={true}
               showCounter={false}
+              
             />
           </div>
         </section>

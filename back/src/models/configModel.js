@@ -38,9 +38,62 @@ const configSchema = new mongoose.Schema({
     default: "#7B0D1C"
   },
 
+  appLogo: {
+    type: String,
+    default: ""
+  },
+  webLogo: {
+    type: String,
+    default: ""
+  },
+  favicon: {
+    type: String,
+    default: ""
+  },
 
-}
-, {
+  name: {
+    type: String,
+    default: "",
+    required: true,
+  },
+  bannerImages: {
+    type: [String],
+    default: [],
+    required: true,
+  },
+  email: {
+    type: String,
+    default: "",
+  },
+  phone: {
+    type: String,
+    default: "",
+  },
+  facebook: {
+    type: String,
+    default: "",
+  },
+  twitter: {
+    type: String,
+    default: "",
+  },
+  instagram: {
+    type: String,
+    default: "",
+  },
+  youtube: {
+    type: String,
+    default: "",
+  },
+  whatsapp: {
+    type: String,
+    default: "",
+  },
+
+  
+
+
+}, {
   timestamps: true,
   strict: false
 });

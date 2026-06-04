@@ -2,19 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { Award, GraduationCap, Medal, Star, Trophy } from 'lucide-react'
 import { memberApi } from '../../lib/api'
 
-const defaultTheme = {
-  gradientStart: '#2E7D32',
-  gradientEnd: '#0D3B12',
-  primaryColor: '#1B5E20',
-  secondaryColor: '#66BB6A',
-  textColor: '#123524',
-  backgroundColor: '#F5FFF7',
-  borderColor: '#D7EFD9',
-  buttonColor: '#1B5E20',
-  fontColor: '#FFFFFF',
-}
-
-
 
 const rankLabel = (index) => {
   const rank = index + 1
@@ -35,7 +22,7 @@ const normalizeStudent = (student, index) => ({
   standard: student.standard || 'Standard',
   score: student.percentage ? `${String(student.percentage).replace('%', '')}%` : '0%',
   achievement: student.school_name || 'Academic Achievement',
-  image: student.result_image || `/${(index % 4) + 1}.png`,
+  image: student.student_image || "/image.png"
 })
 
 const getStoredWebTheme = () => {
@@ -70,13 +57,13 @@ const shadeColor = (color, percent) => {
 }
 
 export default function TopStudents() {
-  const [theme, setTheme] = useState(defaultTheme)
+  const [theme, setTheme] = useState(getStoredWebTheme())
   const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadTheme = () => {
-      setTheme({ ...defaultTheme, ...getStoredWebTheme() })
+      setTheme(getStoredWebTheme())
     }
 
     loadTheme()
@@ -107,7 +94,7 @@ export default function TopStudents() {
   }, [])
 
   const visibleStudents = students.length > 0 ? students : []
-
+console.log(visibleStudents)
   return (
     <section
       id="students"
