@@ -2,6 +2,29 @@ import React, { createContext, useState, useCallback, useEffect } from 'react'
 
 export const AuthContext = createContext()
 
+const storeWebTheme = (themeData) => {
+  if (!themeData) return
+
+  const themeKeys = [
+    'backgroundColor',
+    'borderColor',
+    'buttonColor',
+    'fontColor',
+    'gradientEnd',
+    'gradientStart',
+    'primaryColor',
+    'secondaryColor',
+    'textColor'
+  ]
+
+  themeKeys.forEach((key) => {
+    const value = themeData[key]
+    if (typeof value === 'string' || typeof value === 'number') {
+      localStorage.setItem(`web_${key}`, value)
+    }
+  })
+}
+
 /**
  * Fetch and cache WEBSITE theme colors from backend
  * 
@@ -25,11 +48,7 @@ const fetchWebTheme = async () => {
     const themeData = json.data || json
 
     if (themeData) {
-      Object.keys(themeData).forEach((key) => {
-        if (typeof themeData[key] === 'string' || typeof themeData[key] === 'number') {
-          localStorage.setItem(`web_${key}`, themeData[key])
-        }
-      })
+      storeWebTheme(themeData)
     }
   } catch (err) {
     console.error('Failed to fetch web theme:', err.message)

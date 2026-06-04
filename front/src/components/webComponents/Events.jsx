@@ -2,72 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Calendar, CheckCircle, Clock, MapPin, Users, X } from 'lucide-react'
 import { memberApi } from '../../lib/api'
 
-const defaultTheme = {
-  gradientStart: '#2E7D32',
-  gradientEnd: '#0D3B12',
-  primaryColor: '#1B5E20',
-  secondaryColor: '#66BB6A',
-  textColor: '#123524',
-  backgroundColor: '#F5FFF7',
-  borderColor: '#D7EFD9',
-  buttonColor: '#1B5E20',
-  fontColor: '#FFFFFF',
-}
 
-const fallbackEvents = [
-  {
-    title: 'Bhagwad Spatah',
-    subtitle: 'Bhagwad Spatah Katha 2026, Shastri Shri Param Pujya Dwarkesh Lalji Shri',
-    category: 'Family Reunion',
-    location: 'Surat',
-    time: '02:00 PM - 06:00 PM',
-    date: 'Sunday, 24 May 2026',
-    day: '24',
-    month: 'May',
-    entry: 'Free',
-    attendees: 0,
-    image: '/1.png',
-  },
-  {
-    title: 'vala Annual Family Reunion & Gathering',
-    subtitle: 'Family Reunion 2027',
-    category: 'Family Reunion',
-    location: 'vala Samaj Hall, Vadodara',
-    time: '03:00 PM - 06:00 PM',
-    date: 'Tuesday, 12 January 2027',
-    day: '12',
-    month: 'Jan',
-    entry: 'Free',
-    attendees: 0,
-    image: '/2.png',
-  },
-  {
-    title: 'Grand Diwali Community Night & Celebration',
-    subtitle: 'Diwali Night 2026',
-    category: 'Family Reunion',
-    location: 'vala Samaj Hall, Surat',
-    time: '09:00 PM - 11:00 PM',
-    date: 'Tuesday, 20 October 2026',
-    day: '20',
-    month: 'Oct',
-    entry: 'Paid',
-    attendees: 0,
-    image: '/3.png',
-  },
-  {
-    title: 'Annual Milan 2026',
-    subtitle: 'Annual Milan 2026',
-    category: 'Family Reunion',
-    location: 'vala Community Center',
-    time: '05:00 PM - 09:00 PM',
-    date: 'Friday, 15 May 2026',
-    day: '15',
-    month: 'May',
-    entry: 'Free',
-    attendees: 0,
-    image: '/4.png',
-  },
-]
 
 const formatEventDate = (value) => {
   if (!value) return ''
@@ -92,11 +27,11 @@ const normalizeEvent = (event, index) => ({
   title: event.event_name || event.title || 'Community Event',
   subtitle: event.title || event.event_name || 'Upcoming Event',
   category: event.event_category_name || 'Community Event',
-  location: event.event_location || 'vala Parivar',
+  location: event.event_location || ' Parivar',
   time: [event.start_time, event.end_time].filter(Boolean).join(' - ') || 'Time will be announced',
-  date: formatEventDate(event.event.start_time),
-  day: getDatePart(event.event.start_time, 'day'),
-  month: getDatePart(event.event.start_time, 'month'),
+  date: formatEventDate(event.start_time),
+day: getDatePart(event.start_time, 'day'),
+month: getDatePart(event.start_time, 'month'),
   entry: event.entry_type || 'Free',
   attendees: 0,
   image: event.image || `/${(index % 4) + 1}.png`,
@@ -134,7 +69,7 @@ const shadeColor = (color, percent) => {
 }
 
 export default function Events() {
-  const [theme, setTheme] = useState(defaultTheme)
+  const [theme, setTheme] = useState(getStoredWebTheme() )
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -147,7 +82,7 @@ export default function Events() {
 
   useEffect(() => {
     const loadTheme = () => {
-      setTheme({ ...defaultTheme, ...getStoredWebTheme() })
+      setTheme(getStoredWebTheme())
     }
 
     loadTheme()
@@ -160,7 +95,11 @@ export default function Events() {
       try {
         setLoading(true)
         const response = await memberApi.get('/events')
+        
         const rows = Array.isArray(response.data?.data) ? response.data.data : []
+        const normalizedEvents = normalizeEvent
+        console.log(normalizedEvents)
+
         setEvents(rows.map(normalizeEvent))
       } catch (error) {
         setEvents([])
@@ -198,7 +137,9 @@ export default function Events() {
     setSelectedEvent(null)
   }
 
-  const visibleEvents = events.length > 0 ? events : fallbackEvents
+  const visibleEvents = events.length > 0 ? events : []
+
+
 
   return (
     <section

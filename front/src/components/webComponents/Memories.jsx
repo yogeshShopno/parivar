@@ -1,36 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { memberApi } from '../../lib/api'
+import { assetUrl, memberApi } from '../../lib/api'
 
-const defaultTheme = {
-  gradientStart: '#2E7D32',
-  gradientEnd: '#0D3B12',
-  primaryColor: '#1B5E20',
-  secondaryColor: '#66BB6A',
-  textColor: '#123524',
-  backgroundColor: '#F5FFF7',
-  borderColor: '#D7EFD9',
-  buttonColor: '#1B5E20',
-  fontColor: '#FFFFFF',
-}
 
-const fallbackTabs = [
-  { id: 'all', label: 'All' },
-  { id: 'family', label: 'Family' },
-  { id: 'events', label: 'Events' },
-  { id: 'festival', label: 'Festival' },
-]
 
-const fallbackMemories = [
-  { src: '/1.png', fallback: '/1.png', category: 'family', alt: 'Family memory' },
-  { src: '/2.png', fallback: '/2.png', category: 'events', alt: 'Community event memory' },
-  { src: '/3.png', fallback: '/3.png', category: 'festival', alt: 'Festival memory' },
-  { src: '/4.png', fallback: '/4.png', category: 'family', alt: 'Family gathering memory' },
-  { src: '/5.png', fallback: '/1.png', category: 'events', alt: 'Celebration memory' },
-  { src: '/6.png', fallback: '/2.png', category: 'festival', alt: 'Festival celebration memory' },
-  { src: '/7.png', fallback: '/3.png', category: 'family', alt: 'Community family memory' },
-  { src: '/8.png', fallback: '/4.png', category: 'events', alt: 'Group event memory' },
-  { src: '/9.png', fallback: '/1.png', category: 'festival', alt: 'Traditional celebration memory' },
-]
 
 const normalizeGalleryMemories = (galleryRows, categories) => {
   const categoryMap = categories.reduce((map, category) => {
@@ -43,7 +15,7 @@ const normalizeGalleryMemories = (galleryRows, categories) => {
     const categoryName = categoryMap[categoryId] || row.year || 'Gallery'
 
     return images.map((image, imageIndex) => ({
-      src: image,
+      src: assetUrl(image),
       fallback: `/${((rowIndex + imageIndex) % 4) + 1}.png`,
       category: categoryId || categoryName,
       alt: `${categoryName} memory`,
@@ -64,7 +36,7 @@ const getStoredWebTheme = () => {
     'textColor',
   ]
 
-  return colorKeys.reduce((theme, key) => {
+   return colorKeys.reduce((theme, key) => {
     const value = localStorage.getItem(`web_${key}`)
     return value ? { ...theme, [key]: value } : theme
   }, {})
@@ -84,20 +56,22 @@ const shadeColor = (color, percent) => {
 
 export default function Memories() {
   const [activeTab, setActiveTab] = useState('all')
-  const [theme, setTheme] = useState(defaultTheme)
+  const [theme, setTheme] = useState(getStoredWebTheme())
   const [memories, setMemories] = useState([])
-  const [categoryTabs, setCategoryTabs] = useState(fallbackTabs)
+  const [categoryTabs, setCategoryTabs] = useState([{ id: 'all', label: 'All' }])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadTheme = () => {
-      setTheme({ ...defaultTheme, ...getStoredWebTheme() })
+      setTheme(getStoredWebTheme())
     }
 
     loadTheme()
     window.addEventListener('storage', loadTheme)
     return () => window.removeEventListener('storage', loadTheme)
   }, [])
+
+
 
   useEffect(() => {
     const fetchGallery = async () => {
@@ -118,10 +92,10 @@ export default function Memories() {
           })),
         ]
 
-        setCategoryTabs(dynamicTabs.length > 1 ? dynamicTabs : fallbackTabs)
+        setCategoryTabs(dynamicTabs)
         setMemories(normalizeGalleryMemories(galleryRows, categories))
       } catch (error) {
-        setCategoryTabs(fallbackTabs)
+        setCategoryTabs([{ id: 'all', label: 'All' }])
         setMemories([])
       } finally {
         setLoading(false)
@@ -131,31 +105,33 @@ export default function Memories() {
     fetchGallery()
   }, [])
 
-  const visibleMemories = memories.length > 0 ? memories : fallbackMemories
-  const visibleTabs = memories.length > 0 ? categoryTabs : fallbackTabs
+  const visibleMemories = memories.length > 0 ? memories : []
+  const visibleTabs = memories.length > 0 ? categoryTabs : []
 
-  const filteredMemories = useMemo(() => {
-    if (activeTab === 'all') return visibleMemories
-    return visibleMemories.filter((memory) => memory.category === activeTab)
-  }, [activeTab, visibleMemories])
+const filteredMemories = useMemo(() => {
+  const list = activeTab === 'all'
+    ? visibleMemories
+    : visibleMemories.filter((memory) => memory.category === activeTab)
+  return list ? list.slice(0, 9) : []
+}, [activeTab, visibleMemories])
 
   return (
     <section
       id="gallery"
       className="w-full px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20"
-      style={{ backgroundColor: shadeColor(theme.backgroundColor, 2) }}
+      style={{ backgroundColor: theme.backgroundColor }}
     >
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8 sm:mb-10">
           <p
             className="text-sm sm:text-base font-semibold tracking-wide mb-2"
-            style={{ color: theme.primaryColor }}
+            style={{ color: theme?.primaryColor }}
           >
             - Gallery -
           </p>
           <h2
             className="text-3xl sm:text-4xl font-bold tracking-tight"
-            style={{ color: theme.textColor }}
+            style={{ color: theme?.textColor }}
           >
             Memories That{' '}
             <span
@@ -189,12 +165,8 @@ export default function Memories() {
                 className="min-w-24 rounded-full border px-5 py-2 text-sm font-semibold transition-all duration-200"
                 style={{
                   borderColor: isActive ? theme.primaryColor : theme.borderColor,
-                  backgroundImage: isActive
-                    ? `linear-gradient(to right, ${theme.gradientStart}, ${theme.gradientEnd})`
-                    : 'none',
-                  backgroundColor: isActive ? undefined : theme.backgroundColor,
+                  backgroundColor: isActive ? theme.primaryColor : '#FFFFFF',
                   color: isActive ? theme.fontColor : theme.textColor,
-                  boxShadow: isActive ? `0 10px 24px ${theme.primaryColor}25` : 'none',
                 }}
               >
                 {tab.label}
@@ -208,7 +180,7 @@ export default function Memories() {
             className="mb-6 rounded-lg border px-4 py-3 text-center text-sm font-semibold"
             style={{
               borderColor: theme.borderColor,
-              backgroundColor: theme.backgroundColor,
+              backgroundColor: shadeColor(theme.backgroundColor, 2),
               color: theme.textColor,
             }}
           >
@@ -219,7 +191,7 @@ export default function Memories() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredMemories.map((memory, index) => (
             <article
-              key={`${memory.src}-${memory.category}`}
+              key={`${memory.src}-${memory.category}-${index}`}
               className="group overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               style={{ borderColor: theme.borderColor }}
             >
@@ -238,6 +210,19 @@ export default function Memories() {
             </article>
           ))}
         </div>
+
+        {!loading && filteredMemories.length === 0 && (
+          <div
+            className="rounded-lg border px-4 py-8 text-center text-sm font-semibold"
+            style={{
+              borderColor: theme.borderColor,
+              backgroundColor: '#FFFFFF',
+              color: theme.textColor,
+            }}
+          >
+            No gallery images found.
+          </div>
+        )}
       </div>
     </section>
   )
