@@ -70,7 +70,15 @@ const eventSchema = new mongoose.Schema({
     index: true
   },
   created_by: {
-   
+    id: {
+      type: String,
+      default: ''
+    },
+    name: {
+      type: String,
+      default: ''
+    },
+
   }
 
 }, {

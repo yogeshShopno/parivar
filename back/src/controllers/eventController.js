@@ -14,8 +14,26 @@ const findEvent = (req, id) => Event.findOne(
   isObjectId(id) ? { _id: id } : { _id: String(id) }
 );
 
+const getCreatedByPayload = (req) => ({
+  id: String(req.user?.id || req.user?._id || ''),
+  name: fullName(req.user) || '',
+  
+});
+
 const formatEvent = (req, item = {}) => {
   const image = item.image || '';
+  const createdBy = item.created_by || {};
+  const normalizedCreatedBy = typeof createdBy === 'string'
+    ? {
+      id: '',
+      name: createdBy,
+     
+    }
+    : {
+      id: String(createdBy.id || createdBy._id || ''),
+      name: createdBy.name || fullName(req.user) || '',
+     
+    };
 
   return {
     id: item.id || String(item._id),
@@ -35,7 +53,7 @@ const formatEvent = (req, item = {}) => {
     state: item.state || '',
     city: item.city || '',
     status: Number(item.status ?? 1),
-    created_by: item.created_by || fullName(req.user) || '',
+    created_by: normalizedCreatedBy
   };
 };
 
@@ -59,7 +77,7 @@ const eventPayload = (req, existing = {}) => {
     state: req.body.state || existing.state || '',
     city: req.body.city || existing.city || '',
     status: Number(req.body.status ?? existing.status ?? 1),
-    created_by: req.body.created_by || existing.created_by || fullName(req.user) || '',
+    created_by: existing.created_by || getCreatedByPayload(req),
     image: imageFromRequest(req, existing.image || '')
   };
 };
