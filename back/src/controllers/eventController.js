@@ -6,15 +6,13 @@ const isObjectId = (id) => require('mongoose').isValidObjectId(id);
 
 const imageFromRequest = (req, fallback = '') => {
   if (req.file) return `/uploads/${req.file.filename}`;
+  if (req.body.remove_image === 'true') return '';
   return req.body.image || req.body.image_url || fallback || '';
 };
 
-const findEvent = (req, id) => Event.findOne({
-  $or: [
-    {_id: String(id) },
-    ...(isObjectId(id) ? [{ _id: id }] : [])
-  ]
-});
+const findEvent = (req, id) => Event.findOne(
+  isObjectId(id) ? { _id: id } : { _id: String(id) }
+);
 
 const formatEvent = (req, item = {}) => {
   const image = item.image || '';
@@ -32,7 +30,12 @@ const formatEvent = (req, item = {}) => {
     location_link: item.location_link || '',
     start_time: item.start_time || '',
     end_time: item.end_time || '',
-    entry_type: item.entry_type || ''
+    entry_type: item.entry_type || '',
+    country: item.country || '',
+    state: item.state || '',
+    city: item.city || '',
+    status: Number(item.status ?? 1),
+    created_by: item.created_by || fullName(req.user) || '',
   };
 };
 
@@ -52,6 +55,11 @@ const eventPayload = (req, existing = {}) => {
     start_time: req.body.start_time || existing.start_time || '',
     end_time: req.body.end_time || existing.end_time || '',
     entry_type: req.body.entry_type || existing.entry_type || '',
+    country: req.body.country || existing.country || '',
+    state: req.body.state || existing.state || '',
+    city: req.body.city || existing.city || '',
+    status: Number(req.body.status ?? existing.status ?? 1),
+    created_by: req.body.created_by || existing.created_by || fullName(req.user) || '',
     image: imageFromRequest(req, existing.image || '')
   };
 };

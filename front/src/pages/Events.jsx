@@ -17,8 +17,13 @@ const defaultForm = {
   entry_type: 'free',
   start_time: '',
   end_time: '',
-  image: ''
+  image: '',
+  country_id: '',
+  state_id: '',
+  city_id: '',
+  remove_image: false
 }
+
 
 export default function Events() {
   const [rows, setRows] = useState([])
@@ -34,12 +39,19 @@ export default function Events() {
   const [existingImage, setExistingImage] = useState('')
   const [formData, setFormData] = useState(defaultForm)
   const [categories, setCategories] = useState([])
-
+  const [countryList, setCountryList] = useState([])
+  const [stateList, setStateList] = useState([])
+  const [cityList, setCityList] = useState([])
   const totalPages = Math.max(Number(pagination.totalPages) || 1, 1)
   const currentPage = Math.min(Math.max(Number(pagination.page) || page || 1, 1), totalPages)
   const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
 
   const endpoint = '/events'
+  const toDateTimeLocal = (value) => {
+    if (!value) return ''
+    return new Date(value).toISOString().slice(0, 16)
+  }
+
 
   const fetchRows = useCallback(async () => {
     setLoading(true)
@@ -62,6 +74,44 @@ export default function Events() {
       setLoading(false)
     }
   }, [page, search])
+
+  const fetchCountryList = useCallback(async () => {
+    try {
+      const res = await api.get('/masters/country')
+      setCountryList(res.data?.data || res.data || [])
+    } catch (err) {
+      console.error('Failed to load country list:', err)
+    }
+  }, [])
+
+  const fetchStateList = useCallback(async (countryId) => {
+    setStateList([])
+    setCityList([])
+    if (!countryId) return
+    try {
+      const res = await api.get('/masters/state', { params: { country_id: countryId } })
+      setStateList(res.data?.data || res.data || [])
+    } catch (err) {
+      console.error('Failed to load state list:', err)
+    }
+  }, [])
+
+  const fetchCityList = useCallback(async (stateId) => {
+    setCityList([])
+    if (!stateId) return
+    try {
+      const res = await api.get('/masters/city', { params: { state_id: stateId } })
+      setCityList(res.data?.data || res.data || [])
+    } catch (err) {
+      console.error('Failed to load city list:', err)
+    }
+  }, [])
+
+  useEffect(() => { fetchCountryList() }, [fetchCountryList])
+
+
+
+
 
   useEffect(() => {
     fetchRows()
@@ -90,6 +140,8 @@ export default function Events() {
     setSelectedId('')
     setExistingImage('')
     setFormData(defaultForm)
+    setStateList([])
+    setCityList([])
   }
 
   const openCreate = () => {
@@ -109,11 +161,18 @@ export default function Events() {
       event_category_id: row.event_category_id || '',
       event_category_name: row.event_category_name || '',
       entry_type: row.entry_type || 'free',
-      start_time: row.start_time || '',
-      end_time: row.end_time || '',
-      image: ''
+      country_id: row.country_id || '',
+      state_id: row.state_id || '',
+      city_id: row.city_id || '',
+      start_time: toDateTimeLocal(row.start_time),
+      end_time: toDateTimeLocal(row.end_time),
+      image: '',
+      remove_image: false
     })
     setIsModalOpen(true)
+    if (row.country_id) fetchStateList(row.country_id)
+    if (row.state_id) fetchCityList(row.state_id)
+
   }
 
   const handleSave = async (event) => {
@@ -122,11 +181,7 @@ export default function Events() {
     setError('')
     try {
       const hasFile = formData.image instanceof FileList ? formData.image.length > 0 : formData.image instanceof File
-      const payload = hasFile ? new FormData() : {}
-
-      if (hasFile) {
-        payload.append('image', formData.image[0] || formData.image)
-      }
+      const payload = new FormData()
 
       const bodyFields = {
         title: formData.title,
@@ -137,19 +192,18 @@ export default function Events() {
         event_category_name: formData.event_category_name,
         entry_type: formData.entry_type,
         start_time: formData.start_time,
-        end_time: formData.end_time
+        end_time: formData.end_time,
+        country_id: formData.country_id,
+        state_id: formData.state_id,
+        city_id: formData.city_id
       }
 
+      Object.entries(bodyFields).forEach(([key, value]) => payload.append(key, value ?? ''))
       if (hasFile) {
-        Object.entries(bodyFields).forEach(([key, value]) => {
-          payload.append(key, value ?? '')
-        })
-      } else {
-        Object.entries(bodyFields).forEach(([key, value]) => {
-          if (value !== '' && value !== undefined && value !== null) {
-            payload[key] = value
-          }
-        })
+        payload.append('image', formData.image instanceof FileList ? formData.image[0] : formData.image)
+      }
+      if (formData.remove_image) {
+        payload.append('remove_image', 'true')
       }
 
       if (selectedId) {
@@ -233,6 +287,7 @@ export default function Events() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
+
                 {rows.map((row) => (
                   <tr key={row.id || row._id} className="hover:bg-surface-secondary/40 text-sm text-text">
                     <td className="p-4 max-w-[120px]">
@@ -341,21 +396,34 @@ export default function Events() {
               <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Description</label>
               <textarea rows="4" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className={fieldClass} disabled={saving} />
             </div>
-            <div className="flex flex-col justify-between">
-              <label className="block text-sm  font-semibold text-text-secondary mb-1.5 mb-1.5">Image</label>
+            <div className="flex flex-col bg-input-bg border border-border rounded-xl p-3">
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Image</label>
+
+              {/* Preview */}
+              {(formData.image instanceof File || (formData.image instanceof FileList && formData.image.length > 0)) ? (
+                <div className="relative w-20 h-20 mb-2">
+                  <img
+                    src={URL.createObjectURL(formData.image instanceof FileList ? formData.image[0] : formData.image)}
+                    alt="preview"
+                    className="w-20 h-20 rounded-lg object-cover border border-border"
+                  />
+                  <button type="button" onClick={() => setFormData({ ...formData, image: '', remove_image: false })}
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" disabled={saving}>×</button>
+                </div>
+              ) : existingImage && !formData.remove_image ? (
+                <div className="relative w-20 h-20 mb-2">
+                  <img src={assetUrl(existingImage)} alt="current" className="w-20 h-20 rounded-lg object-cover border border-border" />
+                  <button type="button" onClick={() => setFormData({ ...formData, remove_image: true })}
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" disabled={saving}>×</button>
+                </div>
+              ) : null}
+
               <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setFormData({ ...formData, image: e.target.files })}
+                type="file" accept="image/*"
+                onChange={(e) => setFormData({ ...formData, image: e.target.files, remove_image: false })}
                 className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
                 disabled={saving}
               />
-              {existingImage && !formData.image && (
-                <div className="flex items-center gap-2 text-sm text-text-secondary mt-2">
-                  <ImageIcon className="h-3.5 w-3.5" />
-                  <span>Current image will be kept unless a new file is selected.</span>
-                </div>
-              )}
             </div>
           </div>
 
@@ -378,11 +446,58 @@ export default function Events() {
             </div>
           </div>
 
-
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Country</label>
+              <select
+                value={formData.country_id}
+                onChange={(e) => {
+                  setFormData({ ...formData, country_id: e.target.value, state_id: '', city_id: '' })
+                  fetchStateList(e.target.value)
+                }}
+                className={fieldClass} disabled={saving}
+              >
+                <option value="">Select Country</option>
+                {countryList.map((c) => (
+                  <option key={c.id || c._id} value={c.id || c._id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">State</label>
+              <select
+                value={formData.state_id}
+                onChange={(e) => {
+                  setFormData({ ...formData, state_id: e.target.value, city_id: '' })
+                  fetchCityList(e.target.value)
+                }}
+                className={fieldClass} disabled={saving || !formData.country_id}
+              >
+                <option value="">Select State</option>
+                {stateList.map((s) => (
+                  <option key={s.id || s._id} value={s.id || s._id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">City</label>
+              <select
+                value={formData.city_id}
+                onChange={(e) => setFormData({ ...formData, city_id: e.target.value })}
+                className={fieldClass} disabled={saving || !formData.state_id}
+              >
+                <option value="">Select City</option>
+                {cityList.map((c) => (
+                  <option key={c.id || c._id} value={c.id || c._id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
           <div>
-            <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Location</label>
+            <label className="block text-sm font-semibold text-text-secondary mb-1.5">Venue / Location</label>
             <input type="text" value={formData.event_location} onChange={(e) => setFormData({ ...formData, event_location: e.target.value })} className={fieldClass} disabled={saving} />
           </div>
+
 
           <div>
             <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Location Link</label>
@@ -391,7 +506,7 @@ export default function Events() {
 
 
 
-          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider  disabled:opacity-50 shadow-glow-primary">
+          <button type="submit" disabled={saving} className="flex justify-self-end  bg-primary hover:bg-primary-hover text-white py-3 px-3 rounded-xl font-semibold text-sm tracking-wider  disabled:opacity-50 shadow-glow-primary">
             {saving ? 'Saving...' : 'Save Event'}
           </button>
         </form>

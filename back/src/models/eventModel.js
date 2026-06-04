@@ -38,6 +38,18 @@ const eventSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  country: {
+    type: String,
+    default: ''
+  },
+  state: {
+    type: String,
+    default: ''
+  },
+  city: {
+    type: String,
+    default: ''
+  },
   location_link: {
     type: String,
     default: ''
@@ -52,6 +64,14 @@ const eventSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  status: {
+    type: Number,
+    default: 1,
+    index: true
+  },
+  created_by: {
+   
+  }
 
 }, {
   timestamps: true,
