@@ -13,6 +13,7 @@ export default function CommitteeMemberForm({ member, onSubmit, isLoading }) {
     number: '',
     password: '',
     designation: '',
+    remove_image: false,
     status: 1,
     image: null
   })
@@ -27,7 +28,7 @@ export default function CommitteeMemberForm({ member, onSubmit, isLoading }) {
       password: '',
       designation: member?.designation || '',
       status: Number(member?.status ?? 1),
-      image: null
+      image: member?.image
     })
     setErrors({})
   }, [member])
@@ -89,10 +90,14 @@ export default function CommitteeMemberForm({ member, onSubmit, isLoading }) {
     payload.append('number', formData.number)
     payload.append('designation', formData.designation)
     payload.append('status', formData.status)
-    if (formData.image) payload.append('image', formData.image)
+    payload.append('remove_image', formData.remove_image ? 'true' : 'false')
 
+    if (formData.image instanceof File) {
+      payload.append('image', formData.image)
+    }
     onSubmit(payload)
   }
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 select-none text-text">
@@ -149,8 +154,28 @@ export default function CommitteeMemberForm({ member, onSubmit, isLoading }) {
           <input type="text" placeholder="Enter number" maxLength={10} value={formData.number} onChange={(e) => setFormData({ ...formData, number: e.target.value })} className={fieldClass} disabled={isLoading} />
         </div>
         <div className="flex flex-col bg-input-bg border border-border rounded-xl p-3">
-          <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Image (300*300 px, Max size 1 mb)</label>
-          <input type="file" accept="image/*" onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })} className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20" disabled={isLoading} />
+          <label className="block text-sm font-semibold text-text-secondary mb-1.5">Image (300*300 px, Max size 1 mb)</label>
+
+          {(formData.image && typeof formData.image === 'string') || (formData.image instanceof File) ? (
+            <div className="relative w-20 h-20 mb-2">
+              <img
+                src={formData.image instanceof File ? URL.createObjectURL(formData.image) : formData.image}
+                alt="preview"
+                className="w-20 h-20 rounded-lg object-cover border border-border"
+              />
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, image: null, remove_image: true })}
+                className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
+                disabled={isLoading}
+              >×</button>
+            </div>
+          ) : null}
+
+          <input type="file" accept="image/*"
+            onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null, remove_image: false })}
+            className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
+            disabled={isLoading} />
           {errors.image && <p className="text-error-text text-sm mt-1 font-semibold">{errors.image}</p>}
         </div>
 

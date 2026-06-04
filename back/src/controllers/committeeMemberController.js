@@ -28,7 +28,7 @@ const getcommitteeMembers = async (req, res) => {
 
 const createcommitteeMember = async (req, res) => {
   try {
-    const { first_name, middle_name, last_name, number, designation ,image ,status} = req.body;
+    const { first_name, middle_name, last_name, number, designation, image, status } = req.body;
 
     const committeeMember = new CommitteeMember({
       first_name,
@@ -52,13 +52,17 @@ const updatecommitteeMember = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
+       if (req.body.remove_image === 'true') {
+      updateData.image = ''
+    }
     const committeeMember = await CommitteeMember.findByIdAndUpdate(id, updateData, { new: true });
     if (!committeeMember) {
       return apiResponse(res, 404, 'Committee member not found');
     }
 
+ 
     return apiResponse(res, 200, 'Committee member updated successfully', committeeMember);
-  }catch (error) {
+  } catch (error) {
     return apiResponse(res, 500, 'Error updating committee member', { error: error.message });
   }
 
