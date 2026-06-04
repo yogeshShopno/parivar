@@ -78,36 +78,44 @@ export default function Events() {
   const fetchCountryList = useCallback(async () => {
     try {
       const res = await api.get('/masters/country')
-      setCountryList(res.data?.data || res.data || [])
+      const list = res.data?.data || res.data || []
+      setCountryList(list)
+      return list
     } catch (err) {
       console.error('Failed to load country list:', err)
+      return []
     }
   }, [])
 
-  const fetchStateList = useCallback(async (countryId) => {
-    setStateList([])
-    setCityList([])
-    if (!countryId) return
+  const fetchStateList = useCallback(async () => {
     try {
-      const res = await api.get('/masters/state', { params: { country_id: countryId } })
-      setStateList(res.data?.data || res.data || [])
+      const res = await api.get('/masters/state')
+      const list = res.data?.data || res.data || []
+      setStateList(list)
+      return list
     } catch (err) {
       console.error('Failed to load state list:', err)
+      return []
     }
   }, [])
 
-  const fetchCityList = useCallback(async (stateId) => {
-    setCityList([])
-    if (!stateId) return
+  const fetchCityList = useCallback(async () => {
     try {
-      const res = await api.get('/masters/city', { params: { state_id: stateId } })
-      setCityList(res.data?.data || res.data || [])
+      const res = await api.get('/masters/city')
+      const list = res.data?.data || res.data || []
+      setCityList(list)
+      return list
     } catch (err) {
       console.error('Failed to load city list:', err)
+      return []
     }
   }, [])
 
-  useEffect(() => { fetchCountryList() }, [fetchCountryList])
+  useEffect(() => {
+    fetchCountryList()
+    fetchStateList()
+    fetchCityList()
+  }, [fetchCountryList, fetchStateList, fetchCityList])
 
 
 
@@ -140,8 +148,6 @@ export default function Events() {
     setSelectedId('')
     setExistingImage('')
     setFormData(defaultForm)
-    setStateList([])
-    setCityList([])
   }
 
   const openCreate = () => {
@@ -153,6 +159,7 @@ export default function Events() {
     const id = row.id || row._id || ''
     setSelectedId(id)
     setExistingImage(row.image || '')
+
     setFormData({
       title: row.title || '',
       description: row.description || '',
@@ -170,9 +177,6 @@ export default function Events() {
       remove_image: false
     })
     setIsModalOpen(true)
-    if (row.country_id) fetchStateList(row.country_id)
-    if (row.state_id) fetchCityList(row.state_id)
-
   }
 
   const handleSave = async (event) => {
@@ -445,16 +449,17 @@ export default function Events() {
               </select>
             </div>
           </div>
+           <div>
+            <label className="block text-sm font-semibold text-text-secondary mb-1.5">Venue / Location</label>
+            <input type="text" value={formData.event_location} onChange={(e) => setFormData({ ...formData, event_location: e.target.value })} className={fieldClass} disabled={saving} />
+          </div>
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <label className="block text-sm font-semibold text-text-secondary mb-1.5">Country</label>
               <select
                 value={formData.country_id}
-                onChange={(e) => {
-                  setFormData({ ...formData, country_id: e.target.value, state_id: '', city_id: '' })
-                  fetchStateList(e.target.value)
-                }}
+                onChange={(e) => setFormData({ ...formData, country_id: e.target.value })}
                 className={fieldClass} disabled={saving}
               >
                 <option value="">Select Country</option>
@@ -467,11 +472,8 @@ export default function Events() {
               <label className="block text-sm font-semibold text-text-secondary mb-1.5">State</label>
               <select
                 value={formData.state_id}
-                onChange={(e) => {
-                  setFormData({ ...formData, state_id: e.target.value, city_id: '' })
-                  fetchCityList(e.target.value)
-                }}
-                className={fieldClass} disabled={saving || !formData.country_id}
+                onChange={(e) => setFormData({ ...formData, state_id: e.target.value })}
+                className={fieldClass} disabled={saving}
               >
                 <option value="">Select State</option>
                 {stateList.map((s) => (
@@ -484,7 +486,7 @@ export default function Events() {
               <select
                 value={formData.city_id}
                 onChange={(e) => setFormData({ ...formData, city_id: e.target.value })}
-                className={fieldClass} disabled={saving || !formData.state_id}
+                className={fieldClass} disabled={saving}
               >
                 <option value="">Select City</option>
                 {cityList.map((c) => (
@@ -493,10 +495,7 @@ export default function Events() {
               </select>
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-semibold text-text-secondary mb-1.5">Venue / Location</label>
-            <input type="text" value={formData.event_location} onChange={(e) => setFormData({ ...formData, event_location: e.target.value })} className={fieldClass} disabled={saving} />
-          </div>
+         
 
 
           <div>
