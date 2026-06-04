@@ -16,7 +16,7 @@ export default function Layout() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-h-screen pl-64 transition-all duration-300">
         <Header />
-        <main className="flex-1 p-8 overflow-y-auto animate-fade-in">
+        <main className="flex-1 px-8 py-4 overflow-y-auto animate-fade-in">
           <div className="max-w-full mx-auto space-y-6">
             <Outlet />
           </div>
