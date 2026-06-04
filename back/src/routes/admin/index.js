@@ -23,6 +23,7 @@ router.use('/students', require('./studentRoutes'));
 router.use('/festivals', require('./festivalRoutes'));
 router.use('/matrimonies', require('./matrimonyRoutes'));
 router.use('/donations', require('./donationRoutes'));
+router.use('/bank-details', require('./bankDetailRoutes'));
 router.use('/posts', require('./postRoutes'));
 router.use('/get_app_theme', require('./configRoutes'));
 router.use('/update_app_theme', require('./configRoutes'));

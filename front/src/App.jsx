@@ -66,6 +66,7 @@ export default function App() {
           <Route path="feedback" element={<PermissionRoute permission="feedback.list"><ContentPage type="feedback" /></PermissionRoute>} />
           <Route path="birthday" element={<PermissionRoute permission="birthday.list"><ContentPage type="birthday" /></PermissionRoute>} />
           <Route path="job-vacancy" element={<PermissionRoute permission="job-vacancy.list"><ContentPage type="job-vacancy" /></PermissionRoute>} />
+          <Route path="bank-details" element={<PermissionRoute permission="bank-details.list"><ContentPage type="bank-details" /></PermissionRoute>} />
 
           <Route path="masters/:type" element={<MasterRoute />} />
           <Route path="settings" element={<PermissionRoute permission="settings.edit"><Settings /></PermissionRoute>} />

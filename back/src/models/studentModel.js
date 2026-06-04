@@ -51,9 +51,13 @@ const studentSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  student_image: {
+    type: String,
+    default: ''
+  },
   status: {
     type: Number,
-    default: 1,
+    default: 0,
     index: true
   },
   cdate: {

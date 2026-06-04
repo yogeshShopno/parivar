@@ -2,19 +2,19 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
 import api, { assetUrl } from '../lib/api'
 import Modal from '../components/Modal'
+import usePagination from '../hooks/usePagination'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 const limit = 10
 
-export default function AdminCrudPage({ title, subtitle, endpoint, fields, columns, getRowTitle }) {
+export default function AdminCrudPage({ title, subtitle, endpoint, fields, columns, getRowTitle, supportIsOwn }) {
   const emptyForm = useMemo(() => {
     return fields.reduce((acc, field) => ({ ...acc, [field.name]: field.defaultValue ?? '' }), {})
   }, [fields])
 
   const [rows, setRows] = useState([])
-  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0, limit })
+  const { page, totalPages, total, setPage, setPaginationData, getParams, resetPage } = usePagination(limit)
   const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
   const [search, setSearchValue] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -23,27 +23,24 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
   const [formData, setFormData] = useState(emptyForm)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [remoteOptions, setRemoteOptions] = useState({})
+  const [isOwn, setIsOwn] = useState(false)
 
-  const totalPages = Math.max(Number(pagination.totalPages) || 1, 1)
-  const currentPage = Math.min(Math.max(Number(pagination.page) || page || 1, 1), totalPages)
+  const currentPage = Math.min(Math.max(page || 1, 1), totalPages)
   const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
 
   const fetchRows = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await api.get(endpoint, { params: { page, limit, search } })
+      const params = getParams({ search })
+      if (supportIsOwn) params.is_own = isOwn
+      const res = await api.get(endpoint, { params })
       const data = res.data?.data || res.data || []
       const pg = res.data?.pagination || {}
       setRows(Array.isArray(data) ? data : [])
-      setPagination({
-        page: Number(pg.page || page),
-        totalPages: Number(pg.totalPages || pg.total_pages || pg.last_page || 1),
-        total: Number(pg.total || 0),
-        limit: Number(pg.limit || limit)
-      })
+      setPaginationData(pg)
     } catch (err) {
       setRows([])
-      setPagination({ page, totalPages: 1, total: 0, limit })
+      setPaginationData({ page: 1, totalPages: 1, total: 0 })
       setError(err.response?.data?.message || `Failed to load ${title.toLowerCase()}`)
     } finally {
       setLoading(false)
@@ -56,7 +53,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
 
   const setSearch = (value) => {
     setSearchValue(value)
-    setPage(1)
+    resetPage()
   }
 
   useEffect(() => {
@@ -175,6 +172,20 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
           <button onClick={fetchRows} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
             <RefreshCw className="w-4 h-4" />
           </button>
+          {supportIsOwn && (
+            <label className="flex items-center gap-2 cursor-pointer bg-surface border border-border px-4 py-2.5 rounded-xl">
+              <input
+                type="checkbox"
+                checked={isOwn}
+                onChange={(e) => {
+                  setIsOwn(e.target.checked)
+                  resetPage()
+                }}
+                className="rounded text-primary focus:ring-primary/20 bg-input-bg border-border"
+              />
+              <span className="text-sm font-medium text-text-secondary select-none">My Records</span>
+            </label>
+          )}
           <div className="relative flex-1 sm:w-64">
             <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-text-secondary/60" />
             <input
@@ -241,10 +252,10 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
               </tbody>
             </table>
           </div>
-          {pagination.totalPages > 1 && (
+          {totalPages > 1 && (
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border-t border-border bg-surface-secondary/40 text-sm">
               <span className="text-text-secondary">
-                Page {pagination.page} of {pagination.totalPages} {pagination.total ? `(${pagination.total} total)` : ''}
+                Page {page} of {totalPages} {total ? `(${total} total)` : ''}
               </span>
               <div className="flex items-center gap-2">
                 <button type="button" disabled={loading || page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
@@ -265,7 +276,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                     {item}
                   </button>
                 ))}
-                <button type="button" disabled={loading || page >= pagination.totalPages} onClick={() => setPage((current) => Math.min(pagination.totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+                <button type="button" disabled={loading || page >= totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
                   Next
                 </button>
               </div>
@@ -304,10 +315,15 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                       className="w-full text-sm text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
                       disabled={saving}
                     />
-                    {selected?.image && !field.multiple && (
-                      <div className="flex items-center gap-2 text-sm text-text-secondary">
-                        <ImageIcon className="h-3.5 w-3.5" />
-                        <span>Current image will be kept unless a new file is selected.</span>
+                    {selected?.[field.name] && !field.multiple && (
+                      <div className="flex flex-col gap-2 mt-2">
+                        <div className="flex items-center gap-2 text-sm text-text-secondary">
+                          <ImageIcon className="h-3.5 w-3.5" />
+                          <span>Current file will be kept unless a new file is selected.</span>
+                        </div>
+                        <a href={assetUrl(selected[field.name])} target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline font-semibold">
+                          View Current {field.label}
+                        </a>
                       </div>
                     )}
                   </div>
