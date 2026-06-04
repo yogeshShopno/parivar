@@ -387,7 +387,7 @@ export default function Donations() {
         </div>
       )}
 
-      {/* Add/Edit Modal */}}
+     
       <Modal
         isOpen={isModalOpen}
         title={selectedDonation ? 'Edit Donation' : 'Add Donation'}

@@ -21,10 +21,7 @@ const eventSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  event_date: {
-    type: Date,
-    default: Date.now
-  },
+
   event_category_id: {
     type: String,
     default: ''
