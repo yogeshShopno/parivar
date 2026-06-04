@@ -241,7 +241,7 @@ export default function News() {
                     onClick={() => handleDelete(newsItem.id)}
                     className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold uppercase tracking-wider text-error-text bg-error-bg hover:bg-error/20 border border-error-border hover:border-error/40 transition-all"
                   >
-                    <Trash2 className="w-3 h-3" /> Moderate
+                    <Trash2 className="w-3 h-3" /> Delete
                   </button>
                 </div>
               </div>
