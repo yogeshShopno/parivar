@@ -21,10 +21,7 @@ const eventSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  event_date: {
-    type: Date,
-    default: Date.now
-  },
+
   event_category_id: {
     type: String,
     default: ''
@@ -38,6 +35,30 @@ const eventSchema = new mongoose.Schema({
     default: ''
   },
   event_location: {
+    type: String,
+    default: ''
+  },
+  country_id: {
+    type: String,
+    default: ''
+  },
+  state_id: {
+    type: String,
+    default: ''
+  },
+  city_id: {
+    type: String,
+    default: ''
+  },
+  country: {
+    type: String,
+    default: ''
+  },
+  state: {
+    type: String,
+    default: ''
+  },
+  city: {
     type: String,
     default: ''
   },
@@ -55,6 +76,22 @@ const eventSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  status: {
+    type: Number,
+    default: 1,
+    index: true
+  },
+  created_by: {
+    id: {
+      type: String,
+      default: ''
+    },
+    name: {
+      type: String,
+      default: ''
+    },
+
+  }
 
 }, {
   timestamps: true,

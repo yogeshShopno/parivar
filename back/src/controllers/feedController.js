@@ -84,8 +84,7 @@ const getEvents = async (req, res) => {
       event_name: event.event_name || event.title || '',
       event_location: event.event_location || event.venue || '',
       location_link: event.location_link || '',
-      event_date: toArchiveDate(event.event_date || event.date),
-      timing: `${toArchiveDate(event.start_time || event.event_date || event.date)} - ${toArchiveDate(event.end_time || event.event_date || event.date)}`,
+      timing: `${toArchiveDate(event.start_time ||  event.date)} - ${toArchiveDate(event.end_time || event.date)}`,
       entry_type: event.entry_type || '',
       event_description: event.event_description || event.description || '',
       image: publicUrl(req, event.image || '')
