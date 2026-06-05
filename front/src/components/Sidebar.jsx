@@ -4,6 +4,7 @@ import { Shield } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext'
 import { configurationNavigation, coreNavigation, masterNavigation } from '../config/navigation'
 import { hasPermission } from '../lib/permissions'
+import { getUserRoleLabel } from '../lib/roles'
 
 const LinkItem = ({ to, icon: Icon, label, end }) => (
   <NavLink
@@ -38,6 +39,7 @@ const SectionLabel = ({ children }) => (
 
 export default function Sidebar() {
   const { user } = useContext(AuthContext)
+  const roleLabel = user ? getUserRoleLabel(user) : ''
   const visibleCoreNavigation = coreNavigation.filter((item) => hasPermission(user, item.permission))
   const visibleMasterNavigation = masterNavigation.filter((item) => hasPermission(user, item.permission))
   const visibleConfigurationNavigation = configurationNavigation.filter((item) => hasPermission(user, item.permission))
@@ -105,7 +107,7 @@ export default function Sidebar() {
           </div>
           <div className="min-w-0">
             <h4 className="truncate text-sm font-semibold text-text">{user.name || user.email || 'Administrator'}</h4>
-            <p className="text-sm text-text-secondary truncate capitalize">{user.role || 'Administrator'}</p>
+            <p className="text-sm text-text-secondary truncate capitalize">{roleLabel || 'Administrator'}</p>
           </div>
         </div>
       )}

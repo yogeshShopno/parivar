@@ -26,12 +26,21 @@ export const normalizeRoleId = (role) => {
   return String(role.id || role._id || '')
 }
 
+export const getUserRoleLabel = (user = {}) => {
+  const assignedRole = user.role_name || user.role?.name || user.role_id?.name
+  if (assignedRole) return assignedRole
+  if (user.committee_role || user.designation) return user.committee_role || user.designation
+  if (user.is_committee) return 'Committee'
+  if (user.role) return String(user.role)
+  return 'Member'
+}
+
 const ACTION_ORDER = ['list', 'add', 'edit', 'delete']
 
 export const buildPermissionGroups = (config = {}) => {
   const baseActions = Array.isArray(config.actions) && config.actions.length > 0
     ? config.actions
-    : ACTION_ORDER.map((key) => ({ key, label: key.charAt(0).to() + key.slice(1) }))
+    : ACTION_ORDER.map((key) => ({ key, label: key.charAt(0).toUpperCase() + key.slice(1) }))
 
   const permissions = Array.isArray(config.permissions) ? config.permissions : []
   const actionsByKey = new Map(baseActions.map((action) => [action.key, action]))
@@ -45,7 +54,7 @@ export const buildPermissionGroups = (config = {}) => {
     if (!actionsByKey.has(actionKey)) {
       actionsByKey.set(actionKey, {
         key: actionKey,
-        label: permission.action_label || actionKey.charAt(0).to() + actionKey.slice(1)
+        label: permission.action_label || actionKey.charAt(0).toUpperCase() + actionKey.slice(1)
       })
     }
 

@@ -4,11 +4,13 @@ import { LogOut, Search, Bell, Sparkles } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext'
 import { masterLabels, routeTitles } from '../config/navigation'
 import GoogleTranslate from './GoogleTranslate'
+import { getUserRoleLabel } from '../lib/roles'
 
 export default function Header() {
   const { logout, user } = useContext(AuthContext)
   const navigate = useNavigate()
   const location = useLocation()
+  const roleLabel = user ? getUserRoleLabel(user) : ''
 
   const handleLogout = () => {
     logout()
@@ -54,7 +56,7 @@ export default function Header() {
             <div className="text-sm font-semibold text-text">{user?.name || 'Administrator'}</div>
             <div className="text-sm text-primary font-semibold tracking-wide flex items-center gap-1 justify-end">
               <Sparkles className="w-3 h-3 text-primary/80" />
-              {user?.role}
+              {roleLabel}
             </div>
           </div>
           <button

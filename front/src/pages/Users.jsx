@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Edit2, Trash2, Plus, Search, RefreshCw, Sparkles, Users as UsersIcon } from 'lucide-react'
 import api, { getUsersList } from '../lib/api'
-import { normalizeRoles, unwrapApiData } from '../lib/roles'
+import { getUserRoleLabel, normalizeRoles, unwrapApiData } from '../lib/roles'
 import Modal from '../components/Modal'
 import UserForm from '../components/UserForm'
 
@@ -302,7 +302,10 @@ export default function Users() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {users.map(user => (
+                  {users.map(user => {
+                    const roleLabel = getUserRoleLabel(user)
+
+                    return (
                     <tr key={user.id} className="hover:bg-surface-secondary text-sm text-text-secondary transition-colors">
                       <td className="p-4 font-mono font-semibold text-primary">{user.id}</td>
                       <td className="p-4">
@@ -336,11 +339,11 @@ export default function Users() {
                         {user.is_committee ? (
                           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary font-medium">
                             <Sparkles className="w-3.5 h-3.5 text-primary" />
-                            <span>{user.committee_role || 'Committee'}</span>
+                            <span>{roleLabel}</span>
                           </div>
                         ) : (
                           <span className="inline-flex items-center px-2 py-0.5 rounded bg-surface-secondary text-text-secondary font-medium text-sm">
-                            Member
+                            {roleLabel}
                           </span>
                         )}
                       </td>
@@ -355,7 +358,8 @@ export default function Users() {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
