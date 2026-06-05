@@ -15,7 +15,7 @@ const findNews = (req, id) => News.findOne(
 );
 
 const formatNews = (req, item = {}) => {
-  const image = item.image_url || (typeof item.image === 'string' ? item.image : '');
+  const image = item.image || item.image_url || '';
 
   return {
     _id: String(item._id),
@@ -36,8 +36,11 @@ const newsPayload = (req, existing = {}) => {
   const title = req.body.title || existing.title || '';
   const description = req.body.description || existing.description || req.body.content || existing.content || '';
 
+  const data = { ...req.body };
+  delete data.image;
+
   return {
-    ...req.body,
+    ...data,
     id: existing.id || String(existing._id),
     title,
     description,
@@ -45,7 +48,7 @@ const newsPayload = (req, existing = {}) => {
     reporter_name: req.body.reporter_name || existing.reporter_name || fullName(req.user) || req.user?.email || 'Admin',
     location: req.body.location || existing.location || 'Admin',
     category: req.body.category || existing.category || '',
-    image_url: imageFromRequest(req, existing.image_url || (typeof existing.image === 'string' ? existing.image : '')),
+    image: imageFromRequest(req, existing.image || (typeof existing.image === 'string' ? existing.image : '')),
     cdate: existing.cdate || new Date().toISOString().slice(0, 10)
   };
 };

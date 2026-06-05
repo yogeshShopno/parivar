@@ -30,7 +30,7 @@ export const coreNavigation = [
   { to: '/admin/posts', label: 'Posts', icon: FileText, title: 'Post Moderator', permission: 'posts.list' },
   { to: '/admin/news', label: 'News', icon: FileText, title: 'News Moderator', permission: 'news.list' },
 
-  { to: '/admin/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries', permission: 'contact-inquiries.list' },
+  // { to: '/admin/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries', permission: 'contact-inquiries.list' },
   { to: '/admin/feedback', label: 'Feedback', icon: FileText, title: 'Feedback', permission: 'feedback.list' },
   { to: '/admin/birthday', label: 'Birthdays', icon: CalendarDays, title: 'Member Birthdays', permission: 'birthday.list' },
   { to: '/admin/job-vacancy', label: 'Job Vacancies', icon: Briefcase, title: 'Job Vacancies', permission: 'job-vacancy.list' }

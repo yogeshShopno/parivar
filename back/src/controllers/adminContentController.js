@@ -217,7 +217,7 @@ const saveMaster = async (req, res) => {
     if (!name) return apiResponse(res, 400, 'Name is required');
     const existing = req.params.id ? await findById(config.Model, req.params.id) : null;
     const doc = existing || new config.Model();
-    if (!existing && !config.skipCustomId) doc.id = await nextPublicId(config.Model, `${type.to()}_`);
+    if (!existing && !config.skipCustomId) doc.id = await nextPublicId(config.Model, `${type.toUpperCase()}_`);
     if (config.type) {
       doc.type = config.type;
       doc.name = name;

@@ -120,24 +120,24 @@ const definitions = {
       { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
     ]
   },
-  inquiries: {
-    title: 'Contact Inquiry',
-    subtitle: 'Track and update messages from contact forms',
-    endpoint: '/content/contact-inquiries',
-    fields: [
-      { name: 'name', label: 'Name' },
-      { name: 'email', label: 'Email', type: 'email' },
-      { name: 'phone', label: 'Phone' },
-      { name: 'subject', label: 'Subject' },
-      { name: 'message', label: 'Message', type: 'textarea' },
-      { name: 'status', label: 'Status', type: 'select', defaultValue: 'new', options: [{ value: 'new', label: 'New' }, { value: 'in-progress', label: 'In Progress' }, { value: 'closed', label: 'Closed' }] }
-    ],
-    columns: [
-      { key: 'name', label: 'Name' },
-      { key: 'subject', label: 'Subject' },
-      { key: 'status', label: 'Status' }
-    ]
-  },
+  // inquiries: {
+  //   title: 'Contact Inquiry',
+  //   subtitle: 'Track and update messages from contact forms',
+  //   endpoint: '/content/contact-inquiries',
+  //   fields: [
+  //     { name: 'name', label: 'Name' },
+  //     { name: 'email', label: 'Email', type: 'email' },
+  //     { name: 'phone', label: 'Phone' },
+  //     { name: 'subject', label: 'Subject' },
+  //     { name: 'message', label: 'Message', type: 'textarea' },
+  //     { name: 'status', label: 'Status', type: 'select', defaultValue: 'new', options: [{ value: 'new', label: 'New' }, { value: 'in-progress', label: 'In Progress' }, { value: 'closed', label: 'Closed' }] }
+  //   ],
+  //   columns: [
+  //     { key: 'name', label: 'Name' },
+  //     { key: 'subject', label: 'Subject' },
+  //     { key: 'status', label: 'Status' }
+  //   ]
+  // },
   feedback: {
     title: 'Feedback',
     subtitle: 'Manage user feedback and suggestions',
