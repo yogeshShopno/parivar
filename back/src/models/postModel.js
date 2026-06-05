@@ -47,16 +47,14 @@ const postSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     index: true
   },
-  created_by: {
-    id: {
-      type: String,
-      default: ''
-    },
-    name: {
-      type: String,
-      default: ''
-    }
-  }
+created_by: {
+  id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    index: true
+  },
+  name: { type: String, default: '' }
+},
 
 
 }, {

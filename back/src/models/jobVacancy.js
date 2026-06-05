@@ -43,9 +43,18 @@ const jobVacancySchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    created_by: {
+        id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            index: true
+        },
+        name: { type: String, default: '' }
+    },
+
     status: {
         type: Number,
-        required: false, default: 1
+        required: false, default: 0
     }
 }, { timestamps: true });
 

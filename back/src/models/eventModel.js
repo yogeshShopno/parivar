@@ -83,14 +83,11 @@ const eventSchema = new mongoose.Schema({
   },
   created_by: {
     id: {
-      type: String,
-      default: ''
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      index: true
     },
-    name: {
-      type: String,
-      default: ''
-    },
-
+    name: { type: String, default: '' }
   }
 
 }, {

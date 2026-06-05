@@ -22,7 +22,7 @@ export const coreNavigation = [
   { to: '/admin/festivals', label: 'Festivals', icon: CalendarDays, title: 'Festivals', permission: 'festivals.list' },
   { to: '/admin/events', label: 'Events', icon: CalendarDays, title: 'Events', permission: 'events.list' },
   { to: '/admin/gallery', label: 'Gallery', icon: Image, title: 'Gallery', permission: 'gallery.list' },
-  { to: '/admin/banners', label: 'Banners', icon: Megaphone, title: 'Banner Manager', permission: 'banners.list' },
+  // { to: '/admin/banners', label: 'Banners', icon: Megaphone, title: 'Banner Manager', permission: 'banners.list' },
   { to: '/admin/matrimonies', label: 'Matrimonies', icon: Users, title: 'Matrimony Profiles', permission: 'matrimonies.list' },
   { to: '/admin/businesses', label: 'Businesses', icon: Briefcase, title: 'Business Index', permission: 'businesses.list' },
   { to: '/admin/students', label: 'Students', icon: GraduationCap, title: 'Students', permission: 'students.list' },

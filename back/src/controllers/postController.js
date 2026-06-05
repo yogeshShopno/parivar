@@ -139,7 +139,7 @@ const savePost = async (req, res) => {
       description: post.description || '',
       image: publicUrl(req, post.image || ''),
       cdate: post.cdate || '',
-      status: Number(post.status ?? 1),
+      status: Number(post.status ?? 0),
       is_own: String(req.user?._id) === String(post.created_by?.id)
 
     });

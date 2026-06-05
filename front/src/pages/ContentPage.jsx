@@ -102,24 +102,24 @@ const definitions = {
       { key: 'year', label: 'Year' }
     ]
   },
-  banners: {
-    title: 'Banner',
-    subtitle: 'Control app banner slides and links',
-    endpoint: '/content/banners',
-    fields: [
-      { name: 'title', label: 'Title' },
-      { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
-      { name: 'link', label: 'Link' },
-      { name: 'image', label: 'Image', type: 'file' },
-      { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Active' }, { value: 0, label: 'Inactive' }] }
-    ],
-    columns: [
-      { key: 'image', label: 'Image', type: 'image' },
-      { key: 'title', label: 'Title' },
-      { key: 'subtitle', label: 'Subtitle' },
-      { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
-    ]
-  },
+  // banners: {
+  //   title: 'Banner',
+  //   subtitle: 'Control app banner slides and links',
+  //   endpoint: '/content/banners',
+  //   fields: [
+  //     { name: 'title', label: 'Title' },
+  //     { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
+  //     { name: 'link', label: 'Link' },
+  //     { name: 'image', label: 'Image', type: 'file' },
+  //     { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Active' }, { value: 0, label: 'Inactive' }] }
+  //   ],
+  //   columns: [
+  //     { key: 'image', label: 'Image', type: 'image' },
+  //     { key: 'title', label: 'Title' },
+  //     { key: 'subtitle', label: 'Subtitle' },
+  //     { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
+  //   ]
+  // },
   // inquiries: {
   //   title: 'Contact Inquiry',
   //   subtitle: 'Track and update messages from contact forms',
@@ -169,22 +169,25 @@ const definitions = {
     endpoint: '/job-vacancy',
     fields: [
       { name: 'title', label: 'Title' },
+      { name: 'company_name', label: 'Company Name' },
       { name: 'description', label: 'Description', type: 'textarea' },
       { name: 'qualifications', label: 'Qualifications', type: 'textarea' },
-      { name: 'company_name', label: 'Company Name' },
-      { name: 'location', label: 'Location' },
-      { name: 'job_type', label: 'Job Type' },
+      { name: 'location', label: 'Location' }, 
+      {name: 'job_type', label: 'Job Type', type: 'select',
+        options: [{ value: "full-time", label: 'Full Time' }, { value: "part-time", label: 'Part Time' }, { value: "contract", label: 'Contract' }, { value: "internship", label: 'Internship' }]},
       { name: 'salary', label: 'Salary' },
       { name: 'contact_email', label: 'Contact Email', type: 'email' },
       { name: 'contact_number', label: 'Contact Number' },
-      { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Active' }, { value: 0, label: 'Inactive' }] }
+      { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Approved' }, { value: 0, label: 'Inactive' }] }
     ],
     columns: [
       { key: 'title', label: 'Title' },
-      { key: 'company_name', label: 'Company Name' },
-      { key: 'location', label: 'Location' },
+      { key: 'company_name', label: 'Company' },
+      { key: 'qualifications', label: 'qualifications' },
+
+      { key: 'contact_number', label: 'Number' },
       { key: 'job_type', label: 'Job Type' },
-      { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
+      { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Approved' : 'Inactive' }
     ]
   },
   'bank-details': {
