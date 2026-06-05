@@ -2,16 +2,16 @@ const News = require('../models/newsModel');
 const { apiResponse, fullName, publicUrl } = require('../utils/apiResponse');
 const queryHelper = require('../utils/queryHelper');
 
-const isObjectId = (id) => require('mongoose').isValidObjectId(id);
 
 const imageFromRequest = (req, fallback = '') => {
-  if (req.file) return `/uploads/${req.file.filename}`;
-  if (req.body.remove_image === 'true') return '';
-  return req.body.image || fallback || '';
+    if (req.file) return `/uploads/${req.file.filename}`;
+    if (req.body.remove_image === 'true') return '';
+    return req.body.image || fallback || '';
 };
 
+const isObjectId = (id) => require('mongoose').isValidObjectId(id);
 
-const findNews = (req, _id) => News.findOne(
+const findNews = (req, id) => News.findOne(
     isObjectId(id) ? { _id: id } : null
 );
 

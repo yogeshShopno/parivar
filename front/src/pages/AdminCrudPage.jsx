@@ -323,7 +323,22 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                     ))}
                   </select>
                 ) : field.type === 'file' ? (
-                  <div className="space-y-2">
+                  <div className="flex flex-col bg-input-bg border border-border rounded-xl p-3">
+                        {imagePreview?.[field.name] && (
+                      <div className="relative w-fit">
+                        <img src={imagePreview[field.name]} alt="Preview" className="h-20 w-28 rounded-lg object-cover border border-border" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImagePreview((prev) => ({ ...prev, [field.name]: null }))
+                            setFormData({ ...formData, [field.name]: '' })
+                          }}
+                          className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold"
+                        >
+                          X
+                        </button>
+                      </div>
+                    )}
                     <input
                       type="file"
                       accept={field.accept || 'image/*'}
@@ -340,21 +355,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                       disabled={saving}
                     />
                     {/* New file preview */}
-                    {imagePreview?.[field.name] && (
-                      <div className="relative w-fit">
-                        <img src={imagePreview[field.name]} alt="Preview" className="h-20 w-28 rounded-lg object-cover border border-border" />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setImagePreview((prev) => ({ ...prev, [field.name]: null }))
-                            setFormData({ ...formData, [field.name]: '' })
-                          }}
-                          className="absolute -top-1.5 -right-1.5 bg-error-bg border border-error-border text-error-text rounded-full p-0.5"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    )}
+                
                     {/* Existing image from server */}
                     {!imagePreview?.[field.name] && selected?.[field.name] && !removedImages[field.name] && !field.multiple && (
                       <div className="flex items-center gap-3">
