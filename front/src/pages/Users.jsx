@@ -178,7 +178,7 @@ export default function Users() {
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-text">Family Registry</h2>
+          <h2 className="text-xl font-semibold text-text">Family Registry</h2>
    
         </div>
         <div className="flex items-center gap-3">
@@ -284,7 +284,7 @@ export default function Users() {
             <div className="p-16 text-center flex flex-col items-center justify-center gap-4">
               <UsersIcon className="w-12 h-12 text-text-secondary" />
               <div>
-                <h4 className="font-bold text-text">No registry matches found</h4>
+                <h4 className="font-semibold text-text">No registry matches found</h4>
                 <p className="text-text-secondary text-sm mt-1">Try expanding your search criteria or register a new member</p>
               </div>
             </div>
@@ -292,7 +292,7 @@ export default function Users() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold  tracking-wider">
+                  <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-semibold  tracking-wider">
                     <th className="p-4">Member ID</th>
                     <th className="p-4">Name</th>
                     <th className="p-4">Contact Info</th>
@@ -304,10 +304,10 @@ export default function Users() {
                 <tbody className="divide-y divide-border">
                   {users.map(user => (
                     <tr key={user.id} className="hover:bg-surface-secondary text-sm text-text-secondary transition-colors">
-                      <td className="p-4 font-mono font-bold text-primary">{user.id}</td>
+                      <td className="p-4 font-mono font-semibold text-primary">{user.id}</td>
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center font-bold text-primary border border-primary/20 ">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center font-semibold text-primary border border-primary/20 ">
                             {user.first_name ? user.first_name.substring(0, 1) : '-'}
                             {user.last_name ? user.last_name.substring(0, 1) : ''}
                           </div>
@@ -327,7 +327,7 @@ export default function Users() {
                           {user.blood_group && (
                             <>
                               <span className="w-1.5 h-1.5 rounded-full bg-error"></span>
-                              <span className="font-bold text-error-text">{user.blood_group}</span>
+                              <span className="font-semibold text-error-text">{user.blood_group}</span>
                             </>
                           )}
                         </div>

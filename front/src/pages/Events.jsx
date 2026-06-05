@@ -246,7 +246,7 @@ export default function Events() {
     <div className="space-y-6 animate-slide-up select-none text-text">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-text">Events</h2>
+          <h2 className="text-xl font-semibold text-text">Events</h2>
 
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -282,7 +282,7 @@ export default function Events() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold  tracking-wider">
+                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-semibold  tracking-wider">
                   <th className="p-4">Image</th>
                   <th className="p-4">Event</th>
                   <th className="p-4">Start Date</th>
@@ -412,13 +412,13 @@ export default function Events() {
                     className="w-20 h-20 rounded-lg object-cover border border-border"
                   />
                   <button type="button" onClick={() => setFormData({ ...formData, image: '', remove_image: false })}
-                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" disabled={saving}>×</button>
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold" disabled={saving}>×</button>
                 </div>
               ) : existingImage && !formData.remove_image ? (
                 <div className="relative w-20 h-20 mb-2">
                   <img src={assetUrl(existingImage)} alt="current" className="w-20 h-20 rounded-lg object-cover border border-border" />
                   <button type="button" onClick={() => setFormData({ ...formData, remove_image: true })}
-                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold" disabled={saving}>×</button>
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold" disabled={saving}>×</button>
                 </div>
               ) : null}
 

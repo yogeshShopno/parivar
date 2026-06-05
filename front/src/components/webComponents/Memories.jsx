@@ -130,7 +130,7 @@ const filteredMemories = useMemo(() => {
             - Gallery -
           </p>
           <h2
-            className="text-3xl sm:text-4xl font-bold tracking-tight"
+            className="text-3xl sm:text-4xl font-semibold tracking-tight"
             style={{ color: theme?.textColor }}
           >
             Memories That{' '}

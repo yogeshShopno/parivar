@@ -110,7 +110,7 @@ console.log(visibleStudents)
             - Top Students -
           </p>
           <h2
-            className="text-3xl sm:text-4xl font-bold tracking-tight"
+            className="text-3xl sm:text-4xl font-semibold tracking-tight"
             style={{ color: theme.textColor }}
           >
             Students Who{' '}
@@ -172,14 +172,14 @@ console.log(visibleStudents)
                 </div>
                 <div className="absolute bottom-4 left-4 right-4">
                   <p className="text-sm font-semibold text-white/90">{student.standard}</p>
-                  <h3 className="mt-1 text-xl font-bold text-white">{student.name}</h3>
+                  <h3 className="mt-1 text-xl font-semibold text-white">{student.name}</h3>
                 </div>
               </div>
 
               <div className="p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
                     style={{
                       backgroundColor: shadeColor(theme.backgroundColor, 2),
                       color: theme.primaryColor,
@@ -189,7 +189,7 @@ console.log(visibleStudents)
                     {student.rank}
                   </span>
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
                     style={{
                       backgroundColor: shadeColor(theme.backgroundColor, 4),
                       color: theme.textColor,
@@ -212,7 +212,7 @@ console.log(visibleStudents)
                     <p className="text-sm font-semibold  tracking-wide" style={{ color: shadeColor(theme.textColor, 25) }}>
                       Achievement
                     </p>
-                    <p className="text-sm font-bold" style={{ color: theme.textColor }}>
+                    <p className="text-sm font-semibold" style={{ color: theme.textColor }}>
                       {student.achievement}
                     </p>
                   </div>

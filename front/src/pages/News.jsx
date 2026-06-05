@@ -17,11 +17,16 @@ export default function News() {
   const [success, setSuccess] = useState('')
   const [selected, setSelected] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [existingImage, setExistingImage] = useState('')
+  const [selectedId, setSelectedId] = useState('')
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     status: 1,
-    image: null
+    image: null,
+    remove_image: false,
+
   })
 
   const totalPages = Math.max(Number(pagination.totalPages) || 1, 1)
@@ -71,19 +76,24 @@ export default function News() {
     }
   }
 
-  const openCreate = () => {
-    setSelected(null)
-    setFormData({ title: '', description: '', status: 1, image: null })
-    setIsModalOpen(true)
-  }
+const openCreate = () => {
+  setSelected(null)
+  setSelectedId('')  
+  setExistingImage('')
+  setFormData({ title: '', description: '', status: 1, image: null, remove_image: false })
+  setIsModalOpen(true)
+}
 
   const openEdit = (newsItem) => {
     setSelected(newsItem)
+    setSelectedId(newsItem.id || newsItem._id || '') 
+    setExistingImage(newsItem.image || '')
     setFormData({
       title: newsItem.title || '',
       description: newsItem.description || '',
       status: Number(newsItem.status ?? 1),
-      image: null
+      image: null,
+      remove_image: false
     })
     setIsModalOpen(true)
   }
@@ -92,24 +102,31 @@ export default function News() {
     event.preventDefault()
     setSaving(true)
     setError('')
-
     try {
+      const hasFile = formData.image instanceof FileList
+        ? formData.image.length > 0
+        : formData.image instanceof File
+
       const payload = new FormData()
       payload.append('title', formData.title)
       payload.append('description', formData.description)
       payload.append('status', formData.status)
-      if (formData.image) payload.append('image', formData.image)
-
-      if (selected) {
-        await api.put(`/news/${selected.id}`, payload)
+      if (hasFile) {
+        payload.append('image', formData.image instanceof FileList ? formData.image[0] : formData.image)
+      }
+      if (formData.remove_image) {
+        payload.append('remove_image', 'true')
+      }
+      if (selectedId) {
+        await api.put(`/news/${selectedId}`, payload)
       } else {
         await api.post('/news', payload)
       }
-
       await fetchNews()
       setSuccess('Feed News saved successfully')
       setIsModalOpen(false)
       setSelected(null)
+      setExistingImage('')  
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to save feed News')
@@ -123,7 +140,7 @@ export default function News() {
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-text">News Feed</h2>
+          <h2 className="text-xl font-semibold text-text">News Feed</h2>
 
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -179,7 +196,7 @@ export default function News() {
         <div className="bg-card border border-border rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
           <FileText className="w-12 h-12 text-text-secondary/40 animate-pulse-slow" />
           <div>
-            <h4 className="font-bold text-text">No News found</h4>
+            <h4 className="font-semibold text-text">No News found</h4>
             <p className="text-text-secondary text-sm mt-1">There are no News under this search criteria</p>
           </div>
         </div>
@@ -188,7 +205,7 @@ export default function News() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold  tracking-wider">
+                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-semibold  tracking-wider">
                   <th className="p-4">Image</th>
                   <th className="p-4">News</th>
                   <th className="p-4">Description</th>
@@ -231,7 +248,7 @@ export default function News() {
                         <button onClick={() => openEdit(row)} className="p-2 text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl" title="Edit">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => handleDelete(row)} className="p-2 text-error-text bg-error-bg hover:bg-error/20 border border-error-border rounded-xl" title="Delete">
+                        <button onClick={() => handleDelete(row.id || row._id)} className="p-2 text-error-text bg-error-bg hover:bg-error/20 border border-error-border rounded-xl" title="Delete">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -285,33 +302,57 @@ export default function News() {
         <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 text-text">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm  font-bold text-text-secondary mb-1.5">Title *</label>
+              <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Title *</label>
               <input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={fieldClass} disabled={saving} />
-          </div>
-          <div>
-            <label className="block text-sm  font-bold text-text-secondary mb-1.5">Status</label>
-            <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className={fieldClass} disabled={saving}>
-              <option value={1} className="bg-surface text-text">Active</option>
-              <option value={0} className="bg-surface text-text">Pending (Inactive)</option>
-            </select>
-          </div>
             </div>
+            <div>
+              <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Status</label>
+              <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className={fieldClass} disabled={saving}>
+                <option value={1} className="bg-surface text-text">Active</option>
+                <option value={0} className="bg-surface text-text">Pending (Inactive)</option>
+              </select>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm  font-bold text-text-secondary mb-1.5">Description *</label>
+              <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Description *</label>
               <textarea rows="4" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className={fieldClass} disabled={saving} />
             </div>
 
-            <div>
-              <label className="block text-sm  font-bold text-text-secondary mb-1.5">Image</label>
-              <input type="file" accept="image/*" onChange={(e) => setFormData({ ...formData, image: e.target.files?.[0] || null })} className="w-full text-sm text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20" disabled={saving} />
-              {selected?.image && <p className="text-sm text-text-secondary mt-2">Current image will be kept unless a new file is selected.</p>}
+            <div className="flex flex-col bg-input-bg border border-border rounded-xl p-3">
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Image</label>
+
+              {/* Preview */}
+              {(formData.image instanceof File || (formData.image instanceof FileList && formData.image.length > 0)) ? (
+                <div className="relative w-20 h-20 mb-2">
+                  <img
+                    src={URL.createObjectURL(formData.image instanceof FileList ? formData.image[0] : formData.image)}
+                    alt="preview"
+                    className="w-20 h-20 rounded-lg object-cover border border-border"
+                  />
+                  <button type="button" onClick={() => setFormData({ ...formData, image: '', remove_image: false })}
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold" disabled={saving}>×</button>
+                </div>
+              ) : existingImage && !formData.remove_image ? (
+                <div className="relative w-20 h-20 mb-2">
+                  <img src={assetUrl(existingImage)} alt="current" className="w-20 h-20 rounded-lg object-cover border border-border" />
+                  <button type="button" onClick={() => setFormData({ ...formData, remove_image: true })}
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold" disabled={saving}>×</button>
+                </div>
+              ) : null}
+
+              <input
+                type="file" accept="image/*"
+                onChange={(e) => setFormData({ ...formData, image: e.target.files, remove_image: false })}
+                className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
+                disabled={saving}
+              />
             </div>
           </div>
 
 
-          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider  disabled:opacity-50 shadow-glow-primary">
+          <button type="submit" disabled={saving} className="flex justify-self-end bg-primary hover:bg-primary-hover text-white p-3 rounded-xl font-semibold text-sm tracking-wider  disabled:opacity-50 shadow-glow-primary">
             {saving ? 'Saving...' : 'Save Feed News'}
           </button>
         </form>

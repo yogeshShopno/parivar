@@ -156,7 +156,7 @@ export default function Events() {
             - Upcoming Events -
           </p>
           <h2
-            className="text-3xl sm:text-4xl font-bold tracking-tight"
+            className="text-3xl sm:text-4xl font-semibold tracking-tight"
             style={{ color: theme.textColor }}
           >
             Moments Worth{' '}
@@ -208,7 +208,7 @@ export default function Events() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute left-4 top-4 rounded-md bg-white px-3 py-2 text-center shadow-lg">
-                  <div className="text-xl font-bold leading-none" style={{ color: theme.textColor }}>
+                  <div className="text-xl font-semibold leading-none" style={{ color: theme.textColor }}>
                     {event.day}
                   </div>
                   <div className="mt-1 text-sm font-semibold" style={{ color: theme.primaryColor }}>
@@ -216,7 +216,7 @@ export default function Events() {
                   </div>
                 </div>
                 <div
-                  className="absolute right-4 top-4 rounded-full px-3 py-1.5 text-sm font-bold "
+                  className="absolute right-4 top-4 rounded-full px-3 py-1.5 text-sm font-semibold "
                   style={{
                     backgroundImage: `linear-gradient(to right, ${theme.gradientStart}, ${theme.gradientEnd})`,
                     color: theme.fontColor,
@@ -224,7 +224,7 @@ export default function Events() {
                 >
                   Registering
                 </div>
-                <h3 className="absolute bottom-4 left-4 right-4 text-sm font-bold text-white">
+                <h3 className="absolute bottom-4 left-4 right-4 text-sm font-semibold text-white">
                   {event.subtitle}
                 </h3>
               </div>
@@ -232,7 +232,7 @@ export default function Events() {
               <div className="p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
                     style={{
                       backgroundColor: shadeColor(theme.backgroundColor, 2),
                       color: theme.primaryColor,
@@ -247,7 +247,7 @@ export default function Events() {
                   </span>
                 </div>
 
-                <h4 className="min-h-12 text-base font-bold leading-snug" style={{ color: theme.textColor }}>
+                <h4 className="min-h-12 text-base font-semibold leading-snug" style={{ color: theme.textColor }}>
                   {event.title}
                 </h4>
 
@@ -270,7 +270,7 @@ export default function Events() {
                   <button
                     type="button"
                     onClick={() => openRegisterDialog(event)}
-                    className="inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-bold transition-all duration-200 hover:shadow-lg"
+                    className="inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition-all duration-200 hover:shadow-lg"
                     style={{
                       backgroundColor: theme.buttonColor || theme.primaryColor,
                       color: theme.fontColor,
@@ -280,7 +280,7 @@ export default function Events() {
                     Register Now
                   </button>
                   <div className="text-sm" style={{ color: theme.textColor }}>
-                    Entry: <span className="font-bold">{event.entry}</span>
+                    Entry: <span className="font-semibold">{event.entry}</span>
                   </div>
                 </div>
               </div>
@@ -312,7 +312,7 @@ export default function Events() {
             >
               <div>
                 <p className="text-sm font-semibold opacity-90">Event Registration</p>
-                <h3 id="event-register-title" className="mt-1 text-xl font-bold leading-snug">
+                <h3 id="event-register-title" className="mt-1 text-xl font-semibold leading-snug">
                   {selectedEvent.title}
                 </h3>
               </div>
@@ -381,14 +381,14 @@ export default function Events() {
                 <button
                   type="button"
                   onClick={() => setSelectedEvent(null)}
-                  className="rounded-md border px-5 py-2.5 text-sm font-bold"
+                  className="rounded-md border px-5 py-2.5 text-sm font-semibold"
                   style={{ borderColor: theme.borderColor, color: theme.textColor }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-md px-5 py-2.5 text-sm font-bold"
+                  className="rounded-md px-5 py-2.5 text-sm font-semibold"
                   style={{
                     backgroundColor: theme.buttonColor || theme.primaryColor,
                     color: theme.fontColor,

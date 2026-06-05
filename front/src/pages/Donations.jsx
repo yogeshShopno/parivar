@@ -152,7 +152,7 @@ export default function Donations() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-text">Donations</h2>
+          <h2 className="text-xl font-semibold text-text">Donations</h2>
         
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -176,16 +176,16 @@ export default function Donations() {
       {donations.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <div className="bg-success-bg border border-success-border rounded-2xl p-4">
-            <p className="text-success-text text-sm font-bold  tracking-wider mb-1">Total Collected</p>
-            <p className="text-text text-lg font-bold">{formatAmount(totalAmount)}</p>
+            <p className="text-success-text text-sm font-semibold  tracking-wider mb-1">Total Collected</p>
+            <p className="text-text text-lg font-semibold">{formatAmount(totalAmount)}</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4">
-            <p className="text-text-secondary text-sm font-bold  tracking-wider mb-1">Total Donors</p>
-            <p className="text-text text-lg font-bold">{donations.length}</p>
+            <p className="text-text-secondary text-sm font-semibold  tracking-wider mb-1">Total Donors</p>
+            <p className="text-text text-lg font-semibold">{donations.length}</p>
           </div>
           <div className="bg-card border border-border rounded-2xl p-4 col-span-2 sm:col-span-1">
-            <p className="text-text-secondary text-sm font-bold  tracking-wider mb-1">Avg Donation</p>
-            <p className="text-text text-lg font-bold">{formatAmount(totalAmount / donations.length)}</p>
+            <p className="text-text-secondary text-sm font-semibold  tracking-wider mb-1">Avg Donation</p>
+            <p className="text-text text-lg font-semibold">{formatAmount(totalAmount / donations.length)}</p>
           </div>
         </div>
       )}
@@ -195,7 +195,7 @@ export default function Donations() {
         {bankDetails.length > 0 && (
           <div className="bg-card border border-border rounded-2xl p-6 relative overflow-hidden group">
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-info opacity-40"></div>
-            <h3 className="font-bold text-text mb-4 flex items-center gap-2">
+            <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
               <span className="w-1.5 h-6 bg-primary rounded-full inline-block"></span>
               Donation Bank Details
             </h3>
@@ -203,7 +203,7 @@ export default function Donations() {
               {bankDetails.map((bank) => (
               <div key={bank.id} className="p-4 rounded-xl bg-surface-secondary border border-border flex gap-4 items-start">
                 <div className="flex-1 text-sm text-text-secondary space-y-1">
-                  <p className="font-bold text-primary mb-1">{bank.bank_name}</p>
+                  <p className="font-semibold text-primary mb-1">{bank.bank_name}</p>
                   {bank.account_name && <p><span className="font-medium text-text">Name:</span> {bank.account_name}</p>}
                   <p><span className="font-medium text-text">A/c No:</span> {bank.account_number}</p>
                   <p><span className="font-medium text-text">IFSC:</span> {bank.ifsc_code}</p>
@@ -305,7 +305,7 @@ export default function Donations() {
         <div className="bg-card border border-border rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
           <HeartHandshake className="w-12 h-12 text-text-secondary/40 animate-pulse-slow" />
           <div>
-            <h4 className="font-bold text-text">No donations found</h4>
+            <h4 className="font-semibold text-text">No donations found</h4>
             <p className="text-text-secondary text-sm mt-1">There are no donation records matching your criteria</p>
           </div>
           <button
@@ -330,11 +330,11 @@ export default function Donations() {
                   <div className="flex-1">
                     {/* Amount Badge */}
                     <div className="flex flex-wrap items-center gap-2 mb-2.5">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-success/10 border border-success/20 text-success font-bold text-sm">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-success/10 border border-success/20 text-success font-semibold text-sm">
                         <IndianRupee className="w-3.5 h-3.5" />
                         {Number(donation.donate_amount || 0).toLocaleString('en-IN')}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-bold ${
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-semibold ${
                         Number(donation.status) === 1
                           ? 'bg-success-bg text-success-text border border-success-border'
                           : 'bg-surface-secondary text-text-secondary border border-border'
@@ -344,7 +344,7 @@ export default function Donations() {
                     </div>
 
                     {/* Donator Name */}
-                    <h3 className="text-base font-bold text-text tracking-tight group-hover:text-primary transition-colors">
+                    <h3 className="text-base font-semibold text-text tracking-tight group-hover:text-primary transition-colors">
                       {donation.donator_name}
                     </h3>
 

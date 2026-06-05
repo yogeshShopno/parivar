@@ -152,7 +152,7 @@ export default function Businesses() {
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-text">Business Directory</h2>
+          <h2 className="text-xl font-semibold text-text">Business Directory</h2>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
@@ -219,7 +219,7 @@ export default function Businesses() {
         <div className="bg-card border border-border rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
           <Briefcase className="w-12 h-12 text-text-secondary/40 animate-pulse-slow" />
           <div>
-            <h4 className="font-bold text-text">No businesses found</h4>
+            <h4 className="font-semibold text-text">No businesses found</h4>
             <p className="text-text-secondary text-sm mt-1">There are no business directories registered under this search criteria</p>
           </div>
         </div>
@@ -246,14 +246,14 @@ export default function Businesses() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-sm  tracking-wide">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-semibold text-sm  tracking-wide">
                         {biz.business_category_name || 'Community Enterprise'}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-bold ${Number(biz.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-surface-secondary text-text-secondary border border-border'}`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-semibold ${Number(biz.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-surface-secondary text-text-secondary border border-border'}`}>
                         {Number(biz.status) === 1 ? 'Active' : 'Inactive'}
                       </span>
                     </div>
-                    <h3 className="text-sm sm:text-base font-bold text-text mt-2 tracking-tight group-hover:text-primary transition-colors truncate">
+                    <h3 className="text-sm sm:text-base font-semibold text-text mt-2 tracking-tight group-hover:text-primary transition-colors truncate">
                       {biz.business_name}
                     </h3>
                   </div>
@@ -291,7 +291,7 @@ export default function Businesses() {
                 {/* Gallery Showcase */}
                 {biz.gallery_images && biz.gallery_images.length > 0 && (
                   <div className="mt-4">
-                    <label className="block text-sm  font-bold text-text-secondary mb-1.5 tracking-wider">Showroom Gallery</label>
+                    <label className="block text-sm  font-semibold text-text-secondary mb-1.5 tracking-wider">Showroom Gallery</label>
                     <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
                       {biz.gallery_images.map((img, idx) => (
                         <div key={idx} className="relative w-12 h-12 rounded-lg overflow-hidden border border-border shrink-0 bg-surface-secondary group/img">

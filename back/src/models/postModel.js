@@ -46,7 +46,19 @@ const postSchema = new mongoose.Schema({
   city_id: {
     type: mongoose.Schema.Types.ObjectId,
     index: true
+  },
+  created_by: {
+    id: {
+      type: String,
+      default: ''
+    },
+    name: {
+      type: String,
+      default: ''
+    }
   }
+
+
 }, {
   timestamps: true,
   strict: false

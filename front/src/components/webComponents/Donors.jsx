@@ -96,7 +96,7 @@ export default function Donors() {
             - Donors -
           </p>
           <h2
-            className="text-3xl sm:text-4xl font-bold tracking-tight"
+            className="text-3xl sm:text-4xl font-semibold tracking-tight"
             style={{ color: theme.textColor }}
           >
             Our Generous{' '}
@@ -152,10 +152,10 @@ export default function Donors() {
                   <HeartHandshake className="h-6 w-6" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-lg font-bold" style={{ color: theme.textColor }}>
+                  <h3 className="text-lg font-semibold" style={{ color: theme.textColor }}>
                     {donor.donator_name}
                   </h3>
-                  <p className="mt-1 flex items-center text-xl font-bold" style={{ color: theme.primaryColor }}>
+                  <p className="mt-1 flex items-center text-xl font-semibold" style={{ color: theme.primaryColor }}>
                     <IndianRupee className="h-5 w-5" />
                     {formatAmount(donor.donate_amount)}
                   </p>

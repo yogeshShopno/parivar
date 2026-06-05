@@ -63,7 +63,7 @@ const ImageUploadField = ({ label, icon: Icon, value, onChange, onDelete, accept
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-xs font-bold  tracking-wide text-text-secondary flex items-center gap-1.5">
+      <label className="text-xs font-semibold  tracking-wide text-text-secondary flex items-center gap-1.5">
         {Icon && <Icon className="w-3.5 h-3.5" />} {label}
       </label>
       <div
@@ -111,7 +111,7 @@ const BannerImagesField = ({ bannerImages, bannerFiles, onAdd, onDelete }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-xs font-bold  tracking-wide text-text-secondary flex items-center gap-1.5">
+      <label className="text-xs font-semibold  tracking-wide text-text-secondary flex items-center gap-1.5">
         <ImageIcon className="w-3.5 h-3.5" /> Banner Images
       </label>
       <div className="grid grid-cols-3 gap-2">
@@ -154,7 +154,7 @@ const BannerImagesField = ({ bannerImages, bannerFiles, onAdd, onDelete }) => {
 const ColorInput = ({ label, value, keyName, desc, onChange }) => (
   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-xl bg-surface-secondary border border-border hover:bg-surface transition-colors text-text">
     <div className="max-w-md">
-      <h4 className="text-sm font-bold text-text  tracking-wide">{label}</h4>
+      <h4 className="text-sm font-semibold text-text  tracking-wide">{label}</h4>
       {desc && <p className="text-sm text-text-secondary mt-1 leading-relaxed">{desc}</p>}
     </div>
     <div className="flex items-center gap-3">
@@ -177,7 +177,7 @@ const ColorInput = ({ label, value, keyName, desc, onChange }) => (
 // ─── Text Input ───────────────────────────────────────────────────────────────
 const TextInput = ({ label, icon: Icon, value, keyName, placeholder, type = 'text', onChange }) => (
   <div className="flex flex-col gap-1.5">
-    <label className="text-xs font-bold  tracking-wide text-text-secondary flex items-center gap-1.5">
+    <label className="text-xs font-semibold  tracking-wide text-text-secondary flex items-center gap-1.5">
       {Icon && <Icon className="w-3.5 h-3.5" />} {label}
     </label>
     <input
@@ -194,7 +194,7 @@ const TextInput = ({ label, icon: Icon, value, keyName, placeholder, type = 'tex
 const SectionHeader = ({ icon: Icon, title }) => (
   <div className="flex items-center gap-2 border-b border-border pb-3 mb-4">
     <Icon className="w-4 h-4 text-primary" />
-    <h3 className="text-sm font-bold text-text">{title}</h3>
+    <h3 className="text-sm font-semibold text-text">{title}</h3>
   </div>
 )
 
@@ -448,7 +448,7 @@ export default function SettingsPage() {
               <button
                 type="submit"
                 disabled={saveLoading}
-                className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-glow-primary transition-all duration-300"
+                className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-glow-primary transition-all duration-300"
               >
                 <Save className="w-4 h-4" />
                 {saveLoading ? 'Saving...' : 'Save Branding'}
@@ -464,7 +464,7 @@ export default function SettingsPage() {
             {/* Color Form */}
             <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-glass-sm space-y-5">
               <div className="flex items-center justify-between border-b border-border pb-4">
-                <h3 className="text-sm font-bold text-text flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-text flex items-center gap-2">
                   <Settings className="w-4 h-4 text-primary" /> Theme Settings
                 </h3>
                 <div className="flex items-center gap-2">
@@ -478,7 +478,7 @@ export default function SettingsPage() {
                   <button
                     type="submit"
                     disabled={saveLoading}
-                    className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl text-sm font-bold shadow-glow-primary transition-all duration-300"
+                    className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-glow-primary transition-all duration-300"
                   >
                     <Save className="w-4 h-4" />
                     {saveLoading ? 'Saving...' : 'Save'}
@@ -513,7 +513,7 @@ export default function SettingsPage() {
               <div>
                 <div className="flex items-center gap-2 border-b border-border pb-4 mb-6">
                   <Sparkles className="w-4 h-4 text-primary" />
-                  <h3 className="text-sm font-bold text-text">Live Brand Palette Preview</h3>
+                  <h3 className="text-sm font-semibold text-text">Live Brand Palette Preview</h3>
                 </div>
                 <p className="text-sm text-text-secondary leading-relaxed mb-6">
                   Preview represents the layout of the mobile application dashboard using current theme tokens.
@@ -525,7 +525,7 @@ export default function SettingsPage() {
                       <span className="w-1.5 h-1.5 rounded-full bg-white/60"></span>
                     </div>
                     <div>
-                      <h4 className="text-white text-sm font-bold leading-none">Namaste, Rameshji</h4>
+                      <h4 className="text-white text-sm font-semibold leading-none">Namaste, Rameshji</h4>
                       <p className="text-white/60 text-sm mt-1 font-semibold">{config.name || 'Parivar Community Hub'}</p>
                     </div>
                   </div>
@@ -533,18 +533,18 @@ export default function SettingsPage() {
                     <div className="p-2.5 rounded-xl border flex items-center justify-between text-sm" style={{ borderColor: config.borderColor, backgroundColor: '#ffffff' }}>
                       <div className="flex items-center gap-2">
                         <span className="w-4 h-4 rounded-full" style={{ backgroundColor: config.primaryColor }}></span>
-                        <span className="font-bold" style={{ color: config.textColor }}>View Family Directory</span>
+                        <span className="font-semibold" style={{ color: config.textColor }}>View Family Directory</span>
                       </div>
                       <span style={{ color: config.textColor }}>→</span>
                     </div>
                     <div className="p-2.5 rounded-xl border flex items-center justify-between text-sm" style={{ borderColor: config.borderColor, backgroundColor: '#ffffff' }}>
                       <div className="flex items-center gap-2">
                         <span className="w-4 h-4 rounded-full" style={{ backgroundColor: config.secondaryColor }}></span>
-                        <span className="font-bold" style={{ color: config.textColor }}>Registered Businesses</span>
+                        <span className="font-semibold" style={{ color: config.textColor }}>Registered Businesses</span>
                       </div>
                       <span style={{ color: config.textColor }}>→</span>
                     </div>
-                    <button className="w-full text-center py-1.5 rounded-lg text-sm font-bold  tracking-wider" style={{ backgroundColor: config.buttonColor, color: config.fontColor }}>
+                    <button className="w-full text-center py-1.5 rounded-lg text-sm font-semibold  tracking-wider" style={{ backgroundColor: config.buttonColor, color: config.fontColor }}>
                       Add Member
                     </button>
                   </div>

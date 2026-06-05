@@ -101,7 +101,7 @@ export default function Members() {
             - Members -
           </p>
           <h2
-            className="text-3xl sm:text-4xl font-bold tracking-tight"
+            className="text-3xl sm:text-4xl font-semibold tracking-tight"
             style={{ color: theme.textColor }}
           >
             Meet Our{' '}
@@ -157,7 +157,7 @@ export default function Members() {
 
               <div className="px-5 py-5 text-center">
                 <h3
-                  className="text-lg font-bold"
+                  className="text-lg font-semibold"
                   style={{ color: theme.textColor }}
                 >
                   {member.name}

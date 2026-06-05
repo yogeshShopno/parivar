@@ -166,7 +166,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
     <div className="space-y-6 animate-slide-up select-none text-text">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-text">{title}</h2>
+          <h2 className="text-xl font-semibold text-text">{title}</h2>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button onClick={fetchRows} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
@@ -215,7 +215,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold  tracking-wider">
+                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-semibold  tracking-wider">
                   {columns.map((column) => <th key={column.key} className="p-4">{column.label}</th>)}
                   <th className="p-4 text-right">Actions</th>
                 </tr>
@@ -290,7 +290,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fields.map((field) => (
               <div key={field.name}>
-                <label className="block text-sm  font-bold text-text-secondary mb-1.5">{field.label}</label>
+                <label className="block text-sm  font-semibold text-text-secondary mb-1.5">{field.label}</label>
                 {field.type === 'textarea' ? (
                   <textarea rows="4" value={formData[field.name] || ''} onChange={(e) => setFormData({ ...formData, [field.name]: e.target.value })} className={fieldClass} disabled={saving} />
                 ) : field.type === 'select' ? (
@@ -333,7 +333,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
               </div>
             ))}
           </div>
-          <button type="submit" disabled={saving} className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider  disabled:opacity-50 shadow-glow-primary">
+          <button type="submit" disabled={saving} className="flex justify-self-end bg-primary hover:bg-primary-hover text-white p-3 rounded-xl font-semibold text-sm tracking-wider  disabled:opacity-50 shadow-glow-primary">
             {saving ? 'Saving...' : 'Save Record'}
           </button>
         </form>

@@ -209,7 +209,7 @@ export default function GalleryPage() {
     <div className="space-y-6 animate-slide-up select-none text-text">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-text">Gallery</h2>
+          <h2 className="text-xl font-semibold text-text">Gallery</h2>
 
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -245,7 +245,7 @@ export default function GalleryPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold  tracking-wider">
+                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-semibold  tracking-wider">
                   <th className="p-4">Preview</th>
                   <th className="p-4">Category</th>
                   <th className="p-4">Year</th>
@@ -260,7 +260,7 @@ export default function GalleryPage() {
                         <>
                           <div className="relative inline-block">
                             <img src={assetUrl(row.images[0])} alt={row.category || 'Gallery'} className="h-12 w-16 rounded-lg object-cover border border-border" />
-                            <span className="absolute -top-1.5 -right-2.5 bg-primary text-white text-xs font-bold rounded-full p-1 w-5 h-5 flex items-center justify-center">
+                            <span className="absolute -top-1.5 -right-2.5 bg-primary text-white text-xs font-semibold rounded-full p-1 w-5 h-5 flex items-center justify-center">
                               {row.images.length}
                             </span>
                           </div>

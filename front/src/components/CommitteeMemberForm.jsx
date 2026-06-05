@@ -166,7 +166,7 @@ export default function CommitteeMemberForm({ member, onSubmit, isLoading }) {
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, image: null, remove_image: true })}
-                className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold"
+                className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold"
                 disabled={isLoading}
               >×</button>
             </div>

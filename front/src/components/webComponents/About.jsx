@@ -79,7 +79,7 @@ export default function About() {
           </p>
 
           <h2
-            className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight"
+            className="text-3xl sm:text-4xl font-semibold leading-tight tracking-tight"
             style={{ color: theme.textColor }}
           >
             Built For Families. Designed For Togetherness.
@@ -108,7 +108,7 @@ export default function About() {
 
           <a
             href="#members"
-            className="mt-8 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-bold transition-all duration-200 hover:shadow-lg"
+            className="mt-8 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-semibold transition-all duration-200 hover:shadow-lg"
             style={{
               backgroundColor: theme.buttonColor || theme.primaryColor,
               color: theme.fontColor,

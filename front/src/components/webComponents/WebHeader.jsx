@@ -197,7 +197,7 @@ export default function WebHeader() {
               
               <div className="hidden sm:block">
                 <h1
-                  className="text-lg sm:text-xl font-bold tracking-tight"
+                  className="text-lg sm:text-xl font-semibold tracking-tight"
                   style={{
                     color: theme.textColor || '#123524'
                   }}

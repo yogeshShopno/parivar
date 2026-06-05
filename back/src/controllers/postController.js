@@ -1,84 +1,59 @@
 const mongoose = require('mongoose');
 const Post = require('../models/postModel');
-const User = require('../models/userModels');
-const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
+const { apiResponse, fullName, publicUrl } = require('../utils/apiResponse');
 const queryHelper = require('../utils/queryHelper');
-
 
 const imageFromRequest = (req, fallback = '') => {
   if (req.file) return `/uploads/${req.file.filename}`;
+  if (req.body.remove_image === 'true') return '';
   return req.body.image || fallback || '';
 };
-
-const currentMemberId = (req) => memberPublicId(req.user || {});
+const createdBy = (req) => {
+  const user = req.user || {};
+  const name = fullName(user) || user.name || user.username || user.email || '';
+  const id = user._id || user.id || '';
+  return { id, name };
+};
 
 const tenantStatusQuery = () => ({
-  $or: [
-    { status: 2 },
-    { status: 1 },
-    { status: { $exists: false } }
-  ]
+  $or: [{ status: 2 }, { status: 1 }, { status: { $exists: false } }]
 });
 
 const getPosts = async (req, res) => {
   try {
     const isCommitteeOrAdmin = req.user && (req.user.is_committee || req.user.role === 'admin' || req.user.relation === 'Self');
-    let posts;
-    let pagination;
-    let ownId = currentMemberId(req);
+    let posts, pagination;
 
     if (isCommitteeOrAdmin) {
-      // Admin sees all posts in their tenant
       ({ data: posts, pagination } = await queryHelper(Post, req.query, {
-        searchFields: ['title', 'description', 'member_id'],
-        filterFields: ['member_id', 'status', 'country_id', 'state_id', 'city_id'],
+        searchFields: ['title', 'description', 'created_by.name'],
+        filterFields: ['status', 'country_id', 'state_id', 'city_id'],
         defaultSort: { createdAt: -1, _id: -1 }
       }));
     } else {
-      // Members see approved posts or their own pending posts
       ({ data: posts, pagination } = await queryHelper(Post, req.query, {
         baseQuery: {
-          $and: [
-            {
-              $or: [
-                tenantStatusQuery(),
-                { member_id: ownId }
-              ]
-            }
-          ]
+          $and: [{
+            $or: [tenantStatusQuery(), { 'created_by.id': req.user?._id }]
+          }]
         },
-        searchFields: ['title', 'description', 'member_id'],
-        filterFields: ['member_id', 'status', 'country_id', 'state_id', 'city_id'],
+        searchFields: ['title', 'description', 'created_by.name'],
+        filterFields: ['status', 'country_id', 'state_id', 'city_id'],
         defaultSort: { createdAt: -1, _id: -1 }
       }));
     }
 
-    const memberIds = [...new Set(posts.map((post) => String(post.member_id || '')).filter(Boolean))];
-    const members = await User.find({
-      $and: [
-        { member_id: { $in: memberIds } }
-      ]
-    }).select('-password').lean();
-
-    const memberMap = new Map(members.map((member) => [String(member.member_id), member]));
-
-    const data = posts.map((post) => {
-      const member = memberMap.get(String(post.member_id)) || {};
-
-      return {
-        id: post._id || String(post._id),
-        member_id: post.member_id || '',
-        title: post.title || '',
-        description: post.description || '',
-        image: publicUrl(req, post.image || ''),
-        cdate: post.cdate || (post.createdAt ? new Date(post.createdAt).toISOString().slice(0, 10) : ''),
-        date: post.cdate || (post.createdAt ? new Date(post.createdAt).toISOString().slice(0, 10) : ''),
-        member_name: fullName(member),
-        member_number: member.number || '',
-        status: Number(post.status ?? 1),
-        is_own: String(ownId) === String(post.member_id)
-      };
-    });
+    const data = posts.map((post) => ({
+      id: post._id,
+      created_by: post.created_by || {},
+      title: post.title || '',
+      description: post.description || '',
+      image: publicUrl(req, post.image || ''),
+      cdate: post.cdate || (post.createdAt ? new Date(post.createdAt).toISOString().slice(0, 10) : ''),
+      date: post.cdate || (post.createdAt ? new Date(post.createdAt).toISOString().slice(0, 10) : ''),
+      status: Number(post.status ?? 1),
+      is_own: String(req.user?._id) === String(post.created_by?.id)
+    }));
 
     return apiResponse(res, 200, 'Posts retrieved successfully', data, pagination);
   } catch (error) {
@@ -92,18 +67,17 @@ const getPostById = async (req, res) => {
     const post = await Post.findOne(
       mongoose.isValidObjectId(id) ? { _id: id } : { id: String(id) }
     ).lean();
-
-    if (!post) {
-      return apiResponse(res, 404, 'Post not found');
-    }
-
+    if (!post) return apiResponse(res, 404, 'Post not found');
     return apiResponse(res, 200, 'Post retrieved successfully', {
-      _id: post._id || '',  // ← Add this line
+      _id: post._id || '',
+      created_by: post.created_by || {},
       title: post.title || '',
       description: post.description || '',
       image: publicUrl(req, post.image || ''),
       cdate: post.cdate || '',
-      status: Number(post.status ?? 1)
+      status: Number(post.status ?? 1),
+      is_own: String(req.user?._id) === String(post.created_by?.id)
+
     });
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving post', { error: error.message });
@@ -114,7 +88,7 @@ const savePost = async (req, res) => {
   try {
     const id = req.params.id || req.body.id;
     const { title, description } = req.body;
-    let status = req.body.status;
+    const status = req.body.status;
 
     if (!title || !description) {
       return apiResponse(res, 400, 'Post title and description are required');
@@ -126,21 +100,17 @@ const savePost = async (req, res) => {
       })
       : null;
 
-    if (id && !existing) {
-      return apiResponse(res, 404, 'Post not found or unauthorized');
-    }
+    if (id && !existing) return apiResponse(res, 404, 'Post not found or unauthorized');
 
     const isCommitteeOrAdmin = req.user && (req.user.is_committee || req.user.role === 'admin' || req.user.relation === 'Self');
-    const ownId = currentMemberId(req);
 
-    // Only allow editing if admin or if the user owns the post
-    if (existing && !isCommitteeOrAdmin && String(existing.member_id) !== String(ownId)) {
+    if (existing && !isCommitteeOrAdmin && String(existing.created_by?.id) !== String(req.user?._id)) {
       return apiResponse(res, 403, 'Unauthorized to edit this post');
     }
 
     const post = existing || new Post({
       id: `POST${Date.now()}`,
-member_id: existing ? existing.member_id : currentMemberId(req),
+      created_by: createdBy(req),
       cdate: new Date().toISOString().slice(0, 10)
     });
 
@@ -148,27 +118,30 @@ member_id: existing ? existing.member_id : currentMemberId(req),
     post.description = description;
 
 
+    if (!existing) {
+      post.created_by = createdBy(req);
+    } else if (!post.created_by?.name) {
+      // backfill name if somehow empty
+      post.created_by = { ...post.created_by, ...createdBy(req) };
+    }
 
-    // Admin approval logic
     if (isCommitteeOrAdmin) {
-      // Admins can set status, default to approved
       post.status = status !== undefined ? Number(status) : (existing ? existing.status : 1);
     }
 
-    if (req.file || req.body.image) {
-      post.image = imageFromRequest(req, post.image);
-    }
-
+    post.image = imageFromRequest(req, post.image);
     await post.save();
 
     return apiResponse(res, existing ? 200 : 201, 'Post saved successfully', {
-
       _id: post._id || String(post._id),
+      created_by: post.created_by || {},
       title: post.title || '',
       description: post.description || '',
       image: publicUrl(req, post.image || ''),
       cdate: post.cdate || '',
-      status: Number(post.status ?? 1)
+      status: Number(post.status ?? 1),
+      is_own: String(req.user?._id) === String(post.created_by?.id)
+
     });
   } catch (error) {
     return apiResponse(res, 500, 'Error saving post', { error: error.message });
@@ -179,24 +152,15 @@ const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
     const isCommitteeOrAdmin = req.user && (req.user.is_committee || req.user.role === 'admin' || req.user.relation === 'Self');
-    const ownId = currentMemberId(req);
 
-    // postController.js — deletePost
     const orConditions = [{ id: String(id) }];
     if (mongoose.isValidObjectId(id)) orConditions.push({ _id: id });
-    const query = { $or: orConditions };
-    if (!isCommitteeOrAdmin) query.member_id = ownId;
 
-    // If not admin, can only delete own post
-    if (!isCommitteeOrAdmin) {
-      query.member_id = ownId;
-    }
+    const query = { $or: orConditions };
+    if (!isCommitteeOrAdmin) query['created_by.id'] = req.user?._id;
 
     const result = await Post.deleteOne(query);
-
-    if (result.deletedCount === 0) {
-      return apiResponse(res, 404, 'Post not found or unauthorized');
-    }
+    if (result.deletedCount === 0) return apiResponse(res, 404, 'Post not found or unauthorized');
 
     return apiResponse(res, 200, 'Post deleted successfully');
   } catch (error) {
@@ -204,9 +168,4 @@ const deletePost = async (req, res) => {
   }
 };
 
-module.exports = {
-  getPosts,
-  getPostById,
-  savePost,
-  deletePost
-};
+module.exports = { getPosts, getPostById, savePost, deletePost };

@@ -50,7 +50,7 @@ const DetailCard = ({ icon: Icon, label, value }) => (
 
 const Section = ({ title, children }) => (
   <section className="min-w-0 overflow-hidden rounded-lg border border-[#E5E5E5] bg-[#FFFFFF] p-5 shadow-sm sm:p-6">
-    <h2 className="text-base font-bold text-[#000000] sm:text-lg">{title}</h2>
+    <h2 className="text-base font-semibold text-[#000000] sm:text-lg">{title}</h2>
     <div className="mt-4 min-w-0">{children}</div>
   </section>
 )
@@ -184,7 +184,7 @@ export default function BusinessProfile() {
                   <Building2 className="h-3.5 w-3.5" aria-hidden="true" />
                   {category}
                 </div>
-                <h1 className="mt-3 break-words text-3xl font-bold tracking-normal text-[#000000] [overflow-wrap:anywhere] sm:text-4xl">
+                <h1 className="mt-3 break-words text-3xl font-semibold tracking-normal text-[#000000] [overflow-wrap:anywhere] sm:text-4xl">
                   {normalizeValue(business?.business_name, 'Business Profile')}
                 </h1>
               </div>

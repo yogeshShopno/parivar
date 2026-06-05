@@ -134,7 +134,7 @@ export default function Students() {
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-text">Students</h2>
+          <h2 className="text-xl font-semibold text-text">Students</h2>
 
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -244,7 +244,7 @@ export default function Students() {
         <div className="bg-card border border-border rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
           <GraduationCap className="w-12 h-12 text-text-secondary/40 animate-pulse-slow" />
           <div>
-            <h4 className="font-bold text-text">No students found</h4>
+            <h4 className="font-semibold text-text">No students found</h4>
             <p className="text-text-secondary text-sm mt-1">There are no student records matching your criteria</p>
           </div>
         </div>
@@ -252,7 +252,7 @@ export default function Students() {
         <div className="space-y-10">
           {sortedYears.map(year => (
             <div key={year}>
-              <h3 className="text-xl font-bold text-text mb-4 border-b border-border pb-2 inline-block">
+              <h3 className="text-xl font-semibold text-text mb-4 border-b border-border pb-2 inline-block">
                 {year === 'Unknown' ? 'Unknown Year' : `Year ${year}`}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -270,14 +270,14 @@ export default function Students() {
                           )}
                           <div>
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-sm  tracking-wide">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-semibold text-sm  tracking-wide">
                                 Standard {student.standard}
                               </span>
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-bold ${Number(student.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-warning/10 text-warning border border-warning/20'}`}>
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-semibold ${Number(student.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-warning/10 text-warning border border-warning/20'}`}>
                                 {Number(student.status) === 1 ? 'Active' : 'Pending'}
                               </span>
                             </div>
-                            <h3 className="text-base font-bold text-text mt-2.5 tracking-tight group-hover:text-primary transition-colors">
+                            <h3 className="text-base font-semibold text-text mt-2.5 tracking-tight group-hover:text-primary transition-colors">
                               {student.surname} {student.student_name}
                             </h3>
                             <p className="text-sm text-text-secondary mt-1">Father: {student.father_name}</p>

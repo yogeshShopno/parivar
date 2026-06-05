@@ -123,7 +123,7 @@ export default function CommitteeMembers() {
     <div className="space-y-6 animate-slide-up select-none text-text">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-text">Committee Members</h2>
+          <h2 className="text-xl font-semibold text-text">Committee Members</h2>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button onClick={fetchCommitteeMembers} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
@@ -146,7 +146,7 @@ export default function CommitteeMembers() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-bold  tracking-wider">
+              <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-semibold  tracking-wider">
                 <th className="p-4">Name</th>
                 <th className="p-4">Contact</th>
                 <th className="p-4">Designation</th>
@@ -166,7 +166,7 @@ export default function CommitteeMembers() {
                       {member.image ? (
                         <img src={member.image} alt="" className="h-9 w-9 rounded-lg object-cover border border-border" />
                       ) : (
-                        <div className="h-9 w-9 rounded-lg bg-surface-secondary flex items-center justify-center text-sm font-bold text-text-secondary">{member.first_name?.slice(0, 1) || 'CM'}</div>
+                        <div className="h-9 w-9 rounded-lg bg-surface-secondary flex items-center justify-center text-sm font-semibold text-text-secondary">{member.first_name?.slice(0, 1) || 'CM'}</div>
                       )}
                       <div>
                         <div className="font-semibold text-text">{member.first_name} {member.middle_name} {member.last_name}</div>

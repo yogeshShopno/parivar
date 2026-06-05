@@ -128,7 +128,7 @@ export default function Dashboard() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-text tracking-tight">Dashboard</h2>
+          <h2 className="text-2xl font-semibold text-text tracking-tight">Dashboard</h2>
         
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-secondary border border-border text-sm text-text font-medium select-none shadow-sm">
@@ -161,12 +161,12 @@ export default function Dashboard() {
                 <span className="text-3xl font-extrabold text-text tracking-tight">
                   {card.value}
                 </span>
-                <span className="text-sm font-bold text-text-secondary">records</span>
+                <span className="text-sm font-semibold text-text-secondary">records</span>
               </div>
 
               {/* Sparkline & Growth Indicator */}
               <div className="mt-5 flex items-center justify-between">
-                <span className="text-sm font-bold text-primary flex items-center gap-1">
+                <span className="text-sm font-semibold text-primary flex items-center gap-1">
                   <TrendingUp className="w-3 h-3 text-primary" />
                   {card.change}
                 </span>
@@ -190,10 +190,10 @@ export default function Dashboard() {
         <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-glass-md flex flex-col justify-between">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-sm font-bold text-text tracking-wide">Registration Distribution</h3>
+              <h3 className="text-sm font-semibold text-text tracking-wide">Registration Distribution</h3>
               <p className="text-sm text-text-secondary">6-Month moving average data</p>
             </div>
-            <div className="flex items-center gap-1.5 text-sm text-primary font-bold bg-primary/10 px-2 py-0.5 rounded">
+            <div className="flex items-center gap-1.5 text-sm text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded">
               <ArrowUpRight className="w-3.5 h-3.5" />
               +18.5% year over year
             </div>
@@ -250,7 +250,7 @@ export default function Dashboard() {
         {/* Recent activities section */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-glass-md flex flex-col">
           <div className="mb-6">
-            <h3 className="text-sm font-bold text-text tracking-wide flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-text tracking-wide flex items-center gap-2">
               Recent Activity
             </h3>
             <p className="text-sm text-text-secondary">System actions audit logs</p>
