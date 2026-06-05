@@ -16,11 +16,7 @@ const donationSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  bank_detail_id: {
-    type: String,
-    required: true,
-    trim: true
-  },
+
   donation_purpose: {
     type: String,
     required: true,

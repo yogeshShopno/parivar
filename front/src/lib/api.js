@@ -17,6 +17,9 @@ const api = axios.create({
   }
 })
 
+export const exportDonationsExcel = (search = '') =>
+  api.get('/donations/export', { params: search ? { search } : {}, responseType: 'blob' })
+
 export const memberApi = axios.create({
   baseURL: `${API_BASE}/api`,
   headers: { 'Content-Type': 'application/json' },
@@ -25,6 +28,8 @@ export const memberApi = axios.create({
     clarifyTimeoutError: true
   }
 })
+
+
 
 // Add token to all requests
 const setupInterceptors = (axiosInstance) => {
