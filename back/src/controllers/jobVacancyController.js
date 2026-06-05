@@ -1,7 +1,13 @@
 const mongoose = require('mongoose');
 const JobVacancy = require('../models/jobVacancy');
-const { apiResponse, fullName } = require('../utils/apiResponse');
+const { apiResponse, fullName,publicUrl  } = require('../utils/apiResponse');
 const queryHelper = require('../utils/queryHelper');
+
+const imageFromRequest = (req, fallback = '') => {
+  if (req.file) return `/uploads/${req.file.filename}`;
+  if (req.body.remove_image === 'true') return '';
+  return req.body.image || fallback || '';
+};
 
 const requestData = (req) => ({ ...req.query, ...req.body });
 
@@ -47,10 +53,11 @@ const getJobVacancies = async (req, res) => {
       defaultSort: { createdAt: -1 },
       lean: false
     });
-    const data = jobVacancies.map((job) => ({
-      ...job.toObject ? job.toObject() : job,
-      is_own: String(req.user?._id) === String(job.created_by?.id)
-    }));
+  const data = jobVacancies.map((job) => ({
+  ...job.toObject ? job.toObject() : job,
+  image: publicUrl(req, job.image || ''),
+  is_own: String(req.user?._id) === String(job.created_by?.id)
+}));
     return apiResponse(res, 200, "Job vacancies retrieved successfully", data, pagination);
 
 
@@ -66,9 +73,11 @@ const getJobVacancyById = async (req, res) => {
     if (!jobVacancy) return apiResponse(res, 404, "Job Vacancy not found");
 
     return apiResponse(res, 200, "Job vacancy retrieved successfully", {
-      ...jobVacancy.toObject ? jobVacancy.toObject() : jobVacancy,
-      is_own: String(req.user?._id) === String(jobVacancy.created_by?.id)
-    });
+  ...jobVacancy.toObject ? jobVacancy.toObject() : jobVacancy,
+  image: publicUrl(req, jobVacancy.image || ''),
+  is_own: String(req.user?._id) === String(jobVacancy.created_by?.id)
+});
+
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving vacancy', { error: error.message });
   }
@@ -80,23 +89,31 @@ const postJobVacancy = async (req, res) => {
     const jobVacancyData = extractVacancyData(requestData(req));
 
     if (id) {
-      const jobVacancy = await JobVacancy.findOneAndUpdate(buildIdQuery(id), jobVacancyData, { new: true });
-      if (!jobVacancy) return apiResponse(res, 404, "Job Vacancy not found");
+      const existing = await JobVacancy.findOne(buildIdQuery(id));
+      if (!existing) return apiResponse(res, 404, "Job Vacancy not found");
+      existing.set({ ...jobVacancyData, image: imageFromRequest(req, existing.image) });
+      await existing.save();
       return apiResponse(res, 200, "Job Vacancy updated successfully", {
-        ...jobVacancy.toObject(),
-        is_own: String(req.user?._id) === String(jobVacancy.created_by?.id)
+        ...existing.toObject(),
+        image: publicUrl(req, existing.image || ''),
+        is_own: String(req.user?._id) === String(existing.created_by?.id)
       });
     }
-    const jobVacancy = await JobVacancy.create({ ...jobVacancyData, created_by: createdBy(req) });
+
+    const jobVacancy = await JobVacancy.create({
+      ...jobVacancyData,
+      image: imageFromRequest(req),
+      created_by: createdBy(req)
+    });
     return apiResponse(res, 201, "Job Vacancy created successfully", {
       ...jobVacancy.toObject(),
+      image: publicUrl(req, jobVacancy.image || ''),
       is_own: true
     });
   } catch (error) {
     return apiResponse(res, 500, "Failed to save job vacancy", { error: error.message });
   }
 };
-
 const deleteJobVacancy = async (req, res) => {
   try {
     const { id } = req.params;

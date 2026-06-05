@@ -25,6 +25,9 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
   const [remoteOptions, setRemoteOptions] = useState({})
   const [isOwn, setIsOwn] = useState(false)
 
+  const [imagePreview, setImagePreview] = useState(null)
+  const [removedImages, setRemovedImages] = useState({})
+
   const currentPage = Math.min(Math.max(page || 1, 1), totalPages)
   const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
 
@@ -65,12 +68,17 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
     setFormData(emptyForm)
     loadRemoteOptions(fields)
     setIsModalOpen(true)
+
+    setImagePreview(null)
+    setRemovedImages({})
   }
 
   const openEdit = async (row) => {
     setSelected(row)
     setIsModalOpen(true)
-    
+    setImagePreview(null)
+    setRemovedImages({})
+
     // Set initial values from the row list data immediately
     setFormData(fields.reduce((acc, field) => ({
       ...acc,
@@ -79,7 +87,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
 
     try {
       // Fetch fresh, absolute latest data from the backend by ID
-      const res = await api.get(`${endpoint}/${row.id}`)
+      const res = await api.get(`${endpoint}/${row._id || row.id}`)
       const freshData = res.data?.data || res.data
       if (freshData) {
         setFormData(fields.reduce((acc, field) => ({
@@ -119,8 +127,13 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
         formData[field.name] instanceof FileList ||
         Array.isArray(formData[field.name])
       ))
-      const payload = hasFiles ? new FormData() : formData
 
+      const payload = hasFiles ? new FormData() : { ...formData }
+      if (!hasFiles) {
+        Object.entries(removedImages).forEach(([fieldName, removed]) => {
+          if (removed) payload[`remove_${fieldName}`] = 'true'
+        })
+      }
       if (hasFiles) {
         fields.forEach((field) => {
           const value = formData[field.name]
@@ -131,10 +144,15 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
             payload.append(field.name, value ?? '')
           }
         })
+
+        Object.entries(removedImages).forEach(([fieldName, removed]) => {
+          if (removed) payload.append(`remove_${fieldName}`, 'true')
+        })
       }
 
+
       if (selected) {
-        await api.put(`${endpoint}/${selected.id}`, payload)
+        await api.put(`${endpoint}/${selected._id || selected.id}`, payload)
       } else {
         await api.post(endpoint, payload)
       }
@@ -153,7 +171,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
   const handleDelete = async (row) => {
     if (!window.confirm(`Delete ${getRowTitle?.(row) || row.title || row.name || 'this record'}?`)) return
     try {
-      await api.delete(`${endpoint}/${row.id}`)
+      await api.delete(`${endpoint}/${row._id || row.id}`)
       await fetchRows()
       setSuccess(`${title} deleted successfully`)
       setTimeout(() => setSuccess(''), 3000)
@@ -267,11 +285,10 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                     type="button"
                     disabled={loading || item === currentPage}
                     onClick={() => setPage(item)}
-                    className={`min-w-10 px-3 py-2 rounded-lg border transition-all ${
-                      item === currentPage
-                        ? 'border-primary bg-primary/10 text-primary font-semibold disabled:opacity-100 disabled:cursor-default'
-                        : 'border-border bg-card text-text hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed'
-                    }`}
+                    className={`min-w-10 px-3 py-2 rounded-lg border transition-all ${item === currentPage
+                      ? 'border-primary bg-primary/10 text-primary font-semibold disabled:opacity-100 disabled:cursor-default'
+                      : 'border-border bg-card text-text hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed'
+                      }`}
                   >
                     {item}
                   </button>
@@ -311,20 +328,56 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
                       type="file"
                       accept={field.accept || 'image/*'}
                       multiple={field.multiple}
-                      onChange={(e) => setFormData({ ...formData, [field.name]: field.multiple ? e.target.files : e.target.files?.[0] || '' })}
+                      onChange={(e) => {
+                        const file = field.multiple ? e.target.files : e.target.files?.[0] || ''
+                        setFormData({ ...formData, [field.name]: file })
+                        if (!field.multiple && file) {
+                          setImagePreview((prev) => ({ ...prev, [field.name]: URL.createObjectURL(file) }))
+                          setRemovedImages((prev) => ({ ...prev, [field.name]: false }))
+                        }
+                      }}
                       className="w-full text-sm text-text file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
                       disabled={saving}
                     />
-                    {selected?.[field.name] && !field.multiple && (
-                      <div className="flex flex-col gap-2 mt-2">
-                        <div className="flex items-center gap-2 text-sm text-text-secondary">
-                          <ImageIcon className="h-3.5 w-3.5" />
-                          <span>Current file will be kept unless a new file is selected.</span>
-                        </div>
-                        <a href={assetUrl(selected[field.name])} target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline font-semibold">
-                          View Current {field.label}
-                        </a>
+                    {/* New file preview */}
+                    {imagePreview?.[field.name] && (
+                      <div className="relative w-fit">
+                        <img src={imagePreview[field.name]} alt="Preview" className="h-20 w-28 rounded-lg object-cover border border-border" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImagePreview((prev) => ({ ...prev, [field.name]: null }))
+                            setFormData({ ...formData, [field.name]: '' })
+                          }}
+                          className="absolute -top-1.5 -right-1.5 bg-error-bg border border-error-border text-error-text rounded-full p-0.5"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
                       </div>
+                    )}
+                    {/* Existing image from server */}
+                    {!imagePreview?.[field.name] && selected?.[field.name] && !removedImages[field.name] && !field.multiple && (
+                      <div className="flex items-center gap-3">
+                        <img src={assetUrl(selected[field.name])} alt="Current" className="h-16 w-20 rounded-lg object-cover border border-border" />
+                        <div className="flex flex-col gap-1">
+                          <a href={assetUrl(selected[field.name])} target="_blank" rel="noopener noreferrer" className="text-primary text-xs hover:underline font-semibold">
+                            View Current
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRemovedImages((prev) => ({ ...prev, [field.name]: true }))
+                              setFormData({ ...formData, [field.name]: '' })
+                            }}
+                            className="flex items-center gap-1 text-xs text-error-text hover:underline"
+                          >
+                            <Trash2 className="w-3 h-3" /> Remove
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {removedImages[field.name] && (
+                      <span className="text-xs text-error-text">Image will be removed on save.</span>
                     )}
                   </div>
                 ) : (

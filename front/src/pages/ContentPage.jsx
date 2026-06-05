@@ -178,12 +178,14 @@ const definitions = {
       { name: 'salary', label: 'Salary' },
       { name: 'contact_email', label: 'Contact Email', type: 'email' },
       { name: 'contact_number', label: 'Contact Number' },
-      { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Approved' }, { value: 0, label: 'Inactive' }] }
+      { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Approved' }, { value: 0, label: 'Inactive' }] },
+      { name: 'image', label: 'Image', type: 'file' }
     ],
     columns: [
       { key: 'title', label: 'Title' },
       { key: 'company_name', label: 'Company' },
       { key: 'qualifications', label: 'qualifications' },
+      {key:'image',lable:'Image',type:'image'},
 
       { key: 'contact_number', label: 'Number' },
       { key: 'job_type', label: 'Job Type' },

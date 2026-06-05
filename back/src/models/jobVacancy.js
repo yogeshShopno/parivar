@@ -43,6 +43,10 @@ const jobVacancySchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    image: {
+        type: String,
+        default: ''
+    },
     created_by: {
         id: {
             type: mongoose.Schema.Types.ObjectId,
