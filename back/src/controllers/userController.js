@@ -11,18 +11,6 @@ const requestData = (req) => ({
   ...req.body
 });
 
-const buildMemberId = async () => {
-  const users = await User.find({ member_id: /^\d+$/ }).select('member_id');
-  const highestId = users.reduce((max, user) => {
-    const numericId = Number(user.member_id);
-
-    return Number.isFinite(numericId) && numericId > max ? numericId : max;
-  }, 0);
-  const nextId = highestId > 0 ? highestId + 1 : Date.now();
-
-  return String(nextId);
-};
-
 const sanitizeUser = (user) => {
   if (!user) return user;
 
@@ -61,7 +49,6 @@ const register = async (req, res) => {
     });
 
     const newUser = new User({
-      member_id: await buildMemberId(),
       first_name,
       middle_name,
       last_name,
@@ -81,8 +68,6 @@ const register = async (req, res) => {
       address,
       family_head: familyData.family_head,
       status: familyData.status,
-      created_by_admin_id: owner.created_by_admin_id || '',
-      admin_id: owner.admin_id || '',
    
     });
 
@@ -162,11 +147,11 @@ const getProfile = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
 
-    const { member_id, id, is_committee, search, country_id, state_id, city_id, } = requestData(req);
+    const {  id, is_committee, search, country_id, state_id, city_id, } = requestData(req);
     const birthday = 'birthday' in (req.query || {});
 
-    if (id || member_id) {
-      const query = id ? mongooseQueryForUser(id) : { member_id };
+    if (id ) {
+      const query = id ? mongooseQueryForUser(id) : { _id };
       const user = await User.findOne(query).select('-password');
 
       if (!user) {
@@ -219,17 +204,15 @@ const getUsers = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const data = requestData(req);
-    const id = req.params.id || data.id || data.member_id;
+    const id = req.params.id || data.id ;
 
     if (!id) {
       return res.status(400).json({ message: 'User ID or member ID is required' });
     }
 
     const user = await User.findOne({
-      $or: [
-        { _id: id },
-        { member_id: id }
-      ]
+         _id: id 
+      
     });
 
     if (!user) {
@@ -278,10 +261,10 @@ const updateUser = async (req, res) => {
 
 const mongooseQueryForUser = (id) => {
   if (id.match(/^[0-9a-fA-F]{24}$/)) {
-    return { $or: [{ _id: id }, { member_id: id }] };
+    return { _id: id  };
   }
 
-  return { member_id: id };
+  return { _id: id };
 };
 
 module.exports = {

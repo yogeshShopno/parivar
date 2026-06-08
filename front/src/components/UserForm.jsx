@@ -18,7 +18,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
     committee_role: '',
     role_id: '',
     address: '',
-    password: ''
+    status: 0
   })
   const [errors, setErrors] = useState({})
 
@@ -47,7 +47,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
         committee_role: user.committee_role || '',
         role_id: normalizeRoleId(user.role_id),
         address: user.address || '',
-        password: ''
+        status: user.status || 0
       })
     } else {
       setFormData({
@@ -64,7 +64,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
         committee_role: '',
         role_id: '',
         address: '',
-        password: ''
+        status: 0
       })
     }
   }, [user])
@@ -88,9 +88,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email format is invalid'
     }
-    if (!user && !formData.password?.trim()) {
-      newErrors.password = 'Password is required for new accounts'
-    }
+
     return newErrors
   }
 
@@ -114,7 +112,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-h-[80vh] overflow-y-auto px-1 select-none text-text">
-      
+
       {/* SECTION 1: Personal Name details */}
       <div>
         <h4 className="text-sm font-semibold  tracking-widest text-primary mb-3">Primary Identity</h4>
@@ -176,6 +174,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
             <input
               type="tel"
               value={formData.number}
+              maxLength={10}
               onChange={(e) => setFormData({ ...formData, number: e.target.value })}
               className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
               disabled={isLoading}
@@ -183,26 +182,13 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
             {errors.number && <p className="text-error-text text-sm mt-1 font-semibold">{errors.number}</p>}
           </div>
 
-          <div>
-            <label className="block text-sm  font-semibold text-text-secondary mb-1.5">
-              {user ? 'Reset Password (optional)' : 'Password *'}
-            </label>
-            <input
-              type="password"
-              placeholder={user ? 'Leave blank to keep' : '••••••••'}
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
-              disabled={isLoading}
-            />
-            {errors.password && <p className="text-error-text text-sm mt-1 font-semibold">{errors.password}</p>}
-          </div>
+
         </div>
       </div>
 
       {/* SECTION 3: Bio Metrics & Relation */}
       <div>
-        <h4 className="text-sm font-semibold  tracking-widest text-primary mb-3">Family Metrics</h4>
+        <h4 className="text-sm font-semibold  tracking-widest text-primary mb-3">Family </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Relationship</label>
@@ -244,23 +230,27 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Blood Group</label>
-            <select
-              value={formData.blood_group}
-              onChange={(e) => setFormData({ ...formData, blood_group: e.target.value })}
-              className="w-full bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50 cursor-pointer"
+          
+
+          <div className="" >
+            <label className="block text-sm font-semibold text-text-secondary mb-1.5">Status</label>
+            <div className="flex align-center item-center gap-2">
+            <input
+            className="h-5 w-5 px-3 py-2 self-end"
+              type="checkbox"
+              id="status"
+              name="Approved"
+              checked={formData.status == 1 || formData.status == '1'}
+              onChange={(e) => setFormData({ ...formData, status: e.target.checked ? 1 : 0 })}
               disabled={isLoading}
-            >
-              <option value="" className="bg-surface text-text">Unknown</option>
-              {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
-                <option key={bg} value={bg} className="bg-surface text-text">{bg}</option>
-              ))}
-            </select>
+            /> <span className=''>
+              {formData.status == 1 ? 'Approved' : 'Pending'}
+            </span>
+             </div>
           </div>
         </div>
       </div>
-
+      {/* 
       {canManageRoleFields && (
         <div>
           <h4 className="text-sm font-semibold  tracking-widest text-primary mb-3">Roles & Committee Status</h4>
@@ -311,13 +301,13 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
             )}
           </div>
         </div>
-      )}
+      )} */}
 
       {/* SECTION 5: Address */}
-      <div>
-        <h4 className="text-sm font-semibold  tracking-widest text-primary mb-3">Residential Location</h4>
+      <div >
+        <h4 className="text-sm font-semibold  tracking-widest text-primary mb-3">Address</h4>
         <div>
-          <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Home / Office Address</label>
+          <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Home </label>
           <textarea
             rows="3"
             value={formData.address}
@@ -326,15 +316,16 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
             disabled={isLoading}
           />
         </div>
+
       </div>
 
       {/* SUBMIT BUTTON */}
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full mt-4 bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider  transition-all duration-300 disabled:opacity-50 shadow-glow-primary"
+        className="flex justify-self-end mt-4 bg-primary hover:bg-primary-hover text-white p-3 rounded-xl font-semibold text-sm tracking-wider  transition-all duration-300 disabled:opacity-50 shadow-glow-primary"
       >
-        {isLoading ? 'Processing registry update...' : user ? 'Save Changes' : 'Confirm Registry Entry'}
+        {isLoading ? 'Processing ...' : user ? 'Save Changes' : 'Add Member'}
       </button>
     </form>
   )

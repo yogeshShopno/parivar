@@ -44,17 +44,16 @@ const recoveryKeyFromRequest = (req) => (
 
 const escapeRegExp = (value = '') => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-const adminRecoveryQuery = ({ id, member_id, email, number }) => {
+const adminRecoveryQuery = ({ id,  email, number }) => {
   const query = [];
 
   if (id) {
     if (mongoose.isValidObjectId(id)) {
       query.push({ _id: id });
     }
-    query.push({ member_id: String(id) });
+    query.push({ _id: String(id) });
   }
 
-  if (member_id) query.push({ member_id: String(member_id) });
   if (email) query.push({ email: String(email).toLowerCase() });
   if (number) query.push({ number: String(number) });
 
@@ -123,7 +122,7 @@ const login = async (req, res) => {
     );
 
     const userData = {
-      id: user.member_id || String(user._id),
+      id: user.id || String(user._id),
       name: fullName(user),
       email: user.email,
       role: user.is_committee ? 'admin' : 'user',
@@ -220,7 +219,7 @@ const updateAdminRecovery = async (req, res) => {
     await user.save();
 
     return apiResponse(res, 200, 'Admin updated successfully', {
-      id: user.member_id || String(user._id),
+      id: user.id || String(user._id),
       _id: String(user._id),
       email: user.email || '',
       number: user.number || '',
@@ -304,7 +303,7 @@ const getUsers = async (req, res) => {
     }
     // Map backend user to the fields expected by standard layout or user forms
     const formatted = users.map(u => ({
-      id: u.member_id || String(u._id),
+      id: u.id || String(u._id),
       _id: u._id,
       first_name: u.first_name,
       middle_name: u.middle_name || '',
@@ -377,23 +376,14 @@ const createUser = async (req, res) => {
       return apiResponse(res, 400, 'Committee image must be 1 MB or smaller');
     }
 
-    // Generate unique member_id
-    const users = await User.find({ member_id: /^\d+$/ }).select('member_id');
+
+    const users = await User.find({ _id: /^\d+$/ }).select('_id');
     const highestId = users.reduce((max, u) => {
-      const num = Number(u.member_id);
+      const num = Number(u._id);
       return Number.isFinite(num) && num > max ? num : max;
     }, 0);
-    const nextMemberId = String(highestId > 0 ? highestId + 1 : Date.now());
-
-    const assignedRoleId = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
-    const familyData = await familyUtil.prepareFamilyFields({
-      relation: relation || 'Self',
-      family_head_id: req.body.family_head_id,
-      status
-    });
 
     const newUser = new User({
-      member_id: nextMemberId,
       first_name: first_name,
       middle_name: middle_name || '',
       last_name: last_name || '',
@@ -459,7 +449,6 @@ const updateUser = async (req, res) => {
     const isSelfUpdate = [
       req.user?._id,
       req.user?.id,
-      req.user?.member_id
     ].some((value) => value && String(value) === String(id));
     const isRoleUpdate = [
       'role',
@@ -494,7 +483,7 @@ const updateUser = async (req, res) => {
     } = req.body;
 
 
-    const user = await User.findOne({ member_id: id });
+    const user = await User.findOne({ _id: id });
     if (!user) {
       return apiResponse(res, 404, 'User not found');
     }
@@ -530,7 +519,7 @@ const updateUser = async (req, res) => {
 
     await user.save();
 
-    return apiResponse(res, 200, 'User updated deleteUser ', {
+    return apiResponse(res, 200, 'User updated  ', {
       id: user._id,
       first_name: user.first_name,
       middle_name: user.middle_name || '',
@@ -558,7 +547,7 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await User.deleteOne({ member_id: id });
+    const result = await User.deleteOne({_id: id });
     if (result.deletedCount === 0) {
       return apiResponse(res, 404, 'User not found');
     }

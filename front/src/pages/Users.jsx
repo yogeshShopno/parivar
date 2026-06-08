@@ -191,9 +191,9 @@ export default function Users() {
           </button>
           <button
             onClick={handleCreate}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover hover:shadow-glow-primary text-text px-4 py-2.5 rounded-xl text-sm font-semibold tracking-wide transition-all duration-300"
+            className="flex text-white items-center gap-2 bg-primary hover:bg-primary-hover hover:shadow-glow-primary text-text px-4 py-2.5 rounded-xl text-sm font-semibold tracking-wide transition-all duration-300"
           >
-            <Plus className="w-4 h-4" /> Add Member
+            <Plus className="w-4 h-4 text-white font-semibold text-text tracking-tight" /> Add Member
           </button>
         </div>
       </div>
@@ -293,10 +293,9 @@ export default function Users() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-semibold  tracking-wider">
-                    <th className="p-4">Member ID</th>
                     <th className="p-4">Name</th>
                     <th className="p-4">Contact Info</th>
-                    <th className="p-4">Bio Metrics</th>
+                    <th className="p-4">Status</th>
                     <th className="p-4">Status &amp; Role</th>
                     <th className="p-4 text-right">Actions</th>
                   </tr>
@@ -307,7 +306,6 @@ export default function Users() {
 
                     return (
                     <tr key={user.id} className="hover:bg-surface-secondary text-sm text-text-secondary transition-colors">
-                      <td className="p-4 font-mono font-semibold text-primary">{user.id}</td>
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center font-semibold text-primary border border-primary/20 ">
@@ -326,13 +324,12 @@ export default function Users() {
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
-                          <span className="text-text-secondary">{user.gender || '-'}</span>
-                          {user.blood_group && (
-                            <>
-                              <span className="w-1.5 h-1.5 rounded-full bg-error"></span>
-                              <span className="font-semibold text-error-text">{user.blood_group}</span>
-                            </>
-                          )}
+
+                    <span className={`inline-flex px-2.5 py-1 rounded-lg border text-sm font-semibold ${Number(user.status ?? 1) === 1 ? 'bg-success-bg border-success-border text-success-text' : 'bg-surface-secondary border-border text-text-secondary'}`}>
+                      {Number(user.status ?? 1) === 1 ? 'Active' : 'Inactive'}
+                    </span>
+                  
+                      
                         </div>
                       </td>
                       <td className="p-4">
