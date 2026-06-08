@@ -34,7 +34,6 @@ const memberRow = (req, member, maps = {}) => {
 
   return {
     id,
-    family_code: member.family_code || member.member_id || id,
     number: member.number || '',
     district_id: member.district_id || '',
     taluka_id: member.taluka_id || '',
@@ -56,23 +55,12 @@ const memberRow = (req, member, maps = {}) => {
 const getMembers = async (req, res) => {
   try {
     const query = {
-      $and: [
-       
-        {
-          $or: [
-            { parent_id: null },
-            { parent_id: '' },
-            { parent_member_id: null },
-            { parent_member_id: '' },
-            { relation: 'Self' }
-          ]
-        }
-      ]
+      relation: 'Self'
     };
 
     const { data: members, pagination } = await queryHelper(User, req.query, {
       baseQuery: query,
-      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email', 'family_code', 'address'],
+      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email',  'address'],
       filterFields: ['country_id', 'state_id', 'city_id', 'district_id', 'taluka_id', 'village_id'],
       select: '-password'
     });
@@ -103,16 +91,15 @@ const getFamilyMembers = async (req, res) => {
       return apiResponse(res, 401, 'Invalid member');
     }
 
+    const familyHeadId = parent.family_head?.id || parent._id;
+    if (!familyHeadId) {
+      return apiResponse(res, 401, 'Family head not found');
+    }
+
     const { data: family, pagination } = await queryHelper(User, req.query, {
       baseQuery: {
-        $and: [
-          {
-            $or: [
-              { parent_id: String(member_id) },
-              { parent_member_id: String(member_id) }
-            ]
-          }
-        ]
+        'family_head.id': String(familyHeadId),
+        _id: { $ne: parent._id }
       },
       searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email', 'relation'],
       filterFields: ['relation', 'gender', 'blood_group', 'status'],
@@ -123,7 +110,7 @@ const getFamilyMembers = async (req, res) => {
     return apiResponse(res, 200, 'Family Memeber Data fetch successful', family.map((member) => {
       const merged = {
         ...member,
-        family_code: parent.family_code || parent.member_id,
+  
         district_id: parent.district_id || '',
         taluka_id: parent.taluka_id || '',
         city_id: parent.city_id || '',

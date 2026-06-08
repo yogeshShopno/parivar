@@ -388,7 +388,6 @@ const createUser = async (req, res) => {
     const assignedRoleId = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
     const familyData = await familyUtil.prepareFamilyFields({
       relation: relation || 'Self',
-      parent_member_id: req.body.parent_member_id,
       family_head_id: req.body.family_head_id,
       status
     });
@@ -412,10 +411,7 @@ const createUser = async (req, res) => {
       designation: designation || '',
       status: familyData.status,
       family_head: familyData.family_head,
-      family_code: familyData.family_code,
-      parent_member_id: familyData.parent_member_id,
       image: imageFromRequest(req),
-
     });
 
     await newUser.save();
@@ -425,7 +421,6 @@ const createUser = async (req, res) => {
         id: newUser._id,
         name: familyUtil.fullName(newUser)
       };
-      newUser.family_code = newUser.member_id;
       if (status === undefined) {
         newUser.status = 0;
       }
@@ -506,7 +501,6 @@ const updateUser = async (req, res) => {
 
     const familyData = await familyUtil.prepareFamilyFields({
       relation,
-      parent_member_id: req.body.parent_member_id,
       family_head_id: req.body.family_head_id,
       status
     }, user);
@@ -530,9 +524,7 @@ const updateUser = async (req, res) => {
     if (address !== undefined) user.address = address;
     if (designation !== undefined) user.designation = designation;
     if (status !== undefined) user.status = Number(status);
-    user.parent_member_id = familyData.parent_member_id;
     user.family_head = familyData.family_head;
-    user.family_code = familyData.family_code;
     if (password) user.password = password;
     if (req.file || req.body.image) user.image = imageFromRequest(req, user.image);
 

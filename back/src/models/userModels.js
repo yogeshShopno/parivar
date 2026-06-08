@@ -110,10 +110,7 @@ const userSchema = new mongoose.Schema({
     default: null,
     index: true
   },
-  family_code: {
-    type: String,
-    default: ''
-  },
+
   district_id: {
     type: String,
     default: ''

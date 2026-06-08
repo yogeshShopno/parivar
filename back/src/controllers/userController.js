@@ -37,7 +37,7 @@ const register = async (req, res) => {
 
   try {
     const {
-      member_id, parent_member_id, first_name, middle_name, last_name, email, password,
+      first_name, middle_name, last_name, email, password,
       number, gender, dob, blood_group, relation, is_committee, committee_role,
       profile_image, country_id, state_id, city_id, address
     } = req.body;
@@ -56,14 +56,12 @@ const register = async (req, res) => {
     const owner = req.user ? req.user : {};
     const familyData = await prepareFamilyFields({
       relation,
-      parent_member_id,
       family_head_id: req.body.family_head_id,
       status: req.body.status
     });
 
     const newUser = new User({
-      member_id: member_id || await buildMemberId(),
-      parent_member_id: familyData.parent_member_id,
+      member_id: await buildMemberId(),
       first_name,
       middle_name,
       last_name,
@@ -82,7 +80,6 @@ const register = async (req, res) => {
       city_id,
       address,
       family_head: familyData.family_head,
-      family_code: familyData.family_code,
       status: familyData.status,
       created_by_admin_id: owner.created_by_admin_id || '',
       admin_id: owner.admin_id || '',
@@ -96,7 +93,6 @@ const register = async (req, res) => {
         id: newUser._id,
         name: fullName(newUser)
       };
-      newUser.family_code = newUser.member_id;
 
       if (req.body.status === undefined) {
         newUser.status = 0;
@@ -166,7 +162,7 @@ const getProfile = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
 
-    const { member_id, id, parent_member_id, is_committee, search, country_id, state_id, city_id, } = requestData(req);
+    const { member_id, id, is_committee, search, country_id, state_id, city_id, } = requestData(req);
     const birthday = 'birthday' in (req.query || {});
 
     if (id || member_id) {
@@ -195,7 +191,6 @@ const getUsers = async (req, res) => {
 
     const query = {};
 
-    if (parent_member_id !== undefined) query.parent_member_id = parent_member_id;
     if (is_committee !== undefined) query.is_committee = is_committee === true || is_committee === 'true' || is_committee === '1';
     if (country_id) query.country_id = country_id;
     if (state_id) query.state_id = state_id;
@@ -203,7 +198,7 @@ const getUsers = async (req, res) => {
     const { data: users, pagination } = await queryHelper(User, requestData(req), {
       baseQuery: query,
       searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email'],
-      filterFields: ['parent_member_id', 'is_committee', 'country_id', 'state_id', 'city_id', 'gender', 'blood_group', 'relation', 'status'],
+      filterFields: ['is_committee', 'country_id', 'state_id', 'city_id', 'gender', 'blood_group', 'relation', 'status'],
       select: '-password',
       defaultSort: { createdAt: -1 },
       lean: false
@@ -243,7 +238,6 @@ const updateUser = async (req, res) => {
 
     const familyData = await prepareFamilyFields({
       relation: data.relation,
-      parent_member_id: data.parent_member_id,
       family_head_id: data.family_head_id,
       status: data.status
     }, user);
@@ -260,9 +254,7 @@ const updateUser = async (req, res) => {
       }
     });
 
-    user.parent_member_id = familyData.parent_member_id;
     user.family_head = familyData.family_head;
-    user.family_code = familyData.family_code;
     user.status = familyData.status;
 
     if (data.email !== undefined) {
