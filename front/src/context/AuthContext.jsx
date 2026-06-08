@@ -14,13 +14,27 @@ const storeWebTheme = (themeData) => {
     'gradientStart',
     'primaryColor',
     'secondaryColor',
-    'textColor'
+    'textColor',
+    'name',
+    'webLogo',
+    'favicon',
+    'phone',
+    'email',
+    'facebook',
+    'instagram',
+    'twitter',
+    'youtube',
+    'whatsapp'
   ]
 
   themeKeys.forEach((key) => {
     const value = themeData[key]
-    if (typeof value === 'string' || typeof value === 'number') {
-      localStorage.setItem(`web_${key}`, value)
+    const storageKey = `web_${key}`
+
+    if (value === undefined || value === null || value === '') {
+      localStorage.removeItem(storageKey)
+    } else {
+      localStorage.setItem(storageKey, value)
     }
   })
 }
@@ -49,6 +63,7 @@ const fetchWebTheme = async () => {
 
     if (themeData) {
       storeWebTheme(themeData)
+      window.dispatchEvent(new Event('web-theme-updated'))
     }
   } catch (err) {
     console.error('Failed to fetch web theme:', err.message)

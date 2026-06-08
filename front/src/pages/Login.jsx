@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Shield, Eye, EyeOff, Key } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext'
@@ -12,6 +12,25 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [webTheme, setWebTheme] = useState({ webLogo: '', name: '' })
+
+  useEffect(() => {
+    const loadWebTheme = () => {
+      setWebTheme({
+        webLogo: localStorage.getItem('web_webLogo') || '',
+        name: localStorage.getItem('web_name') || ''
+      })
+    }
+
+    loadWebTheme()
+    window.addEventListener('storage', loadWebTheme)
+    window.addEventListener('web-theme-updated', loadWebTheme)
+
+    return () => {
+      window.removeEventListener('storage', loadWebTheme)
+      window.removeEventListener('web-theme-updated', loadWebTheme)
+    }
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -47,11 +66,19 @@ export default function Login() {
         
         {/* Glowing Head Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-glow-primary mb-3.5 animate-pulse-slow">
-            <Shield className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-glow-primary mb-3.5 animate-pulse-slow overflow-hidden">
+            {webTheme.webLogo ? (
+              <img
+                src={webTheme.webLogo}
+                alt={`${webTheme.name || 'Brand'} logo`}
+                className="h-full w-full object-contain"
+              />
+            ) : (
+              <Shield className="w-6 h-6 text-white" />
+            )}
           </div>
           <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
-            Parivar
+            {webTheme.name || 'Parivar'}
           </h1>
         </div>
 

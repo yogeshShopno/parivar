@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { Shield } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext'
@@ -39,22 +39,43 @@ const SectionLabel = ({ children }) => (
 
 export default function Sidebar() {
   const { user } = useContext(AuthContext)
+  const [webTheme, setWebTheme] = useState({ webLogo: '', name: '' })
   const roleLabel = user ? getUserRoleLabel(user) : ''
   const visibleCoreNavigation = coreNavigation.filter((item) => hasPermission(user, item.permission))
+
+  useEffect(() => {
+    const loadWebTheme = () => {
+      setWebTheme({
+        webLogo: localStorage.getItem('web_webLogo') || '',
+        name: localStorage.getItem('web_name') || ''
+      })
+    }
+
+    loadWebTheme()
+    window.addEventListener('storage', loadWebTheme)
+    window.addEventListener('web-theme-updated', loadWebTheme)
+    return () => {
+      window.removeEventListener('storage', loadWebTheme)
+      window.removeEventListener('web-theme-updated', loadWebTheme)
+    }
+  }, [])
   const visibleMasterNavigation = masterNavigation.filter((item) => hasPermission(user, item.permission))
   const visibleConfigurationNavigation = configurationNavigation.filter((item) => hasPermission(user, item.permission))
 
   return (
     <aside className="fixed left-0 top-0 z-30 flex h-screen w-64 flex-col border-r border-border bg-surface p-5 shadow-glass-md backdrop-blur-xl">
       <div className="mb-6 flex shrink-0 items-center gap-3 px-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white shadow-glow-primary">
-          <Shield className="h-5 w-5" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-white shadow-glow-primary overflow-hidden">
+          {webTheme.webLogo ? (
+            <img src={webTheme.webLogo} alt={`${webTheme.name || 'Brand'} logo`} className="h-full w-full object-contain" />
+          ) : (
+            <Shield className="h-5 w-5" />
+          )}
         </div>
         <div className="min-w-0">
           <h2 className="font-semibold text-base tracking-wide bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
-            Parivar Admin
+            {webTheme.name ? `${webTheme.name} Admin` : 'Parivar Admin'}
           </h2>
-         
         </div>
       </div>
 

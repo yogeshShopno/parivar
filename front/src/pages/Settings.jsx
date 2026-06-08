@@ -44,14 +44,28 @@ const WEB_THEME_KEYS = [
   'gradientStart',
   'primaryColor',
   'secondaryColor',
-  'textColor'
+  'textColor',
+  'name',
+  'webLogo',
+  'favicon',
+  'phone',
+  'email',
+  'facebook',
+  'twitter',
+  'instagram',
+  'youtube',
+  'whatsapp'
 ]
 
 const persistWebThemeToLocalStorage = (theme) => {
   WEB_THEME_KEYS.forEach((key) => {
     const value = theme[key]
-    if (value !== undefined && value !== null) {
-      localStorage.setItem(`web_${key}`, value)
+    const storageKey = `web_${key}`
+
+    if (value === undefined || value === null || value === '') {
+      localStorage.removeItem(storageKey)
+    } else {
+      localStorage.setItem(storageKey, value)
     }
   })
 }
