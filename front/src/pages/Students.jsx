@@ -19,6 +19,11 @@ export default function Students() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [search, setSearchValue] = useState('')
 
+
+  const [existingStudentImage, setExistingStudentImage] = useState('')
+  const [existingResultImage, setExistingResultImage] = useState('')
+  const [imageData, setImageData] = useState({ student_image: null, result_image: null, remove_student_image: false, remove_result_image: false })
+
   const currentPage = Math.min(Math.max(page || 1, 1), totalPages)
   const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
 
@@ -61,31 +66,50 @@ export default function Students() {
     }
   }
 
-  const handleEdit = (student) => {
-    setSelectedStudent(student)
+  const handleCreate = () => {
+    setSelectedStudent(null)
+    setExistingStudentImage('')
+    setExistingResultImage('')
+    setImageData({ student_image: null, result_image: null, remove_student_image: false, remove_result_image: false })
     setIsModalOpen(true)
   }
 
-  const handleCreate = () => {
-    setSelectedStudent(null)
+  const handleEdit = (student) => {
+    setSelectedStudent(student)
+    setExistingStudentImage(student.student_image || '')
+    setExistingResultImage(student.result_image || '')
+    setImageData({ student_image: null, result_image: null, remove_student_image: false, remove_result_image: false })
     setIsModalOpen(true)
   }
 
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setSelectedStudent(null)
+    setExistingStudentImage('')
+    setExistingResultImage('')
+    setImageData({ student_image: null, result_image: null, remove_student_image: false, remove_result_image: false })
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setFormLoading(true)
     setError('')
-    const formData = new FormData(e.target)
+    const fields = new FormData(e.target)
+    const payload = new FormData()
+      ;['surname', 'student_name', 'father_name', 'school_name', 'standard', 'percentage', 'mobile_number', 'year', 'status'].forEach(k => payload.append(k, fields.get(k) ?? ''))
+
+    const hasStudentImg = imageData.student_image instanceof FileList ? imageData.student_image.length > 0 : imageData.student_image instanceof File
+    const hasResultImg = imageData.result_image instanceof FileList ? imageData.result_image.length > 0 : imageData.result_image instanceof File
+    if (hasStudentImg) payload.append('student_image', imageData.student_image instanceof FileList ? imageData.student_image[0] : imageData.student_image)
+    if (imageData.remove_student_image) payload.append('remove_student_image', 'true')
+    if (hasResultImg) payload.append('result_image', imageData.result_image instanceof FileList ? imageData.result_image[0] : imageData.result_image)
+    if (imageData.remove_result_image) payload.append('remove_result_image', 'true')
+
     try {
       if (selectedStudent) {
-        await api.put(`/students/${selectedStudent.id}`, formData)
+        await api.put(`/students/${selectedStudent.id}`, payload)
       } else {
-        await api.post('/students', formData)
+        await api.post('/students', payload)
       }
       await fetchStudents()
       setSuccess(`Student ${selectedStudent ? 'updated' : 'created'} successfully`)
@@ -222,6 +246,7 @@ export default function Students() {
                     <td className="p-4 font-mono text-text-secondary text-xs">
                       {student.mobile_number}
                     </td>
+                    
                     <td className="p-4">
                       <span className={`inline-flex px-2.5 py-1 rounded-lg border text-xs font-semibold ${Number(student.status) === 1
                         ? 'bg-success-bg border-success-border text-success-text'
@@ -231,7 +256,7 @@ export default function Students() {
                       </span>
                     </td>
                     <td className="p-4">
-                
+
                       <span className="ml-2 text-text-secondary text-xs">{student.year}</span>
                     </td>
                     <td className="p-4 text-right">
@@ -378,35 +403,56 @@ export default function Students() {
                 maxLength={4}
                 required
                 placeholder="2026"
-                defaultValue={selectedStudent?.Year || ''}
+                defaultValue={selectedStudent?.year || ''}
                 className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
               />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm text-text-secondary mb-1.5 block">Result Image</label>
-              <input
-                type="file"
-                name="result_image"
-                accept="image/*"
-                className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
-              />
-              {selectedStudent?.result_image && (
-                <p className="text-sm text-text-secondary mt-2">Current result image exists</p>
-              )}
+            {/* Student Image */}
+            <div className="flex flex-col bg-input-bg border border-border rounded-xl p-3">
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Student Image</label>
+              {(imageData.student_image instanceof File || (imageData.student_image instanceof FileList && imageData.student_image.length > 0)) ? (
+                <div className="relative w-20 h-20 mb-2">
+                  <img src={URL.createObjectURL(imageData.student_image instanceof FileList ? imageData.student_image[0] : imageData.student_image)}
+                    alt="preview" className="w-20 h-20 rounded-lg object-cover border border-border" />
+                  <button type="button" onClick={() => setImageData({ ...imageData, student_image: null, remove_student_image: false })}
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold" disabled={formLoading}>×</button>
+                </div>
+              ) : existingStudentImage && !imageData.remove_student_image ? (
+                <div className="relative w-20 h-20 mb-2">
+                  <img src={assetUrl(existingStudentImage)} alt="current" className="w-20 h-20 rounded-lg object-cover border border-border" />
+                  <button type="button" onClick={() => setImageData({ ...imageData, remove_student_image: true })}
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold" disabled={formLoading}>×</button>
+                </div>
+              ) : null}
+              <input type="file" accept="image/*"
+                onChange={(e) => setImageData({ ...imageData, student_image: e.target.files, remove_student_image: false })}
+                className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
+                disabled={formLoading} />
             </div>
-            <div>
-              <label className="text-sm text-text-secondary mb-1.5 block">Student Image</label>
-              <input
-                type="file"
-                name="student_image"
-                accept="image/*"
-                className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
-              />
-              {selectedStudent?.student_image && (
-                <p className="text-sm text-text-secondary mt-2">Current student image exists</p>
-              )}
+
+            {/* Result Image */}
+            <div className="flex flex-col bg-input-bg border border-border rounded-xl p-3">
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Result Image</label>
+              {(imageData.result_image instanceof File || (imageData.result_image instanceof FileList && imageData.result_image.length > 0)) ? (
+                <div className="relative w-20 h-20 mb-2">
+                  <img src={URL.createObjectURL(imageData.result_image instanceof FileList ? imageData.result_image[0] : imageData.result_image)}
+                    alt="preview" className="w-20 h-20 rounded-lg object-cover border border-border" />
+                  <button type="button" onClick={() => setImageData({ ...imageData, result_image: null, remove_result_image: false })}
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold" disabled={formLoading}>×</button>
+                </div>
+              ) : existingResultImage && !imageData.remove_result_image ? (
+                <div className="relative w-20 h-20 mb-2">
+                  <img src={assetUrl(existingResultImage)} alt="current" className="w-20 h-20 rounded-lg object-cover border border-border" />
+                  <button type="button" onClick={() => setImageData({ ...imageData, remove_result_image: true })}
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold" disabled={formLoading}>×</button>
+                </div>
+              ) : null}
+              <input type="file" accept="image/*"
+                onChange={(e) => setImageData({ ...imageData, result_image: e.target.files, remove_result_image: false })}
+                className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
+                disabled={formLoading} />
             </div>
           </div>
           <div>
