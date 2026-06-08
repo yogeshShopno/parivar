@@ -45,7 +45,7 @@ export default function CommitteeMemberForm({ member, onSubmit, isLoading }) {
   const canManageRoleFields = loggedInUser?.role === 'admin'
 
   const validateImage = (file) => new Promise((resolve) => {
-    if (!file) return resolve('')
+  if (!file || !(file instanceof File)) return resolve('')
     if (file.size > 1024 * 1024) return resolve('Image must be 1 MB or smaller')
 
     const image = new Image()

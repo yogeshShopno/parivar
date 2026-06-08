@@ -33,31 +33,30 @@ const toMailHref = (value) => {
   const markdownMail = String(value || '').match(/\]\(mailto:([^)]+)\)/i)
   return markdownMail?.[1] ? `mailto:${markdownMail[1]}` : text ? `mailto:${text}` : ''
 }
-
 const DetailCard = ({ icon: Icon, label, value }) => (
-  <div className="min-w-0 overflow-hidden rounded-lg border border-[#E5E5E5] bg-[#FFFFFF] p-4 shadow-sm">
+  <div className="min-w-0 overflow-hidden rounded-lg border border-border bg-card p-4 shadow-glass-sm">
     <div className="flex items-start gap-3">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#E5E5E5] bg-[#F9F9F9] text-[#000000]">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-primary">
         <Icon className="h-4 w-4" aria-hidden="true" />
       </div>
       <div className="min-w-0">
-        <p className="text-sm font-semibold  text-[#9CA3AF]">{label}</p>
-        <p className="mt-1 break-words text-sm font-medium leading-6 text-[#000000] [overflow-wrap:anywhere]">{normalizeValue(value)}</p>
+        <p className="text-sm font-semibold text-text-secondary">{label}</p>
+        <p className="mt-1 break-words text-sm font-medium leading-6 text-text [overflow-wrap:anywhere]">{normalizeValue(value)}</p>
       </div>
     </div>
   </div>
 )
 
 const Section = ({ title, children }) => (
-  <section className="min-w-0 overflow-hidden rounded-lg border border-[#E5E5E5] bg-[#FFFFFF] p-5 shadow-sm sm:p-6">
-    <h2 className="text-base font-semibold text-[#000000] sm:text-lg">{title}</h2>
+  <section className="min-w-0 overflow-hidden rounded-lg border border-border bg-card p-5 shadow-glass-sm sm:p-6">
+    <h2 className="text-base font-semibold text-text sm:text-lg">{title}</h2>
     <div className="mt-4 min-w-0">{children}</div>
   </section>
 )
 
+
 const SocialButton = ({ href, icon: Icon, label }) => {
   if (!href) return null
-
   return (
     <a
       href={href}
@@ -65,7 +64,7 @@ const SocialButton = ({ href, icon: Icon, label }) => {
       rel="noopener noreferrer"
       aria-label={label}
       title={label}
-      className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#000000] bg-[#FFFFFF] text-[#000000] transition-colors hover:bg-[#F9F9F9] focus:outline-none focus:ring-2 focus:ring-[#000000] focus:ring-offset-2"
+      className="flex h-11 w-11 items-center justify-center rounded-lg border border-border bg-card text-primary transition-colors hover:bg-surface focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
     >
       <Icon className="h-4 w-4" aria-hidden="true" />
     </a>

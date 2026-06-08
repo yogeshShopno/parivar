@@ -72,7 +72,7 @@ const addStudent = async (req, res) => {
     }
 
     const studentData = {
-      id,
+      
       surname,
       student_name,
       father_name,
