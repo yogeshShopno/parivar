@@ -7,6 +7,7 @@ const Student = require('../models/studentModel');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
+const familyUtil = require('../utils/familyHelper');
 const { getRolePermissions } = require('../middleware/auth');
 const queryHelper = require('../utils/queryHelper');
 
@@ -385,7 +386,12 @@ const createUser = async (req, res) => {
     const nextMemberId = String(highestId > 0 ? highestId + 1 : Date.now());
 
     const assignedRoleId = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
-
+    const familyData = await familyUtil.prepareFamilyFields({
+      relation: relation || 'Self',
+      parent_member_id: req.body.parent_member_id,
+      family_head_id: req.body.family_head_id,
+      status
+    });
 
     const newUser = new User({
       member_id: nextMemberId,
@@ -398,18 +404,33 @@ const createUser = async (req, res) => {
       gender: gender || '',
       dob: dob || null,
       blood_group: blood_group || '',
-      relation: relation || 'Self',
+      relation: familyData.relation,
       is_committee: is_committee === true || is_committee === 'true',
       committee_role: committee_role || '',
       role_id: assignedRoleId,
       address: address || '',
       designation: designation || '',
-      status: status === undefined ? 1 : Number(status),
+      status: familyData.status,
+      family_head: familyData.family_head,
+      family_code: familyData.family_code,
+      parent_member_id: familyData.parent_member_id,
       image: imageFromRequest(req),
 
     });
 
     await newUser.save();
+
+    if (familyData.relation === 'Self') {
+      newUser.family_head = {
+        id: newUser._id,
+        name: familyUtil.fullName(newUser)
+      };
+      newUser.family_code = newUser.member_id;
+      if (status === undefined) {
+        newUser.status = 0;
+      }
+      await newUser.save();
+    }
 
     return apiResponse(res, 201, 'User created successfully', {
       _id: newUser._id,
@@ -483,6 +504,13 @@ const updateUser = async (req, res) => {
       return apiResponse(res, 404, 'User not found');
     }
 
+    const familyData = await familyUtil.prepareFamilyFields({
+      relation,
+      parent_member_id: req.body.parent_member_id,
+      family_head_id: req.body.family_head_id,
+      status
+    }, user);
+
     if ((is_committee === true || is_committee === 'true' || user.is_committee) && req.file?.size > 1024 * 1024) {
       return apiResponse(res, 400, 'Committee image must be 1 MB or smaller');
     }
@@ -495,13 +523,16 @@ const updateUser = async (req, res) => {
     if (gender !== undefined) user.gender = gender;
     if (dob !== undefined) user.dob = dob;
     if (blood_group !== undefined) user.blood_group = blood_group;
-    if (relation !== undefined) user.relation = relation;
+    if (relation !== undefined) user.relation = familyData.relation;
     if (is_committee !== undefined) user.is_committee = is_committee === true || is_committee === 'true';
     if (committee_role !== undefined) user.committee_role = committee_role;
     if (role_id !== undefined) user.role_id = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
     if (address !== undefined) user.address = address;
     if (designation !== undefined) user.designation = designation;
     if (status !== undefined) user.status = Number(status);
+    user.parent_member_id = familyData.parent_member_id;
+    user.family_head = familyData.family_head;
+    user.family_code = familyData.family_code;
     if (password) user.password = password;
     if (req.file || req.body.image) user.image = imageFromRequest(req, user.image);
 

@@ -1,6 +1,7 @@
 const User = require('../models/userModels');
 const jwt = require('jsonwebtoken');
 const queryHelper = require('../utils/queryHelper');
+const { prepareFamilyFields, fullName } = require('../utils/familyHelper');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfamilykey';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '365d';
@@ -53,9 +54,16 @@ const register = async (req, res) => {
     }
 
     const owner = req.user ? req.user : {};
+    const familyData = await prepareFamilyFields({
+      relation,
+      parent_member_id,
+      family_head_id: req.body.family_head_id,
+      status: req.body.status
+    });
+
     const newUser = new User({
       member_id: member_id || await buildMemberId(),
-      parent_member_id,
+      parent_member_id: familyData.parent_member_id,
       first_name,
       middle_name,
       last_name,
@@ -65,7 +73,7 @@ const register = async (req, res) => {
       gender,
       dob,
       blood_group,
-      relation,
+      relation: familyData.relation,
       is_committee,
       committee_role,
       profile_image,
@@ -73,16 +81,29 @@ const register = async (req, res) => {
       state_id,
       city_id,
       address,
+      family_head: familyData.family_head,
+      family_code: familyData.family_code,
+      status: familyData.status,
       created_by_admin_id: owner.created_by_admin_id || '',
       admin_id: owner.admin_id || '',
-      tenant_id: owner.tenant_id || '',
-      created_by_user_id: owner.created_by_user_id || '',
-      created_by_member_id: owner.created_by_member_id || '',
-      created_by_name: owner.created_by_name || '',
-      created_by_role: owner.created_by_role || ''
+   
     });
 
     await newUser.save();
+
+    if (familyData.relation === 'Self') {
+      newUser.family_head = {
+        id: newUser._id,
+        name: fullName(newUser)
+      };
+      newUser.family_code = newUser.member_id;
+
+      if (req.body.status === undefined) {
+        newUser.status = 0;
+      }
+
+      await newUser.save();
+    }
 
     res.status(201).json({
       message: 'User registered successfully',
@@ -220,8 +241,15 @@ const updateUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    const familyData = await prepareFamilyFields({
+      relation: data.relation,
+      parent_member_id: data.parent_member_id,
+      family_head_id: data.family_head_id,
+      status: data.status
+    }, user);
+
     const fields = [
-      'parent_member_id', 'first_name', 'middle_name', 'last_name', 'number',
+      'first_name', 'middle_name', 'last_name', 'number',
       'gender', 'dob', 'blood_group', 'relation', 'is_committee', 'committee_role',
       'profile_image', 'country_id', 'state_id', 'city_id', 'address'
     ];
@@ -231,6 +259,11 @@ const updateUser = async (req, res) => {
         user[field] = data[field];
       }
     });
+
+    user.parent_member_id = familyData.parent_member_id;
+    user.family_head = familyData.family_head;
+    user.family_code = familyData.family_code;
+    user.status = familyData.status;
 
     if (data.email !== undefined) {
       user.email = data.email ? data.email.toLowerCase() : '';

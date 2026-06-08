@@ -53,11 +53,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  relation: {
-    type: String,
-    default: 'Self', // 'Self', 'Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Brother', 'Sister', etc.
-    trim: true
-  },
+
   is_committee: {
     type: Boolean,
     default: false,
@@ -95,6 +91,20 @@ const userSchema = new mongoose.Schema({
     default: '',
     trim: true
   },
+   family_head: {
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      index: true
+    },
+    name: { type: String, default: '' }
+  },
+    relation: {
+    type: String,
+    default: 'Self', // 'Self', 'Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Brother', 'Sister', etc.
+    trim: true
+  },
+
   parent_id: {
     type: String,
     default: null,
@@ -119,7 +129,14 @@ const userSchema = new mongoose.Schema({
   image: {
     type: String,
     default: ''
+  },
+  status:{
+    type: Number,
+    default: 0,
+    index: true
   }
+ 
+  
 }, {
   timestamps: true,
   strict: false
