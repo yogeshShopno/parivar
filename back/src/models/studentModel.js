@@ -42,18 +42,20 @@ const studentSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  mobile_number_2: {
+  year: {
     type: String,
     default: '',
-    trim: true
   },
   result_image: {
     type: String,
-    default: ''
+    default: '',
+    required: true
   },
   student_image: {
     type: String,
-    default: ''
+    default: '',
+    required: true
+
   },
   status: {
     type: Number,
