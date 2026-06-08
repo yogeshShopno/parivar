@@ -2,52 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { Award, GraduationCap, Medal, Star, Trophy } from 'lucide-react'
 import { memberApi } from '../../lib/api'
 
-const defaultTheme = {
-  gradientStart: '#2E7D32',
-  gradientEnd: '#0D3B12',
-  primaryColor: '#1B5E20',
-  secondaryColor: '#66BB6A',
-  textColor: '#123524',
-  backgroundColor: '#F5FFF7',
-  borderColor: '#D7EFD9',
-  buttonColor: '#1B5E20',
-  fontColor: '#FFFFFF',
-}
-
-const fallbackStudents = [
-  {
-    name: 'Riya Patel',
-    rank: '1st Rank',
-    standard: 'Class 12 Science',
-    score: '98.80%',
-    achievement: 'District Topper',
-    image: '/1.png',
-  },
-  {
-    name: 'Dev Shah',
-    rank: '2nd Rank',
-    standard: 'Class 10',
-    score: '97.60%',
-    achievement: 'School Topper',
-    image: '/2.png',
-  },
-  {
-    name: 'Krisha Mehta',
-    rank: '3rd Rank',
-    standard: 'Class 12 Commerce',
-    score: '96.40%',
-    achievement: 'Merit Scholar',
-    image: '/3.png',
-  },
-  {
-    name: 'Aarav Desai',
-    rank: '4th Rank',
-    standard: 'Class 8',
-    score: '95.20%',
-    achievement: 'Academic Excellence',
-    image: '/4.png',
-  },
-]
 
 const rankLabel = (index) => {
   const rank = index + 1
@@ -68,7 +22,7 @@ const normalizeStudent = (student, index) => ({
   standard: student.standard || 'Standard',
   score: student.percentage ? `${String(student.percentage).replace('%', '')}%` : '0%',
   achievement: student.school_name || 'Academic Achievement',
-  image: student.result_image || `/${(index % 4) + 1}.png`,
+  image: student.student_image || "/image.png"
 })
 
 const getStoredWebTheme = () => {
@@ -103,13 +57,13 @@ const shadeColor = (color, percent) => {
 }
 
 export default function TopStudents() {
-  const [theme, setTheme] = useState(defaultTheme)
+  const [theme, setTheme] = useState(getStoredWebTheme())
   const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadTheme = () => {
-      setTheme({ ...defaultTheme, ...getStoredWebTheme() })
+      setTheme(getStoredWebTheme())
     }
 
     loadTheme()
@@ -139,8 +93,8 @@ export default function TopStudents() {
     fetchStudents()
   }, [])
 
-  const visibleStudents = students.length > 0 ? students : fallbackStudents
-
+  const visibleStudents = students.length > 0 ? students : []
+console.log(visibleStudents)
   return (
     <section
       id="students"
@@ -156,7 +110,7 @@ export default function TopStudents() {
             - Top Students -
           </p>
           <h2
-            className="text-3xl sm:text-4xl font-bold tracking-tight"
+            className="text-3xl sm:text-4xl font-semibold tracking-tight"
             style={{ color: theme.textColor }}
           >
             Students Who{' '}
@@ -218,14 +172,14 @@ export default function TopStudents() {
                 </div>
                 <div className="absolute bottom-4 left-4 right-4">
                   <p className="text-sm font-semibold text-white/90">{student.standard}</p>
-                  <h3 className="mt-1 text-xl font-bold text-white">{student.name}</h3>
+                  <h3 className="mt-1 text-xl font-semibold text-white">{student.name}</h3>
                 </div>
               </div>
 
               <div className="p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
                     style={{
                       backgroundColor: shadeColor(theme.backgroundColor, 2),
                       color: theme.primaryColor,
@@ -235,7 +189,7 @@ export default function TopStudents() {
                     {student.rank}
                   </span>
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
                     style={{
                       backgroundColor: shadeColor(theme.backgroundColor, 4),
                       color: theme.textColor,
@@ -255,10 +209,10 @@ export default function TopStudents() {
                 >
                   <GraduationCap className="h-5 w-5 flex-shrink-0" style={{ color: theme.primaryColor }} />
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: shadeColor(theme.textColor, 25) }}>
+                    <p className="text-sm font-semibold  tracking-wide" style={{ color: shadeColor(theme.textColor, 25) }}>
                       Achievement
                     </p>
-                    <p className="text-sm font-bold" style={{ color: theme.textColor }}>
+                    <p className="text-sm font-semibold" style={{ color: theme.textColor }}>
                       {student.achievement}
                     </p>
                   </div>

@@ -1,45 +1,60 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Briefcase, MapPin, Phone, Globe, Trash2, Search, Edit2, RefreshCw, Plus, Eye } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import api, { assetUrl } from '../lib/api'
+import api, { assetUrl, getBusinessesList } from '../lib/api'
 import Modal from '../components/Modal'
 import BusinessForm from '../components/BusinessForm'
+import usePagination from '../hooks/usePagination'
+
+const limit = 10
 
 export default function Businesses() {
   const navigate = useNavigate()
   const [businesses, setBusinesses] = useState([])
+  const { page, totalPages, total, setPage, setPaginationData, getParams, resetPage } = usePagination(limit)
   const [loading, setLoading] = useState(false)
+  const [search, setSearchValue] = useState('')
+  const [isOwn, setIsOwn] = useState(false)
   const [formLoading, setFormLoading] = useState(false)
-  const [search, setSearch] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [selectedBusiness, setSelectedBusiness] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  useEffect(() => {
-    fetchBusinesses()
-  }, [])
+  const currentPage = Math.min(Math.max(page || 1, 1), totalPages)
+  const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
 
-  const fetchBusinesses = async () => {
+  const fetchBusinesses = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await api.get('/businesses')
-      const data = res.data?.data || res.data || []
-      setBusinesses(data)
-      setError('')
+      const res = await getBusinessesList(getParams({ search, is_own: isOwn }))
+      const rows = res.data?.data || res.data || []
+      const pg = res.data?.pagination || {}
+      setBusinesses(Array.isArray(rows) ? rows : [])
+      setPaginationData(pg)
     } catch (err) {
-      setError('Failed to fetch business directory')
-      console.error(err)
+      setBusinesses([])
+      setPaginationData({ page: 1, totalPages: 1, total: 0 })
+      setError(err.response?.data?.message || 'Failed to load businesses')
     } finally {
       setLoading(false)
     }
+  }, [page, search, isOwn, getParams, setPaginationData])
+
+  useEffect(() => {
+    fetchBusinesses()
+  }, [fetchBusinesses])
+
+  const setSearch = (value) => {
+    setSearchValue(value)
+    resetPage()
   }
 
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this business listing?')) return
     try {
       await api.delete(`/businesses/${id}`)
-      setBusinesses(businesses.filter(b => b.id !== id))
+      await fetchBusinesses()
       setSuccess('Business listing deleted successfully')
       setTimeout(() => setSuccess(''), 3000)
     } catch (err) {
@@ -116,12 +131,7 @@ export default function Businesses() {
       }
 
       const savedData = res.data?.data || res.data;
-
-      if (selectedBusiness) {
-        setBusinesses(businesses.map(b => b.id === savedData.id ? savedData : b))
-      } else {
-        setBusinesses([savedData, ...businesses])
-      }
+      await fetchBusinesses()
 
       setSuccess(`Business listing ${selectedBusiness ? 'updated' : 'created'} successfully`)
       setIsModalOpen(false)
@@ -135,18 +145,14 @@ export default function Businesses() {
     }
   }
 
-  const filtered = businesses.filter(b => 
-    b.business_name?.toLowerCase().includes(search.toLowerCase()) ||
-    b.about_us?.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = businesses
 
   return (
     <div className="space-y-6 animate-slide-up select-none text-text">
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-text">Business Directory</h2>
-          <p className="text-text-secondary text-xs mt-0.5">Manage and moderate community businesses and enterprise registries</p>
+          <h2 className="text-xl font-semibold text-text">Business Directory</h2>
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <button
@@ -158,10 +164,22 @@ export default function Businesses() {
           </button>
           <button
             onClick={handleCreate}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-xs font-semibold transition-all shadow-glow-primary"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary"
           >
             <Plus className="w-4 h-4" /> Add
           </button>
+          <label className="flex items-center gap-2 cursor-pointer bg-surface border border-border px-4 py-2.5 rounded-xl">
+            <input
+              type="checkbox"
+              checked={isOwn}
+              onChange={(e) => {
+                setIsOwn(e.target.checked)
+                resetPage()
+              }}
+              className="rounded text-primary focus:ring-primary/20 bg-input-bg border-border"
+            />
+            <span className="text-sm font-medium text-text-secondary select-none">My Businesses</span>
+          </label>
           <div className="relative group flex-1 sm:w-64">
             <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-text-secondary/60">
               <Search className="w-4 h-4" />
@@ -171,7 +189,7 @@ export default function Businesses() {
               placeholder="Search listings..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 pl-10 pr-4 text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
             />
           </div>
         </div>
@@ -179,13 +197,13 @@ export default function Businesses() {
 
       {/* Alerts */}
       {error && (
-        <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+        <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-sm flex items-center gap-2 animate-fade-in shadow-sm">
           <span className="w-2 h-2 rounded-full bg-error animate-ping"></span>
           {error}
         </div>
       )}
       {success && (
-        <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-xs flex items-center gap-2 animate-fade-in shadow-sm">
+        <div className="bg-success-bg border border-success-border text-success-text p-4 rounded-2xl text-sm flex items-center gap-2 animate-fade-in shadow-sm">
           <span className="w-2 h-2 rounded-full bg-success animate-ping"></span>
           {success}
         </div>
@@ -195,14 +213,14 @@ export default function Businesses() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-primary/25 border-t-primary animate-spin"></div>
-          <span className="text-text-secondary text-xs">Querying businesses directory...</span>
+          <span className="text-text-secondary text-sm">Querying businesses directory...</span>
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-card border border-border rounded-2xl p-16 text-center shadow-glass-sm flex flex-col items-center justify-center gap-4">
           <Briefcase className="w-12 h-12 text-text-secondary/40 animate-pulse-slow" />
           <div>
-            <h4 className="font-bold text-text">No businesses found</h4>
-            <p className="text-text-secondary text-xs mt-1">There are no business directories registered under this search criteria</p>
+            <h4 className="font-semibold text-text">No businesses found</h4>
+            <p className="text-text-secondary text-sm mt-1">There are no business directories registered under this search criteria</p>
           </div>
         </div>
       ) : (
@@ -228,14 +246,14 @@ export default function Businesses() {
 
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-bold text-[10px] uppercase tracking-wide">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-semibold text-sm  tracking-wide">
                         {biz.business_category_name || 'Community Enterprise'}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${Number(biz.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-surface-secondary text-text-secondary border border-border'}`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-semibold ${Number(biz.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-surface-secondary text-text-secondary border border-border'}`}>
                         {Number(biz.status) === 1 ? 'Active' : 'Inactive'}
                       </span>
                     </div>
-                    <h3 className="text-sm sm:text-base font-bold text-text mt-2 tracking-tight group-hover:text-primary transition-colors truncate">
+                    <h3 className="text-sm sm:text-base font-semibold text-text mt-2 tracking-tight group-hover:text-primary transition-colors truncate">
                       {biz.business_name}
                     </h3>
                   </div>
@@ -266,14 +284,14 @@ export default function Businesses() {
                 </div>
 
                 {/* About description */}
-                <p className="text-xs text-text-secondary leading-relaxed mt-4 line-clamp-3">
+                <p className="text-sm text-text-secondary leading-relaxed mt-4 line-clamp-3">
                   {biz.about_us || 'No business description provided by the enterprise owner. Contact the primary administrator for further details.'}
                 </p>
 
                 {/* Gallery Showcase */}
                 {biz.gallery_images && biz.gallery_images.length > 0 && (
                   <div className="mt-4">
-                    <label className="block text-[9px] uppercase font-bold text-text-secondary mb-1.5 tracking-wider">Showroom Gallery</label>
+                    <label className="block text-sm  font-semibold text-text-secondary mb-1.5 tracking-wider">Showroom Gallery</label>
                     <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
                       {biz.gallery_images.map((img, idx) => (
                         <div key={idx} className="relative w-12 h-12 rounded-lg overflow-hidden border border-border shrink-0 bg-surface-secondary group/img">
@@ -290,7 +308,7 @@ export default function Businesses() {
               </div>
 
               {/* Action contacts and tags */}
-              <div className="mt-6 pt-4 border-t border-border space-y-2 text-[11px] text-text-secondary">
+              <div className="mt-6 pt-4 border-t border-border space-y-2 text-sm text-text-secondary">
                 <div className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-primary" />
                   <span>Primary: </span>
@@ -315,6 +333,37 @@ export default function Businesses() {
               <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-success opacity-25 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
           ))}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-4 py-3 border border-border bg-surface-secondary/40 rounded-xl text-sm">
+          <span className="text-text-secondary">
+            Page {page} of {totalPages} {total ? `(${total} total)` : ''}
+          </span>
+          <div className="flex items-center gap-2">
+            <button type="button" disabled={loading || page <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+              Previous
+            </button>
+            {pageNumbers.map((item) => (
+              <button
+                key={item}
+                type="button"
+                disabled={loading || item === currentPage}
+                onClick={() => setPage(item)}
+                className={`min-w-10 px-3 py-2 rounded-lg border transition-all ${
+                  item === currentPage
+                    ? 'border-primary bg-primary/10 text-primary font-semibold disabled:opacity-100 disabled:cursor-default'
+                    : 'border-border bg-card text-text hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed'
+                }`}
+              >
+                {item}
+              </button>
+            ))}
+            <button type="button" disabled={loading || page >= totalPages} onClick={() => setPage((current) => Math.min(totalPages, current + 1))} className="px-3 py-2 rounded-lg border border-border bg-card text-text disabled:opacity-50 disabled:cursor-not-allowed">
+              Next
+            </button>
+          </div>
         </div>
       )}
 

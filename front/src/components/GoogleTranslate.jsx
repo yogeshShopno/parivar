@@ -187,7 +187,7 @@ export default function GoogleTranslate() {
 
             {/* Footer */}
             <div
-              className="px-3 py-2 text-xs text-center border-t"
+              className="px-3 py-2 text-sm text-center border-t"
               style={{
                 borderTopColor: secondaryColor + '30',
                 color: themeColors.text || '#0f172a',

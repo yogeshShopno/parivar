@@ -128,10 +128,10 @@ export default function Dashboard() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-text tracking-tight">Operations Console</h2>
-          <p className="text-text-secondary text-xs mt-1">Real-time indicators and user registry metrics</p>
+          <h2 className="text-2xl font-semibold text-text tracking-tight">Dashboard</h2>
+        
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-secondary border border-border text-xs text-text font-medium select-none shadow-sm">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-secondary border border-border text-sm text-text font-medium select-none shadow-sm">
           <Clock className="w-3.5 h-3.5 text-primary" />
           <span>Last Sync: Just now</span>
         </div>
@@ -148,7 +148,7 @@ export default function Dashboard() {
             >
               {/* Card Header */}
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-text-secondary tracking-wider uppercase group-hover:text-text transition-colors">
+                <span className="text-sm font-semibold text-text-secondary tracking-wider  group-hover:text-text transition-colors">
                   {card.title}
                 </span>
                 <div className={`p-2.5 rounded-xl bg-gradient-to-tr ${card.color} ${card.shadow} text-white transition-transform duration-300 group-hover:scale-105`}>
@@ -161,12 +161,12 @@ export default function Dashboard() {
                 <span className="text-3xl font-extrabold text-text tracking-tight">
                   {card.value}
                 </span>
-                <span className="text-[10px] font-bold text-text-secondary">records</span>
+                <span className="text-sm font-semibold text-text-secondary">records</span>
               </div>
 
               {/* Sparkline & Growth Indicator */}
               <div className="mt-5 flex items-center justify-between">
-                <span className="text-[10px] font-bold text-primary flex items-center gap-1">
+                <span className="text-sm font-semibold text-primary flex items-center gap-1">
                   <TrendingUp className="w-3 h-3 text-primary" />
                   {card.change}
                 </span>
@@ -190,10 +190,10 @@ export default function Dashboard() {
         <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-glass-md flex flex-col justify-between">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-sm font-bold text-text tracking-wide">Registration Distribution</h3>
-              <p className="text-[10px] text-text-secondary">6-Month moving average data</p>
+              <h3 className="text-sm font-semibold text-text tracking-wide">Registration Distribution</h3>
+              <p className="text-sm text-text-secondary">6-Month moving average data</p>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-primary font-bold bg-primary/10 px-2 py-0.5 rounded">
+            <div className="flex items-center gap-1.5 text-sm text-primary font-semibold bg-primary/10 px-2 py-0.5 rounded">
               <ArrowUpRight className="w-3.5 h-3.5" />
               +18.5% year over year
             </div>
@@ -235,7 +235,7 @@ export default function Dashboard() {
           </div>
 
           {/* Chart Legends */}
-          <div className="flex items-center gap-6 mt-6 border-t border-border pt-4 text-xs font-semibold text-text-secondary">
+          <div className="flex items-center gap-6 mt-6 border-t border-border pt-4 text-sm font-semibold text-text-secondary">
             <div className="flex items-center gap-2">
               <span className="w-3 h-1.5 rounded-full bg-primary"></span>
               <span>Member Signups</span>
@@ -250,19 +250,19 @@ export default function Dashboard() {
         {/* Recent activities section */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-glass-md flex flex-col">
           <div className="mb-6">
-            <h3 className="text-sm font-bold text-text tracking-wide flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-text tracking-wide flex items-center gap-2">
               Recent Activity
             </h3>
-            <p className="text-[10px] text-text-secondary">System actions audit logs</p>
+            <p className="text-sm text-text-secondary">System actions audit logs</p>
           </div>
 
           <div className="flex-1 space-y-5">
             {recentActivities.length === 0 ? (
-              <div className="h-full min-h-40 flex items-center justify-center text-center text-xs text-text-secondary border border-dashed border-border rounded-2xl">
+              <div className="h-full min-h-40 flex items-center justify-center text-center text-sm text-text-secondary border border-dashed border-border rounded-2xl">
                 No recent records available yet
               </div>
             ) : recentActivities.map((act) => (
-              <div key={act.id} className="flex gap-3 text-xs leading-relaxed group">
+              <div key={act.id} className="flex gap-3 text-sm leading-relaxed group">
                 {/* Visual line bullet */}
                 <div className="flex flex-col items-center">
                   <span className="w-2.5 h-2.5 rounded-full bg-primary border-2 border-surface group-hover:scale-110 transition-transform shadow-glow-primary"></span>
@@ -273,7 +273,7 @@ export default function Dashboard() {
                   <p className="text-text font-medium transition-colors">
                     {act.text}
                   </p>
-                  <div className="flex items-center gap-2 text-[10px] text-text-secondary mt-1">
+                  <div className="flex items-center gap-2 text-sm text-text-secondary mt-1">
                     <Clock className="w-3 h-3" />
                     <span>{act.time}</span>
                     <span>•</span>

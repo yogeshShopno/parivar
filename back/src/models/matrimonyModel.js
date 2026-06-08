@@ -7,6 +7,10 @@ const matrimonySchema = new mongoose.Schema({
     sparse: true,
     index: true
   },
+  member_id: {
+    type: String,
+    index: true
+  },
   full_name: {
     type: String,
     required: true,
@@ -84,11 +88,19 @@ const matrimonySchema = new mongoose.Schema({
   },
   about: {
     type: String,
+    trim: true
+  },
+  biodata: {
+    type: String,
+    default: ''
+  },
+  person_image: {
+    type: String,
     default: ''
   },
   status: {
     type: Number,
-    default: 1,
+    default: 0,
     index: true
   },
   cdate: {

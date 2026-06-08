@@ -26,6 +26,15 @@ export const normalizeRoleId = (role) => {
   return String(role.id || role._id || '')
 }
 
+export const getUserRoleLabel = (user = {}) => {
+  const assignedRole = user.role_name || user.role?.name || user.role_id?.name
+  if (assignedRole) return assignedRole
+  if (user.committee_role || user.designation) return user.committee_role || user.designation
+  if (user.is_committee) return 'Committee'
+  if (user.role) return String(user.role)
+  return 'Member'
+}
+
 const ACTION_ORDER = ['list', 'add', 'edit', 'delete']
 
 export const buildPermissionGroups = (config = {}) => {

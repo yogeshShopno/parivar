@@ -16,6 +16,8 @@ const postSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+
+
   description: {
     type: String,
     required: true,
@@ -46,7 +48,17 @@ const postSchema = new mongoose.Schema({
   city_id: {
     type: mongoose.Schema.Types.ObjectId,
     index: true
-  }
+  },
+created_by: {
+  id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    index: true
+  },
+  name: { type: String, default: '' }
+},
+
+
 }, {
   timestamps: true,
   strict: false

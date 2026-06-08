@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Gallery = require('../models/galleryModel');
 
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const isObjectId = (id) => mongoose.isValidObjectId(id);
 
@@ -63,8 +64,11 @@ const formatGallery = (req, item) => ({
 const getGallery = async (req, res) => {
 
   try {
-    const rows = await Gallery.find({}).sort({ _id: -1 }).lean();
-    return apiResponse(res, 200, 'Gallery retrieved successfully', rows.map((row) => formatGallery(req, row)));
+    const { data, pagination } = await queryHelper(Gallery, req.query, {
+      searchFields: ['category', 'year'],
+      filterFields: ['category', 'year', 'gallery_category_id']
+    });
+    return apiResponse(res, 200, 'Gallery retrieved successfully', data.map((row) => formatGallery(req, row)), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving gallery', { error: error.message });
   }

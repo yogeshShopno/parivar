@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Student = require('../models/studentModel');
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const requestData = (req) => ({
   ...req.query,
@@ -9,13 +10,10 @@ const requestData = (req) => ({
 
 const getStudents = async (req, res) => {
   try {
-    const { standard, student_name, school_name } = requestData(req);
-    const query = {};
-    if (standard) query.standard = new RegExp(standard, 'i');
-    if (student_name) query.student_name = new RegExp(student_name, 'i');
-    if (school_name) query.school_name = new RegExp(school_name, 'i');
-    
-    const students = await Student.find(query).sort({ _id: -1 }).lean();
+    const { data: students, pagination } = await queryHelper(Student, requestData(req), {
+      searchFields: ['surname', 'student_name', 'father_name', 'school_name', 'standard', 'mobile_number'],
+      filterFields: ['standard', 'student_name', 'school_name', 'status']
+    });
     
     return res.status(200).json({
       status: 200,
@@ -31,8 +29,11 @@ const getStudents = async (req, res) => {
         mobile_number: s.mobile_number || '',
         mobile_number_2: s.mobile_number_2 || '',
         result_image: publicUrl(req, s.result_image || ''),
-        status: Number(s.status ?? 1)
-      }))
+        student_image: publicUrl(req, s.student_image || ''),
+        status: Number(s.status ?? 0),
+        createdAt: s.createdAt || s.cdate || ''
+      })),
+      ...(pagination ? { pagination } : {})
     });
   } catch (error) {
     return res.status(500).json({
@@ -56,6 +57,7 @@ const addStudent = async (req, res) => {
       mobile_number,
       mobile_number_2,
       result_image,
+      student_image,
       status
     } = requestData(req);
 
@@ -78,7 +80,8 @@ const addStudent = async (req, res) => {
       mobile_number,
       mobile_number_2: mobile_number_2 || '',
       result_image: result_image || '',
-      status: status === undefined ? 1 : Number(status),
+      student_image: student_image || '',
+      status: status === undefined ? 0 : Number(status),
       cdate: new Date().toISOString().slice(0, 10)
     };
 
@@ -97,7 +100,9 @@ const addStudent = async (req, res) => {
         mobile_number: student.mobile_number || '',
         mobile_number_2: student.mobile_number_2 || '',
         result_image: publicUrl(req, student.result_image || ''),
-        status: Number(student.status ?? 1)
+        student_image: publicUrl(req, student.student_image || ''),
+        status: Number(student.status ?? 0),
+        createdAt: student.createdAt || student.cdate || ''
       }
     });
   } catch (error) {
@@ -141,6 +146,7 @@ const updateStudent = async (req, res) => {
       mobile_number,
       mobile_number_2,
       result_image,
+      student_image,
       status
     } = requestData(req);
 
@@ -153,6 +159,7 @@ const updateStudent = async (req, res) => {
     if (mobile_number) student.mobile_number = mobile_number;
     if (mobile_number_2 !== undefined) student.mobile_number_2 = mobile_number_2;
     if (result_image) student.result_image = result_image;
+    if (student_image) student.student_image = student_image;
     if (status !== undefined) student.status = Number(status);
 
     await student.save();
@@ -170,7 +177,9 @@ const updateStudent = async (req, res) => {
         mobile_number: student.mobile_number || '',
         mobile_number_2: student.mobile_number_2 || '',
         result_image: publicUrl(req, student.result_image || ''),
-        status: Number(student.status ?? 1)
+        student_image: publicUrl(req, student.student_image || ''),
+        status: Number(student.status ?? 0),
+        createdAt: student.createdAt || student.cdate || ''
       }
     });
   } catch (error) {

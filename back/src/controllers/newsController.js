@@ -1,61 +1,68 @@
 const News = require('../models/newsModel');
 const { apiResponse, fullName, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
+
+
+const imageFromRequest = (req, fallback = '') => {
+    if (req.file) return `/uploads/${req.file.filename}`;
+    if (req.body.remove_image === 'true') return '';
+    return req.body.image || fallback || '';
+};
 
 const isObjectId = (id) => require('mongoose').isValidObjectId(id);
 
-const imageFromRequest = (req, fallback = '') => {
-  if (req.file) return `/uploads/${req.file.filename}`;
-  return req.body.image || req.body.image_url || fallback || '';
-};
-
-
 const findNews = (req, id) => News.findOne(
-  isObjectId(id) ? { _id: id } : null
+    isObjectId(id) ? { _id: id } : null
 );
 
 const formatNews = (req, item = {}) => {
-  const image = item.image_url || (typeof item.image === 'string' ? item.image : '');
+    const image = item.image || item.image_url || '';
 
-  return {
-    _id: String(item._id),
-    title: item.title || '',
-    description: item.description || item.content || '',
-    content: item.content || item.description || '',
-    date: item.date || item.createdAt || '',
-    cdate: item.cdate || (item.createdAt ? new Date(item.createdAt).toISOString().slice(0, 10) : ''),
-    category: item.category || '',
-    status: Number(item.status ?? 1),
-    image: publicUrl(req, image),
-    reporter_name: item.reporter_name || '',
-    location: item.location || ''
-  };
+    return {
+        _id: String(item._id),
+        title: item.title || '',
+        description: item.description || item.content || '',
+        content: item.content || item.description || '',
+        date: item.date || item.createdAt || '',
+        cdate: item.cdate || (item.createdAt ? new Date(item.createdAt).toISOString().slice(0, 10) : ''),
+        status: Number(item.status ?? 1),
+        image: publicUrl(req, image),
+        reporter_name: item.reporter_name || '',
+        location: item.location || ''
+    };
 };
 
 const newsPayload = (req, existing = {}) => {
-  const title = req.body.title || existing.title || '';
-  const description = req.body.description || existing.description || req.body.content || existing.content || '';
+    const title = req.body.title || existing.title || '';
+    const description = req.body.description || existing.description || req.body.content || existing.content || '';
 
-  return {
-    ...req.body,
-    id: existing.id || String(existing._id),
-    title,
-    description,
-    content: req.body.content || description,
-    reporter_name: req.body.reporter_name || existing.reporter_name || fullName(req.user) || req.user?.email || 'Admin',
-    location: req.body.location || existing.location || 'Admin',
-    category: req.body.category || existing.category || '',
-    image_url: imageFromRequest(req, existing.image_url || (typeof existing.image === 'string' ? existing.image : '')),
-    cdate: existing.cdate || new Date().toISOString().slice(0, 10)
-  };
+    const data = { ...req.body };
+    delete data.image;
+
+    return {
+        ...data,
+        id: existing.id || String(existing._id),
+        title,
+        description,
+        content: req.body.content || description,
+        reporter_name: req.body.reporter_name || existing.reporter_name || fullName(req.user) || req.user?.email || 'Admin',
+        location: req.body.location || existing.location || 'Admin',
+        category: req.body.category || existing.category || '',
+        image: imageFromRequest(req, existing.image || (typeof existing.image === 'string' ? existing.image : '')),
+        cdate: existing.cdate || new Date().toISOString().slice(0, 10)
+    };
 };
 
 const getNewsList = async (req, res) => {
-  try {
-		const news = await News.find({}).sort({ _id: -1 }).lean();
-		return apiResponse(res, 200, 'News retrieved successfully', news.map((item) => formatNews(req, item)));
-	} catch (error) {
-		return apiResponse(res, 500, 'Error retrieving news', { error: error.message });
-	}
+    try {
+        const { data, pagination } = await queryHelper(News, req.query, {
+            searchFields: ['title', 'description', 'content', 'category', 'reporter_name', 'location'],
+            filterFields: ['category', 'reporter_name', 'location', 'status']
+        });
+        return apiResponse(res, 200, 'News retrieved successfully', data.map((item) => formatNews(req, item)), pagination);
+    } catch (error) {
+        return apiResponse(res, 500, 'Error retrieving news', { error: error.message });
+    }
 };
 
 const getNewsById = async (req, res) => {

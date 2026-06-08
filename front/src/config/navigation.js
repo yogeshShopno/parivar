@@ -22,7 +22,7 @@ export const coreNavigation = [
   { to: '/admin/festivals', label: 'Festivals', icon: CalendarDays, title: 'Festivals', permission: 'festivals.list' },
   { to: '/admin/events', label: 'Events', icon: CalendarDays, title: 'Events', permission: 'events.list' },
   { to: '/admin/gallery', label: 'Gallery', icon: Image, title: 'Gallery', permission: 'gallery.list' },
-  { to: '/admin/banners', label: 'Banners', icon: Megaphone, title: 'Banner Manager', permission: 'banners.list' },
+  // { to: '/admin/banners', label: 'Banners', icon: Megaphone, title: 'Banner Manager', permission: 'banners.list' },
   { to: '/admin/matrimonies', label: 'Matrimonies', icon: Users, title: 'Matrimony Profiles', permission: 'matrimonies.list' },
   { to: '/admin/businesses', label: 'Businesses', icon: Briefcase, title: 'Business Index', permission: 'businesses.list' },
   { to: '/admin/students', label: 'Students', icon: GraduationCap, title: 'Students', permission: 'students.list' },
@@ -30,7 +30,7 @@ export const coreNavigation = [
   { to: '/admin/posts', label: 'Posts', icon: FileText, title: 'Post Moderator', permission: 'posts.list' },
   { to: '/admin/news', label: 'News', icon: FileText, title: 'News Moderator', permission: 'news.list' },
 
-  { to: '/admin/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries', permission: 'contact-inquiries.list' },
+  // { to: '/admin/contact-inquiries', label: 'Contact Inquiries', icon: Mail, title: 'Contact Inquiries', permission: 'contact-inquiries.list' },
   { to: '/admin/feedback', label: 'Feedback', icon: FileText, title: 'Feedback', permission: 'feedback.list' },
   { to: '/admin/birthday', label: 'Birthdays', icon: CalendarDays, title: 'Member Birthdays', permission: 'birthday.list' },
   { to: '/admin/job-vacancy', label: 'Job Vacancies', icon: Briefcase, title: 'Job Vacancies', permission: 'job-vacancy.list' }
@@ -38,6 +38,7 @@ export const coreNavigation = [
 
 export const masterNavigation = [
   { type: 'business', label: 'Business', permission: 'businesses.list' },
+  { type: 'bank-details', label: 'Bank Details', permission: 'bank-details.list', to: '/admin/bank-details' },
   { type: 'country', label: 'Country', permission: 'country.list' },
   { type: 'state', label: 'State', permission: 'state.list' },
   { type: 'district', label: 'District', permission: 'district.list' },

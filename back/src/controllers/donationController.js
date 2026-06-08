@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Donation = require('../models/donationModel');
 const { apiResponse } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const requestData = (req) => ({
   ...req.query,
@@ -11,27 +12,23 @@ const requestData = (req) => ({
 
 const getDonations = async (req, res) => {
   try {
-    const { donator_name, location, donation_purpose } = requestData(req);
-    const query = {};
-    if (donator_name) query.donator_name = new RegExp(donator_name, 'i');
-    if (location) query.location = new RegExp(location, 'i');
-    if (donation_purpose) query.donation_purpose = new RegExp(donation_purpose, 'i');
-
-    const donations = await Donation.find(query).sort({ _id: -1 }).lean();
+    const { data: donations, pagination } = await queryHelper(Donation, requestData(req), {
+      searchFields: ['donator_name', 'donation_purpose'],
+      filterFields: ['donator_name', 'donation_purpose', 'status',]
+    });
 
     return res.status(200).json({
       status: 200,
       message: 'Donations retrieved successfully',
       data: donations.map(d => ({
-        id: d.id || String(d._id),
+        id: d._id || String(d._id),
         donator_name: d.donator_name || '',
         donate_amount: Number(d.donate_amount || 0),
-        location: d.location || '',
         donation_purpose: d.donation_purpose || '',
         date: d.date || '',
-        whose_possession: d.whose_possession || 'direct',
         status: Number(d.status ?? 1)
-      }))
+      })),
+      ...(pagination ? { pagination } : {})
     });
   } catch (error) {
     return res.status(500).json({
@@ -48,17 +45,15 @@ const addDonation = async (req, res) => {
     const {
       donator_name,
       donate_amount,
-      location,
       donation_purpose,
       date,
-      whose_possession,
       status
     } = requestData(req);
 
-    if (!donator_name || !donate_amount || !location || !donation_purpose || !date) {
+    if (!donator_name || !donate_amount || !donation_purpose || !date) {
       return res.status(400).json({
         status: 400,
-        message: 'All fields except Whose possession are mandatory',
+        message: 'All fields are mandatory',
         data: []
       });
     }
@@ -67,10 +62,8 @@ const addDonation = async (req, res) => {
       id: `DON${Date.now()}`,
       donator_name,
       donate_amount: Number(donate_amount),
-      location,
       donation_purpose,
       date,
-      whose_possession: whose_possession && whose_possession.trim() !== '' ? whose_possession.trim() : 'direct',
       status: status === undefined ? 1 : Number(status),
       cdate: new Date().toISOString().slice(0, 10)
     };
@@ -83,10 +76,8 @@ const addDonation = async (req, res) => {
         id: donation.id || String(donation._id),
         donator_name: donation.donator_name || '',
         donate_amount: Number(donation.donate_amount || 0),
-        location: donation.location || '',
         donation_purpose: donation.donation_purpose || '',
         date: donation.date || '',
-        whose_possession: donation.whose_possession || 'direct',
         status: Number(donation.status ?? 1)
       }
     });
@@ -123,21 +114,15 @@ const updateDonation = async (req, res) => {
     const {
       donator_name,
       donate_amount,
-      location,
       donation_purpose,
       date,
-      whose_possession,
       status
     } = requestData(req);
 
     if (donator_name) donation.donator_name = donator_name;
     if (donate_amount !== undefined) donation.donate_amount = Number(donate_amount);
-    if (location) donation.location = location;
-    if (donation_purpose) donation.donation_purpose = donation_purpose;
-    if (date) donation.date = date;
-    if (whose_possession !== undefined) {
-      donation.whose_possession = whose_possession && whose_possession.trim() !== '' ? whose_possession.trim() : 'direct';
-    }
+    if (donation_purpose !== undefined) donation.donation_purpose = donation_purpose;
+    if (date !== undefined) donation.date = date;
     if (status !== undefined) donation.status = Number(status);
 
     await donation.save();
@@ -148,10 +133,8 @@ const updateDonation = async (req, res) => {
         id: donation.id || String(donation._id),
         donator_name: donation.donator_name || '',
         donate_amount: Number(donation.donate_amount || 0),
-        location: donation.location || '',
         donation_purpose: donation.donation_purpose || '',
         date: donation.date || '',
-        whose_possession: donation.whose_possession || 'direct',
         status: Number(donation.status ?? 1)
       }
     });
@@ -204,27 +187,23 @@ const deleteDonation = async (req, res) => {
 
 const adminGetDonations = async (req, res) => {
   try {
-    const { donator_name, location, donation_purpose } = req.query;
-    const query = {};
-    if (donator_name) query.donator_name = new RegExp(donator_name, 'i');
-    if (location) query.location = new RegExp(location, 'i');
-    if (donation_purpose) query.donation_purpose = new RegExp(donation_purpose, 'i');
-
-    const donations = await Donation.find(query).sort({ _id: -1 }).lean();
+    const { data: donations, pagination } = await queryHelper(Donation, req.query, {
+      searchFields: ['donator_name', 'donation_purpose'],
+      filterFields: ['donator_name', 'donation_purpose', 'status',]
+    });
 
     return res.status(200).json({
       status: 200,
       message: 'Donations retrieved successfully',
       data: donations.map(d => ({
-        id: d.id || String(d._id),
+        id: d._id || String(d._id),
         donator_name: d.donator_name || '',
         donate_amount: Number(d.donate_amount || 0),
-        location: d.location || '',
         donation_purpose: d.donation_purpose || '',
         date: d.date || '',
-        whose_possession: d.whose_possession || 'direct',
         status: Number(d.status ?? 1)
-      }))
+      })),
+      ...(pagination ? { pagination } : {})
     });
   } catch (error) {
     return res.status(500).json({
@@ -238,6 +217,7 @@ const adminGetDonations = async (req, res) => {
 
 const adminSaveDonation = async (req, res) => {
   try {
+    console.log(req)
     const { id } = req.params;
     let existing = null;
     if (id) {
@@ -261,38 +241,35 @@ const adminSaveDonation = async (req, res) => {
     const {
       donator_name,
       donate_amount,
-      location,
       donation_purpose,
       date,
-      whose_possession,
       status
     } = requestData(req);
 
+    console.log(donator_name,
+      donate_amount,
+      donation_purpose,
+      date,
+      status)
+
     // For new donation, check mandatory fields
-    if (!existing && (!donator_name || !donate_amount || !location || !donation_purpose || !date)) {
+    if (!existing && (!donator_name || !donate_amount || !donation_purpose || !date)) {
       return res.status(400).json({
         status: 400,
-        message: 'All fields except Whose possession are mandatory',
+        message: 'All fields are mandatory',
         data: []
       });
     }
 
     const donation = existing || new Donation({
-      id: `DON${Date.now()}`,
       cdate: new Date().toISOString().slice(0, 10)
     });
 
     const updateFields = {};
     if (donator_name !== undefined) updateFields.donator_name = donator_name;
     if (donate_amount !== undefined) updateFields.donate_amount = Number(donate_amount);
-    if (location !== undefined) updateFields.location = location;
     if (donation_purpose !== undefined) updateFields.donation_purpose = donation_purpose;
     if (date !== undefined) updateFields.date = date;
-    if (whose_possession !== undefined) {
-      updateFields.whose_possession = whose_possession && whose_possession.trim() !== '' ? whose_possession.trim() : 'direct';
-    } else if (!existing) {
-      updateFields.whose_possession = 'direct';
-    }
     if (status !== undefined) updateFields.status = Number(status);
 
     donation.set(updateFields);
@@ -305,10 +282,8 @@ const adminSaveDonation = async (req, res) => {
         id: donation.id || String(donation._id),
         donator_name: donation.donator_name || '',
         donate_amount: Number(donation.donate_amount || 0),
-        location: donation.location || '',
         donation_purpose: donation.donation_purpose || '',
         date: donation.date || '',
-        whose_possession: donation.whose_possession || 'direct',
         status: Number(donation.status ?? 1)
       }
     });
@@ -357,6 +332,37 @@ const adminDeleteDonation = async (req, res) => {
   }
 };
 
+const exportDonations = async (req, res) => {
+  try {
+    const { search } = req.query
+    const query = {}
+    if (search) {
+      const regex = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i')
+      query.$or = [{ donator_name: regex }, { donation_purpose: regex }]
+    }
+    const donations = await Donation.find(query).sort({ _id: -1 }).lean()
+    const rows = donations.map(d => ({
+      'Donator Name': d.donator_name || '',
+      'Amount (₹)': Number(d.donate_amount || 0),
+      'Purpose': d.donation_purpose || '',
+      'Date': d.date || '',
+      'Status': Number(d.status ?? 1) === 1 ? 'Active' : 'Inactive'
+    }))
+    const header = Object.keys(rows[0] || { 'Donator Name': '', 'Amount (₹)': '', 'Purpose': '', 'Date': '', 'Status': '' })
+    const csv = [
+      header.join(','),
+      ...rows.map(row => header.map(h => `"${String(row[h]).replace(/"/g, '""')}"`).join(','))
+    ].join('\n')
+    res.setHeader('Content-Type', 'text/csv')
+    res.setHeader('Content-Disposition', 'attachment; filename="donations.csv"')
+    return res.status(200).send(csv)
+  } catch (error) {
+    return res.status(500).json({ status: 500, message: 'Export failed', error: error.message })
+  }
+}
+
+
+
 module.exports = {
   getDonations,
   addDonation,
@@ -364,5 +370,7 @@ module.exports = {
   deleteDonation,
   adminGetDonations,
   adminSaveDonation,
-  adminDeleteDonation
+  adminDeleteDonation,
+  exportDonations
+
 };

@@ -1,4 +1,5 @@
 node_modules/
+vite-dev*.log
 dist/
 .DS_Store
 *.local

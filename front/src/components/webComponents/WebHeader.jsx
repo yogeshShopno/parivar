@@ -1,38 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Phone, Mail, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe, Menu, X, LogIn } from 'lucide-react'
 
-/**
- * Professional Website Header Component with Dynamic Theme Colors
- * 
- * IMPORTANT: This component uses ONLY web_* localStorage keys
- * It does NOT interfere with admin dashboard theme (CSS variables)
- * 
- * Theme Sources:
- * - website: localStorage (web_primaryColor, web_backgroundColor, etc.)
- * - admin dashboard: CSS variables (--color-primary, --color-background, etc.)
- * 
- * Features:
- * - Dynamic theme colors from backend (stored with web_ prefix)
- * - Sticky top bar with contact info and social media
- * - Main navigation bar with logo and nav links
- * - Responsive mobile hamburger menu
- * - Language selector
- * - Accessibility compliant
- * - Smooth transitions and hover effects
- */
+
 export default function WebHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isLanguageOpen, setIsLanguageOpen] = useState(false)
   const [theme, setTheme] = useState({})
   const mobileMenuRef = useRef(null)
   const languageRef = useRef(null)
-
   // Load theme colors from localStorage
   useEffect(() => {
     const loadTheme = () => {
       const colorKeys = [
         'backgroundColor', 'borderColor', 'buttonColor', 'fontColor',
-        'gradientEnd', 'gradientStart', 'primaryColor', 'secondaryColor', 'textColor'
+        'gradientEnd', 'gradientStart', 'primaryColor', 'secondaryColor', 'textColor',
+        'name','webLogo','favicon','phone','email','facebook','instagram','twitter','youtube','whatsapp',
       ]
       
       const loadedTheme = {}
@@ -43,20 +25,9 @@ export default function WebHeader() {
         }
       })
 
-      // Fallback colors if theme not loaded yet
-      const defaultTheme = {
-        gradientStart: '#2E7D32',
-        gradientEnd: '#0D3B12',
-        primaryColor: '#1B5E20',
-        secondaryColor: '#66BB6A',
-        textColor: '#123524',
-        backgroundColor: '#F5FFF7',
-        borderColor: '#D7EFD9',
-        buttonColor: '#1B5E20',
-        fontColor: '#FFFFFF'
-      }
+    
 
-      setTheme({ ...defaultTheme, ...loadedTheme })
+      setTheme(loadedTheme)
     }
 
     loadTheme()
@@ -105,11 +76,11 @@ export default function WebHeader() {
   ]
 
   const socialLinks = [
-    { icon: Facebook, href: '#facebook', label: 'Facebook', color: 'hover:text-blue-600' },
-    { icon: Instagram, href: '#instagram', label: 'Instagram', color: 'hover:text-pink-600' },
-    { icon: Twitter, href: '#twitter', label: 'Twitter', color: 'hover:text-sky-500' },
-    { icon: Youtube, href: '#youtube', label: 'YouTube', color: 'hover:text-red-600' },
-    { icon: MessageCircle, href: '#whatsapp', label: 'WhatsApp', color: 'hover:text-green-600' },
+    { icon: Facebook, href: theme?.facebook || '#facebook', label: 'Facebook', color: 'hover:text-blue-600' },
+    { icon: Instagram, href: theme?.instagram || '#instagram', label: 'Instagram', color: 'hover:text-pink-600' },
+    { icon: Twitter, href: theme?.twitter || '#twitter', label: 'Twitter', color: 'hover:text-sky-500' },
+    { icon: Youtube, href: theme?.youtube || '#youtube', label: 'YouTube', color: 'hover:text-red-600' },
+    { icon: MessageCircle, href: theme?.whatsapp || '#whatsapp', label: 'WhatsApp', color: 'hover:text-green-600' },
   ]
 
   const languages = [
@@ -144,7 +115,7 @@ export default function WebHeader() {
             {/* Contact Info */}
             <div className="flex items-center gap-4 sm:gap-6 text-sm">
               <a
-                href="tel:+919876543210"
+                href={theme?.phone ? `tel:${theme.phone}` : 'tel:+919876543210'}
                 className="flex items-center gap-2 transition-colors duration-200"
                 style={{
                   color: theme.fontColor || '#FFFFFF',
@@ -155,7 +126,7 @@ export default function WebHeader() {
                 aria-label="Phone number"
               >
                 <Phone className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                <span className="hidden sm:inline">+91 98765 43210</span>
+                <span className="hidden sm:inline">+91{theme?.phone}</span>
               </a>
               <div
                 className="hidden sm:block w-px h-4"
@@ -164,7 +135,7 @@ export default function WebHeader() {
                 }}
               ></div>
               <a
-                href="mailto:info@parivar.org"
+                href={theme?.email ? `mailto:${theme.email}` : 'mailto:info@parivar.org'}
                 className="flex items-center gap-2 transition-colors duration-200"
                 style={{
                   color: theme.fontColor || '#FFFFFF',
@@ -175,7 +146,7 @@ export default function WebHeader() {
                 aria-label="Email address"
               >
                 <Mail className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
-                <span className="hidden sm:inline">info@parivar.org</span>
+                <span className="hidden sm:inline">{theme?.email}</span>
               </a>
             </div>
 
@@ -187,6 +158,8 @@ export default function WebHeader() {
                   <a
                     key={social.label}
                     href={social.href}
+                      target="_blank"
+
                     aria-label={social.label}
                     title={social.label}
                     className="rounded-full transition-all duration-200 p-1.5"
@@ -194,6 +167,7 @@ export default function WebHeader() {
                       backgroundColor: shadeColor(theme.fontColor || '#FFFFFF', -80),
                       color: theme.fontColor || '#FFFFFF'
                     }}
+
                   >
                     <Icon className="w-4 h-4" aria-hidden="true" />
                   </a>
@@ -216,26 +190,22 @@ export default function WebHeader() {
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo & Title */}
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-              <div
-                className="w-12 h-12 rounded-lg  flex items-center justify-center font-bold text-lg transition-all duration-300"
-                style={{
-                  backgroundImage: `linear-gradient(to right, ${theme.gradientStart}, ${theme.gradientEnd})`,
-                  color: theme.fontColor || '#FFFFFF'
-                }}
-              >
-                VALA
-              </div>
+          
+                {theme?.webLogo ? (
+                  <img src={theme.webLogo} alt={`${theme.name} logo`} className="h-12  object-contain" />
+                ) : (theme.name ? theme.name.charAt(0).to() : 'P')}
+              
               <div className="hidden sm:block">
                 <h1
-                  className="text-lg sm:text-xl font-bold tracking-tight"
+                  className="text-lg sm:text-xl font-semibold tracking-tight"
                   style={{
                     color: theme.textColor || '#123524'
                   }}
                 >
-                  vala Parivar
+                 {theme?.name} Parivar
                 </h1>
                 <p
-                  className="text-xs"
+                  className="text-sm"
                   style={{
                     color: shadeColor(theme.textColor || '#123524', 30)
                   }}
@@ -268,54 +238,7 @@ export default function WebHeader() {
 
             {/* Right Side: Language Selector & Login */}
             <div className="flex items-center gap-2 sm:gap-4">
-              {/* Language Selector */}
-              <div className="relative" ref={languageRef}>
-                <button
-                  onClick={() => setIsLanguageOpen(!isLanguageOpen)}
-                  aria-expanded={isLanguageOpen}
-                  aria-label="Select language"
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
-                  style={{
-                    color: theme.textColor || '#123524',
-                    backgroundColor: shadeColor(theme.textColor || '#123524', -95)
-                  }}
-                >
-                  <Globe className="w-4 h-4" aria-hidden="true" />
-                  <span className="hidden sm:inline">EN</span>
-                </button>
-
-                {/* Language Dropdown */}
-                {isLanguageOpen && (
-                  <div
-                    className="absolute right-0 mt-1 w-40 rounded-lg shadow-lg py-2 z-50 border"
-                    style={{
-                      backgroundColor: theme.backgroundColor || '#F5FFF7',
-                      borderColor: theme.borderColor || '#D7EFD9'
-                    }}
-                  >
-                    {languages.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => {
-                          setIsLanguageOpen(false)
-                        }}
-                        className="w-full text-left px-4 py-2 text-sm transition-colors duration-150"
-                        style={{
-                          color: theme.textColor || '#123524'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = shadeColor(theme.textColor || '#123524', -92)
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent'
-                        }}
-                      >
-                        {lang.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              
 
               {/* Login Button - Desktop */}
               <a

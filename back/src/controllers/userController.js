@@ -1,5 +1,7 @@
 const User = require('../models/userModels');
 const jwt = require('jsonwebtoken');
+const queryHelper = require('../utils/queryHelper');
+const { prepareFamilyFields, fullName } = require('../utils/familyHelper');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfamilykey';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '365d';
@@ -8,18 +10,6 @@ const requestData = (req) => ({
   ...req.query,
   ...req.body
 });
-
-const buildMemberId = async () => {
-  const users = await User.find({ member_id: /^\d+$/ }).select('member_id');
-  const highestId = users.reduce((max, user) => {
-    const numericId = Number(user.member_id);
-
-    return Number.isFinite(numericId) && numericId > max ? numericId : max;
-  }, 0);
-  const nextId = highestId > 0 ? highestId + 1 : Date.now();
-
-  return String(nextId);
-};
 
 const sanitizeUser = (user) => {
   if (!user) return user;
@@ -35,7 +25,7 @@ const register = async (req, res) => {
 
   try {
     const {
-      member_id, parent_member_id, first_name, middle_name, last_name, email, password,
+      first_name, middle_name, last_name, email, password,
       number, gender, dob, blood_group, relation, is_committee, committee_role,
       profile_image, country_id, state_id, city_id, address
     } = req.body;
@@ -52,9 +42,13 @@ const register = async (req, res) => {
     }
 
     const owner = req.user ? req.user : {};
+    const familyData = await prepareFamilyFields({
+      relation,
+      family_head_id: req.body.family_head_id,
+      status: req.body.status
+    });
+
     const newUser = new User({
-      member_id: member_id || await buildMemberId(),
-      parent_member_id,
       first_name,
       middle_name,
       last_name,
@@ -64,7 +58,7 @@ const register = async (req, res) => {
       gender,
       dob,
       blood_group,
-      relation,
+      relation: familyData.relation,
       is_committee,
       committee_role,
       profile_image,
@@ -72,16 +66,25 @@ const register = async (req, res) => {
       state_id,
       city_id,
       address,
-      created_by_admin_id: owner.created_by_admin_id || '',
-      admin_id: owner.admin_id || '',
-      tenant_id: owner.tenant_id || '',
-      created_by_user_id: owner.created_by_user_id || '',
-      created_by_member_id: owner.created_by_member_id || '',
-      created_by_name: owner.created_by_name || '',
-      created_by_role: owner.created_by_role || ''
+      family_head: familyData.family_head,
+      status: familyData.status,
+   
     });
 
     await newUser.save();
+
+    if (familyData.relation === 'Self') {
+      newUser.family_head = {
+        id: newUser._id,
+        name: fullName(newUser)
+      };
+
+      if (req.body.status === undefined) {
+        newUser.status = 0;
+      }
+
+      await newUser.save();
+    }
 
     res.status(201).json({
       message: 'User registered successfully',
@@ -144,11 +147,11 @@ const getProfile = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
 
-    const { member_id, id, parent_member_id, is_committee, search, country_id, state_id, city_id, } = requestData(req);
+    const {  id, is_committee, search, country_id, state_id, city_id, } = requestData(req);
     const birthday = 'birthday' in (req.query || {});
 
-    if (id || member_id) {
-      const query = id ? mongooseQueryForUser(id) : { member_id };
+    if (id ) {
+      const query = id ? mongooseQueryForUser(id) : { _id };
       const user = await User.findOne(query).select('-password');
 
       if (!user) {
@@ -173,28 +176,25 @@ const getUsers = async (req, res) => {
 
     const query = {};
 
-    if (parent_member_id !== undefined) query.parent_member_id = parent_member_id;
     if (is_committee !== undefined) query.is_committee = is_committee === true || is_committee === 'true' || is_committee === '1';
     if (country_id) query.country_id = country_id;
     if (state_id) query.state_id = state_id;
     if (city_id) query.city_id = city_id;
-    if (search) {
-      query.$or = [
-        { first_name: new RegExp(search, 'i') },
-        { middle_name: new RegExp(search, 'i') },
-        { last_name: new RegExp(search, 'i') },
-        { number: new RegExp(search, 'i') },
-        { email: new RegExp(search, 'i') }
-      ];
-    }
-
-
-    const users = await User.find(query).select('-password').sort({ createdAt: -1 });
+    const { data: users, pagination } = await queryHelper(User, requestData(req), {
+      baseQuery: query,
+      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email'],
+      filterFields: ['is_committee', 'country_id', 'state_id', 'city_id', 'gender', 'blood_group', 'relation', 'status'],
+      select: '-password',
+      defaultSort: { createdAt: -1 },
+      lean: false
+    });
 
 
     res.status(200).json({
+      ...(pagination ? { status: 200 } : {}),
       message: 'Users retrieved successfully',
-      data: users
+      data: users,
+      ...(pagination ? { pagination } : {})
     });
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving users', error: error.message });
@@ -204,25 +204,29 @@ const getUsers = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const data = requestData(req);
-    const id = req.params.id || data.id || data.member_id;
+    const id = req.params.id || data.id ;
 
     if (!id) {
       return res.status(400).json({ message: 'User ID or member ID is required' });
     }
 
     const user = await User.findOne({
-      $or: [
-        { _id: id },
-        { member_id: id }
-      ]
+         _id: id 
+      
     });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    const familyData = await prepareFamilyFields({
+      relation: data.relation,
+      family_head_id: data.family_head_id,
+      status: data.status
+    }, user);
+
     const fields = [
-      'parent_member_id', 'first_name', 'middle_name', 'last_name', 'number',
+      'first_name', 'middle_name', 'last_name', 'number',
       'gender', 'dob', 'blood_group', 'relation', 'is_committee', 'committee_role',
       'profile_image', 'country_id', 'state_id', 'city_id', 'address'
     ];
@@ -232,6 +236,9 @@ const updateUser = async (req, res) => {
         user[field] = data[field];
       }
     });
+
+    user.family_head = familyData.family_head;
+    user.status = familyData.status;
 
     if (data.email !== undefined) {
       user.email = data.email ? data.email.toLowerCase() : '';
@@ -254,10 +261,10 @@ const updateUser = async (req, res) => {
 
 const mongooseQueryForUser = (id) => {
   if (id.match(/^[0-9a-fA-F]{24}$/)) {
-    return { $or: [{ _id: id }, { member_id: id }] };
+    return { _id: id  };
   }
 
-  return { member_id: id };
+  return { _id: id };
 };
 
 module.exports = {

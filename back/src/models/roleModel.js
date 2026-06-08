@@ -25,6 +25,5 @@ const roleSchema = new mongoose.Schema({
   strict: false
 });
 
-roleSchema.index({ name: 1, created_by_admin_id: 1 }, { unique: true, sparse: true });
 
 module.exports = mongoose.model('Role', roleSchema);

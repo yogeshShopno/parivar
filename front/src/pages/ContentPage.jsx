@@ -46,6 +46,7 @@ const definitions = {
     title: 'Matrimonies',
     subtitle: 'Create and manage matrimony profiles',
     endpoint: '/matrimonies',
+    supportIsOwn: true,
     fields: [
       { name: 'full_name', label: 'Full Name' },
       { name: 'gender', label: 'Gender' },
@@ -66,15 +67,18 @@ const definitions = {
         name: 'status',
         label: 'Status',
         type: 'select',
-        defaultValue: 1,
+        defaultValue: 0,
         options: [
           { value: 1, label: 'Active' },
           { value: 0, label: 'Inactive' }
         ]
       },
-      { name: 'about', label: 'About', type: 'textarea' }
+      { name: 'about', label: 'About', type: 'textarea' },
+      { name: 'biodata', label: 'Biodata (PDF/Image)', type: 'file', accept: 'image/*,application/pdf' },
+      { name: 'person_image', label: 'Person Image', type: 'file' }
     ],
     columns: [
+      { key: 'person_image', label: 'Photo', type: 'image' },
       { key: 'full_name', label: 'Name' },
       { key: 'gender', label: 'Gender' },
       { key: 'marital_status', label: 'Status' },
@@ -98,42 +102,42 @@ const definitions = {
       { key: 'year', label: 'Year' }
     ]
   },
-  banners: {
-    title: 'Banner',
-    subtitle: 'Control app banner slides and links',
-    endpoint: '/content/banners',
-    fields: [
-      { name: 'title', label: 'Title' },
-      { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
-      { name: 'link', label: 'Link' },
-      { name: 'image', label: 'Image', type: 'file' },
-      { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Active' }, { value: 0, label: 'Inactive' }] }
-    ],
-    columns: [
-      { key: 'image', label: 'Image', type: 'image' },
-      { key: 'title', label: 'Title' },
-      { key: 'subtitle', label: 'Subtitle' },
-      { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
-    ]
-  },
-  inquiries: {
-    title: 'Contact Inquiry',
-    subtitle: 'Track and update messages from contact forms',
-    endpoint: '/content/contact-inquiries',
-    fields: [
-      { name: 'name', label: 'Name' },
-      { name: 'email', label: 'Email', type: 'email' },
-      { name: 'phone', label: 'Phone' },
-      { name: 'subject', label: 'Subject' },
-      { name: 'message', label: 'Message', type: 'textarea' },
-      { name: 'status', label: 'Status', type: 'select', defaultValue: 'new', options: [{ value: 'new', label: 'New' }, { value: 'in-progress', label: 'In Progress' }, { value: 'closed', label: 'Closed' }] }
-    ],
-    columns: [
-      { key: 'name', label: 'Name' },
-      { key: 'subject', label: 'Subject' },
-      { key: 'status', label: 'Status' }
-    ]
-  },
+  // banners: {
+  //   title: 'Banner',
+  //   subtitle: 'Control app banner slides and links',
+  //   endpoint: '/content/banners',
+  //   fields: [
+  //     { name: 'title', label: 'Title' },
+  //     { name: 'subtitle', label: 'Subtitle', type: 'textarea' },
+  //     { name: 'link', label: 'Link' },
+  //     { name: 'image', label: 'Image', type: 'file' },
+  //     { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Active' }, { value: 0, label: 'Inactive' }] }
+  //   ],
+  //   columns: [
+  //     { key: 'image', label: 'Image', type: 'image' },
+  //     { key: 'title', label: 'Title' },
+  //     { key: 'subtitle', label: 'Subtitle' },
+  //     { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
+  //   ]
+  // },
+  // inquiries: {
+  //   title: 'Contact Inquiry',
+  //   subtitle: 'Track and update messages from contact forms',
+  //   endpoint: '/content/contact-inquiries',
+  //   fields: [
+  //     { name: 'name', label: 'Name' },
+  //     { name: 'email', label: 'Email', type: 'email' },
+  //     { name: 'phone', label: 'Phone' },
+  //     { name: 'subject', label: 'Subject' },
+  //     { name: 'message', label: 'Message', type: 'textarea' },
+  //     { name: 'status', label: 'Status', type: 'select', defaultValue: 'new', options: [{ value: 'new', label: 'New' }, { value: 'in-progress', label: 'In Progress' }, { value: 'closed', label: 'Closed' }] }
+  //   ],
+  //   columns: [
+  //     { key: 'name', label: 'Name' },
+  //     { key: 'subject', label: 'Subject' },
+  //     { key: 'status', label: 'Status' }
+  //   ]
+  // },
   feedback: {
     title: 'Feedback',
     subtitle: 'Manage user feedback and suggestions',
@@ -165,21 +169,47 @@ const definitions = {
     endpoint: '/job-vacancy',
     fields: [
       { name: 'title', label: 'Title' },
+      { name: 'company_name', label: 'Company Name' },
       { name: 'description', label: 'Description', type: 'textarea' },
       { name: 'qualifications', label: 'Qualifications', type: 'textarea' },
-      { name: 'company_name', label: 'Company Name' },
-      { name: 'location', label: 'Location' },
-      { name: 'job_type', label: 'Job Type' },
+      { name: 'location', label: 'Location' }, 
+      {name: 'job_type', label: 'Job Type', type: 'select',
+        options: [{ value: "full-time", label: 'Full Time' }, { value: "part-time", label: 'Part Time' }, { value: "contract", label: 'Contract' }, { value: "internship", label: 'Internship' }]},
       { name: 'salary', label: 'Salary' },
       { name: 'contact_email', label: 'Contact Email', type: 'email' },
       { name: 'contact_number', label: 'Contact Number' },
-      { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Active' }, { value: 0, label: 'Inactive' }] }
+      { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Approved' }, { value: 0, label: 'Inactive' }] },
+      { name: 'image', label: 'Image', type: 'file' }
     ],
     columns: [
       { key: 'title', label: 'Title' },
-      { key: 'company_name', label: 'Company Name' },
-      { key: 'location', label: 'Location' },
+      { key: 'company_name', label: 'Company' },
+      { key: 'qualifications', label: 'qualifications' },
+      {key:'image',lable:'Image',type:'image'},
+
+      { key: 'contact_number', label: 'Number' },
       { key: 'job_type', label: 'Job Type' },
+      { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Approved' : 'Inactive' }
+    ]
+  },
+  'bank-details': {
+    title: 'Bank Details',
+    subtitle: 'Manage bank accounts for donations',
+    endpoint: '/bank-details',
+    fields: [
+      { name: 'bank_name', label: 'Bank Name' },
+      { name: 'account_name', label: 'Account Name' },
+      { name: 'account_number', label: 'Account Number' },
+      { name: 'ifsc_code', label: 'IFSC Code' },
+      { name: 'branch', label: 'Branch' },
+      { name: 'upi_link', label: 'UPI Link' },
+      { name: 'qr_code', label: 'QR Code', type: 'file' },
+      { name: 'status', label: 'Status', type: 'select', defaultValue: 1, options: [{ value: 1, label: 'Active' }, { value: 0, label: 'Inactive' }] }
+    ],
+    columns: [
+      { key: 'bank_name', label: 'Bank Name' },
+      { key: 'account_name', label: 'Account Name' },
+      { key: 'account_number', label: 'Account Number' },
       { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
     ]
   }

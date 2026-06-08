@@ -2,28 +2,8 @@
 import { HeartHandshake, IndianRupee, MapPin, Sparkles } from 'lucide-react'
 import { memberApi } from '../../lib/api'
 
-const defaultTheme = {
-  gradientStart: '#2E7D32',
-  gradientEnd: '#0D3B12',
-  primaryColor: '#1B5E20',
-  secondaryColor: '#66BB6A',
-  textColor: '#123524',
-  backgroundColor: '#F5FFF7',
-  borderColor: '#D7EFD9',
-  buttonColor: '#1B5E20',
-  fontColor: '#FFFFFF',
-}
 
-const fallbackDonors = [
-  {
-    id: 'sample-1',
-    donator_name: 'Community Supporter',
-    donate_amount: 0,
-    location: 'vala Parivar',
-    donation_purpose: 'Donation records will appear here',
-    date: '',
-  },
-]
+
 
 const getStoredWebTheme = () => {
   const colorKeys = [
@@ -62,14 +42,14 @@ const formatAmount = (amount) => {
 }
 
 export default function Donors() {
-  const [theme, setTheme] = useState(defaultTheme)
+  const [theme, setTheme] = useState(getStoredWebTheme())
   const [donors, setDonors] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
     const loadTheme = () => {
-      setTheme({ ...defaultTheme, ...getStoredWebTheme() })
+      setTheme(getStoredWebTheme())
     }
 
     loadTheme()
@@ -95,7 +75,7 @@ export default function Donors() {
     fetchDonors()
   }, [])
 
-  const visibleDonors = donors.length > 0 ? donors : fallbackDonors
+  const visibleDonors = donors.length > 0 ? donors : []
   const totalAmount = useMemo(
     () => donors.reduce((sum, donor) => sum + Number(donor.donate_amount || 0), 0),
     [donors]
@@ -116,7 +96,7 @@ export default function Donors() {
             - Donors -
           </p>
           <h2
-            className="text-3xl sm:text-4xl font-bold tracking-tight"
+            className="text-3xl sm:text-4xl font-semibold tracking-tight"
             style={{ color: theme.textColor }}
           >
             Our Generous{' '}
@@ -172,10 +152,10 @@ export default function Donors() {
                   <HeartHandshake className="h-6 w-6" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-lg font-bold" style={{ color: theme.textColor }}>
+                  <h3 className="text-lg font-semibold" style={{ color: theme.textColor }}>
                     {donor.donator_name}
                   </h3>
-                  <p className="mt-1 flex items-center text-xl font-bold" style={{ color: theme.primaryColor }}>
+                  <p className="mt-1 flex items-center text-xl font-semibold" style={{ color: theme.primaryColor }}>
                     <IndianRupee className="h-5 w-5" />
                     {formatAmount(donor.donate_amount)}
                   </p>
@@ -189,7 +169,7 @@ export default function Donors() {
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 flex-shrink-0" style={{ color: theme.primaryColor }} />
-                  <span>{donor.location || 'vala Parivar'}</span>
+                  <span>{donor.location || ''}</span>
                 </div>
               </div>
             </article>

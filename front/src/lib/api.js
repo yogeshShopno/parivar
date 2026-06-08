@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from './toast'
 
 export const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
 
@@ -17,6 +18,9 @@ const api = axios.create({
   }
 })
 
+export const exportDonationsExcel = (search = '') =>
+  api.get('/donations/export', { params: search ? { search } : {}, responseType: 'blob' })
+
 export const memberApi = axios.create({
   baseURL: `${API_BASE}/api`,
   headers: { 'Content-Type': 'application/json' },
@@ -25,6 +29,8 @@ export const memberApi = axios.create({
     clarifyTimeoutError: true
   }
 })
+
+
 
 // Add token to all requests
 const setupInterceptors = (axiosInstance) => {
@@ -44,13 +50,27 @@ const setupInterceptors = (axiosInstance) => {
 
   // Handle 401 responses
   axiosInstance.interceptors.response.use(
-    (response) => response,
+    (response) => {
+      const method = response.config?.method?.toLowerCase()
+      const shouldToastSuccess = ['post', 'put', 'patch', 'delete'].includes(method)
+      const message = response.data?.message
+
+      if (shouldToastSuccess && message) {
+        toast.success(message)
+      }
+
+      return response
+    },
     (error) => {
       if (error.response?.status === 401) {
         localStorage.removeItem('auth_token')
         localStorage.removeItem('auth_user')
         window.location.href = '/login'
       }
+
+      const message = error.response?.data?.message || error.message || 'Something went wrong'
+      toast.error(message)
+
       return Promise.reject(error)
     }
   )
@@ -58,5 +78,16 @@ const setupInterceptors = (axiosInstance) => {
 
 setupInterceptors(api)
 setupInterceptors(memberApi)
+
+export const getEventsList = (params = {}) => api.get('/events', { params })
+export const getUsersList = (params = {}) => api.get('/users', { params })
+export const getStudentsList = (params = {}) => api.get('/content/students', { params })
+export const getBusinessesList = (params = {}) => api.get('/businesses', { params })
+export const getPostsList = (params = {}) => api.get('/posts', { params })
+export const getNewsList = (params = {}) => api.get('/news', { params })
+export const getDonationsList = (params = {}) => api.get('/donations', { params })
+export const getBankDetailsList = (params = {}) => api.get('/bank-details', { params })
+export const getCommitteeMembersList = (params = {}) => api.get('/committee-members', { params })
+export const getGalleryList = (params = {}) => api.get('/gallery', { params })
 
 export default api

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { Suspense, lazy, useContext } from 'react'
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { AuthContext, AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -24,6 +24,8 @@ import { activeTheme, applyTheme } from './theme/theme'
 
 import Home from './pages/websitePages/Home'
 
+const ReactToaster = lazy(() => import('./components/ReactToaster'))
+
 
 // Bootstrap selected design system theme
 applyTheme(activeTheme)
@@ -31,6 +33,9 @@ applyTheme(activeTheme)
 export default function App() {
   return (
     <AuthProvider>
+      <Suspense fallback={null}>
+        <ReactToaster />
+      </Suspense>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
@@ -54,7 +59,7 @@ export default function App() {
           <Route path="festivals" element={<PermissionRoute permission="festivals.list"><ContentPage type="festivals" /></PermissionRoute>} />
           <Route path="events" element={<PermissionRoute permission="events.list"><Events /></PermissionRoute>} />
           <Route path="gallery" element={<PermissionRoute permission="gallery.list"><ContentPage type="gallery" /></PermissionRoute>} />
-          <Route path="banners" element={<PermissionRoute permission="banners.list"><ContentPage type="banners" /></PermissionRoute>} />
+          {/* <Route path="banners" element={<PermissionRoute permission="banners.list"><ContentPage type="banners" /></PermissionRoute>} /> */}
           <Route path="matrimonies" element={<PermissionRoute permission="matrimonies.list"><ContentPage type="matrimonies" /></PermissionRoute>} />
           <Route path="businesses" element={<PermissionRoute permission="businesses.list"><Businesses /></PermissionRoute>} />
           <Route path="students" element={<PermissionRoute permission="students.list"><Students /></PermissionRoute>} />
@@ -66,6 +71,7 @@ export default function App() {
           <Route path="feedback" element={<PermissionRoute permission="feedback.list"><ContentPage type="feedback" /></PermissionRoute>} />
           <Route path="birthday" element={<PermissionRoute permission="birthday.list"><ContentPage type="birthday" /></PermissionRoute>} />
           <Route path="job-vacancy" element={<PermissionRoute permission="job-vacancy.list"><ContentPage type="job-vacancy" /></PermissionRoute>} />
+          <Route path="bank-details" element={<PermissionRoute permission="bank-details.list"><ContentPage type="bank-details" /></PermissionRoute>} />
 
           <Route path="masters/:type" element={<MasterRoute />} />
           <Route path="settings" element={<PermissionRoute permission="settings.edit"><Settings /></PermissionRoute>} />

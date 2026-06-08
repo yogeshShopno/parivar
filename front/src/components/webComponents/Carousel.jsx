@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { assetUrl, memberApi } from '../../lib/api';
 
 /**
  * Professional Web Carousel Component
@@ -13,13 +14,28 @@ const Carousel = ({
   showArrows = true,
   showDots = true,
   showCounter = false,
-  images = ['/1.png', '/2.png', '/3.png', '/4.png'],
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [theme, setTheme] = useState({});
+  const [images, setImages] = useState([])
+
+  const normalizeBannerImages = (value) => {
+    if (Array.isArray(value)) return value.filter(Boolean).map(assetUrl)
+
+    if (typeof value !== 'string' || !value.trim()) return []
+
+    try {
+      const parsed = JSON.parse(value)
+      if (Array.isArray(parsed)) return parsed.filter(Boolean).map(assetUrl)
+    } catch (error) {
+      // Fall back to comma-separated values for older saved localStorage data.
+    }
+
+    return value.split(',').map((item) => item.trim()).filter(Boolean).map(assetUrl)
+  }
 
   // Load theme from localStorage (same as WebHeader)
   useEffect(() => {
@@ -27,7 +43,9 @@ const Carousel = ({
       const colorKeys = [
         'backgroundColor', 'borderColor', 'buttonColor', 'fontColor',
         'gradientEnd', 'gradientStart', 'primaryColor', 'secondaryColor', 'textColor',
+        'name','webLogo','favicon','phone','email','facebook','instagram','twitter','youtube','whatsapp',"bannerImages"
       ];
+
 
       const loadedTheme = {};
       colorKeys.forEach((key) => {
@@ -37,26 +55,31 @@ const Carousel = ({
         }
       });
 
-      // Fallback colors
-      const defaultTheme = {
-        gradientStart: '#2E7D32',
-        gradientEnd: '#0D3B12',
-        primaryColor: '#1B5E20',
-        secondaryColor: '#66BB6A',
-        textColor: '#123524',
-        backgroundColor: '#F5FFF7',
-        borderColor: '#D7EFD9',
-        buttonColor: '#1B5E20',
-        fontColor: '#FFFFFF',
-      };
 
-      setTheme({ ...defaultTheme, ...loadedTheme });
+      setTheme(loadedTheme);
+      setImages(normalizeBannerImages(loadedTheme.bannerImages));
+
     };
 
     loadTheme();
     window.addEventListener('storage', loadTheme);
     return () => window.removeEventListener('storage', loadTheme);
   }, []);
+
+  useEffect(() => {
+    const fetchBannerImages = async () => {
+      try {
+        const res = await memberApi.get('/get_app_theme')
+        const data = res.data?.data || res.data || {}
+        const bannerImages = normalizeBannerImages(data.bannerImages)
+        if (bannerImages.length) setImages(bannerImages)
+      } catch (error) {
+        console.error('Failed to load banner images:', error)
+      }
+    }
+
+    fetchBannerImages()
+  }, [])
 
   // Keyboard navigation
   useEffect(() => {
@@ -78,12 +101,18 @@ const Carousel = ({
     return () => clearInterval(timer);
   }, [autoplay, autoplayInterval, images.length]);
 
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [images.length]);
+
   const nextSlide = () => {
+    if (!images.length) return;
     setDirection(1);
     setCurrentIndex((prev) => (prev + 1) % images.length);
   };
 
   const prevSlide = () => {
+    if (!images.length) return;
     setDirection(-1);
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   };
@@ -112,7 +141,7 @@ const Carousel = ({
     >
       {/* Images Container */}
       <div className="relative w-full h-full">
-        {images.map((image, index) => {
+        {images.length ? images.map((image, index) => {
           const isActive = index === currentIndex;
           const isNext = (index === (currentIndex + 1) % images.length && direction > 0) ||
                         (index === (currentIndex - 1 + images.length) % images.length && direction < 0);
@@ -135,7 +164,11 @@ const Carousel = ({
               />
             </div>
           );
-        })}
+        }) : (
+          <div className="absolute inset-0" style={{
+            backgroundImage: `linear-gradient(135deg, ${theme.gradientStart || '#E65100'}, ${theme.gradientEnd || '#7B0D1C'})`
+          }} />
+        )}
       </div>
 
         

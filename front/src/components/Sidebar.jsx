@@ -4,6 +4,7 @@ import { Shield } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext'
 import { configurationNavigation, coreNavigation, masterNavigation } from '../config/navigation'
 import { hasPermission } from '../lib/permissions'
+import { getUserRoleLabel } from '../lib/roles'
 
 const LinkItem = ({ to, icon: Icon, label, end }) => (
   <NavLink
@@ -31,13 +32,14 @@ const LinkItem = ({ to, icon: Icon, label, end }) => (
 )
 
 const SectionLabel = ({ children }) => (
-  <div className="px-3 pb-2 pt-5 text-[11px] font-bold uppercase tracking-widest text-text-secondary/60 first:pt-0">
+  <div className="px-3 pb-2 pt-5 text-sm font-semibold  tracking-widest text-text-secondary/60 first:pt-0">
     {children}
   </div>
 )
 
 export default function Sidebar() {
   const { user } = useContext(AuthContext)
+  const roleLabel = user ? getUserRoleLabel(user) : ''
   const visibleCoreNavigation = coreNavigation.filter((item) => hasPermission(user, item.permission))
   const visibleMasterNavigation = masterNavigation.filter((item) => hasPermission(user, item.permission))
   const visibleConfigurationNavigation = configurationNavigation.filter((item) => hasPermission(user, item.permission))
@@ -49,17 +51,14 @@ export default function Sidebar() {
           <Shield className="h-5 w-5" />
         </div>
         <div className="min-w-0">
-          <h2 className="font-bold text-base tracking-wide bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
+          <h2 className="font-semibold text-base tracking-wide bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
             Parivar Admin
           </h2>
-          <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
-            Console HQ
-          </span>
+         
         </div>
       </div>
 
       <nav className="min-h-0 flex-1 overflow-y-auto pr-1">
-        <SectionLabel>Core Operations</SectionLabel>
         <div className="space-y-1">
           {visibleCoreNavigation.map((item) => (
             <LinkItem key={item.to} {...item} />
@@ -70,19 +69,19 @@ export default function Sidebar() {
           <>
             <SectionLabel>Masters</SectionLabel>
             <div className="ml-4 space-y-1 border-l border-primary/40 pl-3">
-              {visibleMasterNavigation.map(({ type, label }) => (
+              {visibleMasterNavigation.map((item) => (
                 <NavLink
-                  key={type}
-                  to={`/admin/masters/${type}`}
+                  key={item.type}
+                  to={item.to || `/admin/masters/${item.type}`}
                   end
                   className={({ isActive }) =>
-                    `block min-h-8 w-full rounded-md px-3 py-2 text-xs transition-colors ${
+                    `block min-h-8 w-full rounded-md px-3 py-2 text-sm transition-colors ${
                       isActive ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:text-text hover:bg-surface-secondary'
                     }`
                   }
-                  title={`${label} Master`}
+                  title={`${item.label} Master`}
                 >
-                  {label}
+                  {item.label}
                 </NavLink>
               ))}
             </div>
@@ -103,12 +102,12 @@ export default function Sidebar() {
 
       {user && (
         <div className="mt-5 flex shrink-0 items-center gap-3 rounded-xl border border-border bg-surface-secondary p-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 text-sm font-bold uppercase text-primary shadow-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 text-sm font-semibold  text-primary shadow-sm">
             {user.name ? user.name.substring(0, 2) : user.email?.substring(0, 2) || 'AD'}
           </div>
           <div className="min-w-0">
-            <h4 className="truncate text-xs font-semibold text-text">{user.name || user.email || 'Administrator'}</h4>
-            <p className="text-[10px] text-text-secondary truncate capitalize">{user.role || 'Administrator'}</p>
+            <h4 className="truncate text-sm font-semibold text-text">{user.name || user.email || 'Administrator'}</h4>
+            <p className="text-sm text-text-secondary truncate capitalize">{roleLabel || 'Administrator'}</p>
           </div>
         </div>
       )}

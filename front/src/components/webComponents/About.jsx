@@ -1,17 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { CheckCircle, Heart, Home } from 'lucide-react'
 
-const defaultTheme = {
-  gradientStart: '#2E7D32',
-  gradientEnd: '#0D3B12',
-  primaryColor: '#1B5E20',
-  secondaryColor: '#66BB6A',
-  textColor: '#123524',
-  backgroundColor: '#F5FFF7',
-  borderColor: '#D7EFD9',
-  buttonColor: '#1B5E20',
-  fontColor: '#FFFFFF',
-}
+
 
 const features = [
   'Bring Every Generation Onto One Private Space',
@@ -51,11 +41,11 @@ const shadeColor = (color, percent) => {
 }
 
 export default function About() {
-  const [theme, setTheme] = useState(defaultTheme)
+  const [theme, setTheme] = useState({})
 
   useEffect(() => {
     const loadTheme = () => {
-      setTheme({ ...defaultTheme, ...getStoredWebTheme() })
+      setTheme(getStoredWebTheme())
     }
 
     loadTheme()
@@ -73,7 +63,7 @@ export default function About() {
         <div className="flex justify-center lg:justify-start">
           <img
             src="/mobile.png"
-            alt="Paneliya Parivar mobile app"
+            alt="r mobile app"
             className="w-full max-w-md lg:max-w-lg object-contain"
             loading="lazy"
           />
@@ -85,11 +75,11 @@ export default function About() {
             style={{ color: theme.primaryColor }}
           >
             <Home className="h-4 w-4" />
-            About Paneliya Parivar
+            About   Parivar
           </p>
 
           <h2
-            className="text-3xl sm:text-4xl font-bold leading-tight tracking-tight"
+            className="text-3xl sm:text-4xl font-semibold leading-tight tracking-tight"
             style={{ color: theme.textColor }}
           >
             Built For Families. Designed For Togetherness.
@@ -99,7 +89,7 @@ export default function About() {
             className="mt-5 text-base leading-7"
             style={{ color: shadeColor(theme.textColor, 25) }}
           >
-            Paneliya Parivar is a warm, modern community platform that helps families and groups stay beautifully connected, combining elegant design with the joy of being together across every generation.
+             Parivar is a warm, modern community platform that helps families and groups stay beautifully connected, combining elegant design with the joy of being together across every generation.
           </p>
 
           <div className="mt-7 divide-y" style={{ borderColor: theme.borderColor }}>
@@ -118,7 +108,7 @@ export default function About() {
 
           <a
             href="#members"
-            className="mt-8 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-bold transition-all duration-200 hover:shadow-lg"
+            className="mt-8 inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-semibold transition-all duration-200 hover:shadow-lg"
             style={{
               backgroundColor: theme.buttonColor || theme.primaryColor,
               color: theme.fontColor,

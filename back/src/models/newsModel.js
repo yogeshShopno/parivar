@@ -30,12 +30,8 @@ const newsSchema = new mongoose.Schema({
     required: false
   },
   image: {
-    data: {
-      type: Buffer
-    },
-    contentType: {
-      type: String
-    }
+    type: String,
+    default: ''
   },
   reporter_name: {
     type: String,

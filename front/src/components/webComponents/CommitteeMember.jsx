@@ -1,40 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { memberApi } from '../../lib/api'
 
-const defaultTheme = {
-  gradientStart: '#2E7D32',
-  gradientEnd: '#0D3B12',
-  primaryColor: '#1B5E20',
-  secondaryColor: '#66BB6A',
-  textColor: '#123524',
-  backgroundColor: '#F5FFF7',
-  borderColor: '#D7EFD9',
-  buttonColor: '#1B5E20',
-  fontColor: '#FFFFFF',
-}
 
-const fallbackMembers = [
-  {
-    name: 'Aarav Sharma',
-    role: 'Community President',
-    image: '/1.png',
-  },
-  {
-    name: 'Priya Shah',
-    role: 'Health Coordinator',
-    image: '/2.png',
-  },
-  {
-    name: 'Rajesh Patel',
-    role: 'Elder & Mentor',
-    image: '/3.png',
-  },
-  {
-    name: 'Ananya Verma',
-    role: 'Member Relations',
-    image: '/4.png',
-  },
-]
 
 const normalizeCommitteeMember = (member, index) => {
   const name = [member.first_name, member.middle_name, member.last_name]
@@ -46,7 +13,7 @@ const normalizeCommitteeMember = (member, index) => {
     id: member.id || `${name}-${index}`,
     name: name || 'Committee Member',
     role: member.designation || member.role || 'Committee',
-    image: member.image || `/${(index % 4) + 1}.png`,
+    image: member.image || "/image.png",
   }
 }
 
@@ -61,6 +28,7 @@ const getStoredWebTheme = () => {
     'primaryColor',
     'secondaryColor',
     'textColor',
+    
   ]
 
   return colorKeys.reduce((theme, key) => {
@@ -82,13 +50,13 @@ const shadeColor = (color, percent) => {
 }
 
 export default function Members() {
-  const [theme, setTheme] = useState(defaultTheme)
+  const [theme, setTheme] = useState(getStoredWebTheme())
   const [members, setMembers] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadTheme = () => {
-      setTheme({ ...defaultTheme, ...getStoredWebTheme() })
+      setTheme(getStoredWebTheme())
     }
 
     loadTheme()
@@ -100,7 +68,7 @@ export default function Members() {
     const fetchCommitteeMembers = async () => {
       try {
         setLoading(true)
-        const response = await memberApi.get('/committee_members')
+        const response = await memberApi.get('/committee-members')
         const rows = Array.isArray(response.data?.data) ? response.data.data : []
         setMembers(rows.map(normalizeCommitteeMember))
       } catch (error) {
@@ -113,7 +81,8 @@ export default function Members() {
     fetchCommitteeMembers()
   }, [])
 
-  const visibleMembers = members.length > 0 ? members : fallbackMembers
+  const visibleMembers = members.length > 0 ? members : []
+ 
 
   return (
     <section
@@ -132,7 +101,7 @@ export default function Members() {
             - Members -
           </p>
           <h2
-            className="text-3xl sm:text-4xl font-bold tracking-tight"
+            className="text-3xl sm:text-4xl font-semibold tracking-tight"
             style={{ color: theme.textColor }}
           >
             Meet Our{' '}
@@ -169,7 +138,7 @@ export default function Members() {
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {visibleMembers.map((member) => (
+          {visibleMembers?.map((member) => (
             <article
               key={member.id || member.name}
               className="group overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
@@ -188,13 +157,13 @@ export default function Members() {
 
               <div className="px-5 py-5 text-center">
                 <h3
-                  className="text-lg font-bold"
+                  className="text-lg font-semibold"
                   style={{ color: theme.textColor }}
                 >
                   {member.name}
                 </h3>
                 <span
-                  className="inline-flex items-center rounded-full border px-4 py-1.5 mt-2 text-xs font-semibold"
+                  className="inline-flex items-center rounded-full border px-4 py-1.5 mt-2 text-sm font-semibold"
                   style={{
                     borderColor: theme.primaryColor,
                     color: theme.primaryColor,

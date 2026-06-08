@@ -6,7 +6,7 @@ const legacyPermissionFor = (permission) => {
     'festivals.': 'festivals.manage',
     'events.': 'events.manage',
     'gallery.': 'gallery.manage',
-    'banners.': 'banners.manage',
+    // 'banners.': 'banners.manage',
     'businesses.': 'businesses.manage',
     'news.': 'news.manage',
     'posts.': 'posts.manage',

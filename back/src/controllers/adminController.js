@@ -7,7 +7,9 @@ const Student = require('../models/studentModel');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { apiResponse, fullName, memberPublicId, publicUrl } = require('../utils/apiResponse');
+const familyUtil = require('../utils/familyHelper');
 const { getRolePermissions } = require('../middleware/auth');
+const queryHelper = require('../utils/queryHelper');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfamilykey';
 
@@ -42,17 +44,16 @@ const recoveryKeyFromRequest = (req) => (
 
 const escapeRegExp = (value = '') => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-const adminRecoveryQuery = ({ id, member_id, email, number }) => {
+const adminRecoveryQuery = ({ id,  email, number }) => {
   const query = [];
 
   if (id) {
     if (mongoose.isValidObjectId(id)) {
       query.push({ _id: id });
     }
-    query.push({ member_id: String(id) });
+    query.push({ _id: String(id) });
   }
 
-  if (member_id) query.push({ member_id: String(member_id) });
   if (email) query.push({ email: String(email).toLowerCase() });
   if (number) query.push({ number: String(number) });
 
@@ -121,7 +122,7 @@ const login = async (req, res) => {
     );
 
     const userData = {
-      id: user.member_id || String(user._id),
+      id: user.id || String(user._id),
       name: fullName(user),
       email: user.email,
       role: user.is_committee ? 'admin' : 'user',
@@ -218,7 +219,7 @@ const updateAdminRecovery = async (req, res) => {
     await user.save();
 
     return apiResponse(res, 200, 'Admin updated successfully', {
-      id: user.member_id || String(user._id),
+      id: user.id || String(user._id),
       _id: String(user._id),
       email: user.email || '',
       number: user.number || '',
@@ -263,17 +264,16 @@ const getStats = async (req, res) => {
 // --- Users Management ---
 const getUsers = async (req, res) => {
   try {
-    const { search, gender, blood_group, is_committee } = req.query;
     const birthday = 'birthday' in req.query;
     const query = {};
     const requestPermissions = getRolePermissions(req.user);
     const canListMembers = requestPermissions.includes('members.list') || requestPermissions.includes('users.manage');
     const canListCommittee = requestPermissions.includes('committee.list') || requestPermissions.includes('committee.manage');
 
-    if (gender) query.gender = gender;
-    if (blood_group) query.blood_group = blood_group;
-    if (is_committee !== undefined) {
-      query.is_committee = is_committee === 'true';
+    if (req.query.gender) query.gender = req.query.gender;
+    if (req.query.blood_group) query.blood_group = req.query.blood_group;
+    if (req.query.is_committee !== undefined) {
+      query.is_committee = req.query.is_committee === 'true';
     }
     if (!canListMembers && canListCommittee) {
       query.is_committee = true;
@@ -283,20 +283,15 @@ const getUsers = async (req, res) => {
       query.dob = { $exists: true };
     }
 
-    if (search) {
-      query.$or = [
-        { first_name: new RegExp(search, 'i') },
-        { middle_name: new RegExp(search, 'i') },
-        { last_name: new RegExp(search, 'i') },
-        { number: new RegExp(search, 'i') },
-        { email: new RegExp(search, 'i') }
-      ];
-    }
-
-    const users = await User.find(query)
-      .select(birthday ? 'first_name middle_name last_name number dob' : '-password')
-      .populate(birthday ? '' : 'role_id')
-      .sort({ createdAt: -1 });
+    const { data: users, pagination } = await queryHelper(User, req.query, {
+      baseQuery: query,
+      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email'],
+      filterFields: ['gender', 'blood_group', 'is_committee', 'committee_role', 'role_id', 'status'],
+      select: birthday ? 'first_name middle_name last_name number dob' : '-password',
+      populate: birthday ? '' : 'role_id',
+      defaultSort: { createdAt: -1 },
+      lean: false
+    });
 
     if (birthday) {
       const formatted = users.map(u => ({
@@ -304,11 +299,11 @@ const getUsers = async (req, res) => {
         number: u.number,
         dob: u.dob || null
       }));
-      return apiResponse(res, 200, 'Users birthday list retrieved successfully', formatted);
+      return apiResponse(res, 200, 'Users birthday list retrieved successfully', formatted, pagination);
     }
     // Map backend user to the fields expected by standard layout or user forms
     const formatted = users.map(u => ({
-      id: u.member_id || String(u._id),
+      id: u.id || String(u._id),
       _id: u._id,
       first_name: u.first_name,
       middle_name: u.middle_name || '',
@@ -332,7 +327,7 @@ const getUsers = async (req, res) => {
       role: u.is_committee ? 'admin' : 'user'
     }));
 
-    return apiResponse(res, 200, 'Users retrieved successfully', formatted);
+    return apiResponse(res, 200, 'Users retrieved successfully', formatted, pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving users', { error: error.message });
   }
@@ -381,19 +376,14 @@ const createUser = async (req, res) => {
       return apiResponse(res, 400, 'Committee image must be 1 MB or smaller');
     }
 
-    // Generate unique member_id
-    const users = await User.find({ member_id: /^\d+$/ }).select('member_id');
+
+    const users = await User.find({ _id: /^\d+$/ }).select('_id');
     const highestId = users.reduce((max, u) => {
-      const num = Number(u.member_id);
+      const num = Number(u._id);
       return Number.isFinite(num) && num > max ? num : max;
     }, 0);
-    const nextMemberId = String(highestId > 0 ? highestId + 1 : Date.now());
-
-    const assignedRoleId = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
-
 
     const newUser = new User({
-      member_id: nextMemberId,
       first_name: first_name,
       middle_name: middle_name || '',
       last_name: last_name || '',
@@ -403,18 +393,29 @@ const createUser = async (req, res) => {
       gender: gender || '',
       dob: dob || null,
       blood_group: blood_group || '',
-      relation: relation || 'Self',
+      relation: familyData.relation,
       is_committee: is_committee === true || is_committee === 'true',
       committee_role: committee_role || '',
       role_id: assignedRoleId,
       address: address || '',
       designation: designation || '',
-      status: status === undefined ? 1 : Number(status),
+      status: familyData.status,
+      family_head: familyData.family_head,
       image: imageFromRequest(req),
-
     });
 
     await newUser.save();
+
+    if (familyData.relation === 'Self') {
+      newUser.family_head = {
+        id: newUser._id,
+        name: familyUtil.fullName(newUser)
+      };
+      if (status === undefined) {
+        newUser.status = 0;
+      }
+      await newUser.save();
+    }
 
     return apiResponse(res, 201, 'User created successfully', {
       _id: newUser._id,
@@ -448,7 +449,6 @@ const updateUser = async (req, res) => {
     const isSelfUpdate = [
       req.user?._id,
       req.user?.id,
-      req.user?.member_id
     ].some((value) => value && String(value) === String(id));
     const isRoleUpdate = [
       'role',
@@ -483,10 +483,16 @@ const updateUser = async (req, res) => {
     } = req.body;
 
 
-    const user = await User.findOne({ member_id: id });
+    const user = await User.findOne({ _id: id });
     if (!user) {
       return apiResponse(res, 404, 'User not found');
     }
+
+    const familyData = await familyUtil.prepareFamilyFields({
+      relation,
+      family_head_id: req.body.family_head_id,
+      status
+    }, user);
 
     if ((is_committee === true || is_committee === 'true' || user.is_committee) && req.file?.size > 1024 * 1024) {
       return apiResponse(res, 400, 'Committee image must be 1 MB or smaller');
@@ -500,19 +506,20 @@ const updateUser = async (req, res) => {
     if (gender !== undefined) user.gender = gender;
     if (dob !== undefined) user.dob = dob;
     if (blood_group !== undefined) user.blood_group = blood_group;
-    if (relation !== undefined) user.relation = relation;
+    if (relation !== undefined) user.relation = familyData.relation;
     if (is_committee !== undefined) user.is_committee = is_committee === true || is_committee === 'true';
     if (committee_role !== undefined) user.committee_role = committee_role;
     if (role_id !== undefined) user.role_id = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
     if (address !== undefined) user.address = address;
     if (designation !== undefined) user.designation = designation;
     if (status !== undefined) user.status = Number(status);
+    user.family_head = familyData.family_head;
     if (password) user.password = password;
     if (req.file || req.body.image) user.image = imageFromRequest(req, user.image);
 
     await user.save();
 
-    return apiResponse(res, 200, 'User updated deleteUser ', {
+    return apiResponse(res, 200, 'User updated  ', {
       id: user._id,
       first_name: user.first_name,
       middle_name: user.middle_name || '',
@@ -540,7 +547,7 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await User.deleteOne({ member_id: id });
+    const result = await User.deleteOne({_id: id });
     if (result.deletedCount === 0) {
       return apiResponse(res, 404, 'User not found');
     }
@@ -553,13 +560,10 @@ const deleteUser = async (req, res) => {
 
 const getStudents = async (req, res) => {
   try {
-    const { standard, student_name, school_name } = req.query;
-    const query = {};
-    if (standard) query.standard = new RegExp(standard, 'i');
-    if (student_name) query.student_name = new RegExp(student_name, 'i');
-    if (school_name) query.school_name = new RegExp(school_name, 'i');
-
-const students = await Student.find(query).sort({ _id: -1 }).lean();
+    const { data: students, pagination } = await queryHelper(Student, req.query, {
+      searchFields: ['surname', 'student_name', 'father_name', 'school_name', 'standard', 'mobile_number'],
+      filterFields: ['standard', 'student_name', 'school_name', 'status']
+    });
     return apiResponse(res, 200, 'Students retrieved successfully', students.map(s => ({
       id: s.id || String(s._id),
       surname: s.surname || '',
@@ -571,8 +575,10 @@ const students = await Student.find(query).sort({ _id: -1 }).lean();
       mobile_number: s.mobile_number || '',
       mobile_number_2: s.mobile_number_2 || '',
       result_image: publicUrl(req, s.result_image || ''),
-      status: Number(s.status ?? 1)
-    })));
+      student_image: publicUrl(req, s.student_image || ''),
+      status: Number(s.status ?? 0),
+      createdAt: s.createdAt || s.cdate || ''
+    })), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving students', { error: error.message });
   }
@@ -589,7 +595,8 @@ const studentPayload = (req, existing = {}) => ({
   mobile_number: req.body.mobile_number || existing.mobile_number || '',
   mobile_number_2: req.body.mobile_number_2 || existing.mobile_number_2 || '',
   result_image: req.body.result_image || existing.result_image || '',
-  status: req.body.status === undefined ? Number(existing.status ?? 1) : Number(req.body.status)
+  student_image: req.body.student_image || existing.student_image || '',
+  status: req.body.status === undefined ? Number(existing.status ?? 0) : Number(req.body.status)
 });
 
 const saveStudent = async (req, res) => {
@@ -633,7 +640,9 @@ const saveStudent = async (req, res) => {
       mobile_number: student.mobile_number || '',
       mobile_number_2: student.mobile_number_2 || '',
       result_image: publicUrl(req, student.result_image || ''),
-      status: Number(student.status ?? 1)
+      student_image: publicUrl(req, student.student_image || ''),
+      status: Number(student.status ?? 0),
+      createdAt: student.createdAt || student.cdate || ''
     });
   } catch (error) {
     return apiResponse(res, 500, 'Error saving student', { error: error.message });

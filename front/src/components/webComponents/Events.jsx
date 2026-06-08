@@ -2,72 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Calendar, CheckCircle, Clock, MapPin, Users, X } from 'lucide-react'
 import { memberApi } from '../../lib/api'
 
-const defaultTheme = {
-  gradientStart: '#2E7D32',
-  gradientEnd: '#0D3B12',
-  primaryColor: '#1B5E20',
-  secondaryColor: '#66BB6A',
-  textColor: '#123524',
-  backgroundColor: '#F5FFF7',
-  borderColor: '#D7EFD9',
-  buttonColor: '#1B5E20',
-  fontColor: '#FFFFFF',
-}
 
-const fallbackEvents = [
-  {
-    title: 'Bhagwad Spatah',
-    subtitle: 'Bhagwad Spatah Katha 2026, Shastri Shri Param Pujya Dwarkesh Lalji Shri',
-    category: 'Family Reunion',
-    location: 'Surat',
-    time: '02:00 PM - 06:00 PM',
-    date: 'Sunday, 24 May 2026',
-    day: '24',
-    month: 'May',
-    entry: 'Free',
-    attendees: 0,
-    image: '/1.png',
-  },
-  {
-    title: 'vala Annual Family Reunion & Gathering',
-    subtitle: 'Family Reunion 2027',
-    category: 'Family Reunion',
-    location: 'vala Samaj Hall, Vadodara',
-    time: '03:00 PM - 06:00 PM',
-    date: 'Tuesday, 12 January 2027',
-    day: '12',
-    month: 'Jan',
-    entry: 'Free',
-    attendees: 0,
-    image: '/2.png',
-  },
-  {
-    title: 'Grand Diwali Community Night & Celebration',
-    subtitle: 'Diwali Night 2026',
-    category: 'Family Reunion',
-    location: 'vala Samaj Hall, Surat',
-    time: '09:00 PM - 11:00 PM',
-    date: 'Tuesday, 20 October 2026',
-    day: '20',
-    month: 'Oct',
-    entry: 'Paid',
-    attendees: 0,
-    image: '/3.png',
-  },
-  {
-    title: 'Annual Milan 2026',
-    subtitle: 'Annual Milan 2026',
-    category: 'Family Reunion',
-    location: 'vala Community Center',
-    time: '05:00 PM - 09:00 PM',
-    date: 'Friday, 15 May 2026',
-    day: '15',
-    month: 'May',
-    entry: 'Free',
-    attendees: 0,
-    image: '/4.png',
-  },
-]
 
 const formatEventDate = (value) => {
   if (!value) return ''
@@ -92,11 +27,11 @@ const normalizeEvent = (event, index) => ({
   title: event.event_name || event.title || 'Community Event',
   subtitle: event.title || event.event_name || 'Upcoming Event',
   category: event.event_category_name || 'Community Event',
-  location: event.event_location || 'vala Parivar',
+  location: event.event_location || ' Parivar',
   time: [event.start_time, event.end_time].filter(Boolean).join(' - ') || 'Time will be announced',
-  date: formatEventDate(event.event_date),
-  day: getDatePart(event.event_date, 'day'),
-  month: getDatePart(event.event_date, 'month'),
+  date: formatEventDate(event.start_time),
+day: getDatePart(event.start_time, 'day'),
+month: getDatePart(event.start_time, 'month'),
   entry: event.entry_type || 'Free',
   attendees: 0,
   image: event.image || `/${(index % 4) + 1}.png`,
@@ -134,7 +69,7 @@ const shadeColor = (color, percent) => {
 }
 
 export default function Events() {
-  const [theme, setTheme] = useState(defaultTheme)
+  const [theme, setTheme] = useState(getStoredWebTheme() )
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -147,7 +82,7 @@ export default function Events() {
 
   useEffect(() => {
     const loadTheme = () => {
-      setTheme({ ...defaultTheme, ...getStoredWebTheme() })
+      setTheme(getStoredWebTheme())
     }
 
     loadTheme()
@@ -160,7 +95,11 @@ export default function Events() {
       try {
         setLoading(true)
         const response = await memberApi.get('/events')
+        
         const rows = Array.isArray(response.data?.data) ? response.data.data : []
+        const normalizedEvents = normalizeEvent
+        console.log(normalizedEvents)
+
         setEvents(rows.map(normalizeEvent))
       } catch (error) {
         setEvents([])
@@ -198,7 +137,9 @@ export default function Events() {
     setSelectedEvent(null)
   }
 
-  const visibleEvents = events.length > 0 ? events : fallbackEvents
+  const visibleEvents = events.length > 0 ? events : []
+
+
 
   return (
     <section
@@ -215,7 +156,7 @@ export default function Events() {
             - Upcoming Events -
           </p>
           <h2
-            className="text-3xl sm:text-4xl font-bold tracking-tight"
+            className="text-3xl sm:text-4xl font-semibold tracking-tight"
             style={{ color: theme.textColor }}
           >
             Moments Worth{' '}
@@ -267,15 +208,15 @@ export default function Events() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute left-4 top-4 rounded-md bg-white px-3 py-2 text-center shadow-lg">
-                  <div className="text-xl font-bold leading-none" style={{ color: theme.textColor }}>
+                  <div className="text-xl font-semibold leading-none" style={{ color: theme.textColor }}>
                     {event.day}
                   </div>
-                  <div className="mt-1 text-xs font-semibold" style={{ color: theme.primaryColor }}>
+                  <div className="mt-1 text-sm font-semibold" style={{ color: theme.primaryColor }}>
                     {event.month}
                   </div>
                 </div>
                 <div
-                  className="absolute right-4 top-4 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase"
+                  className="absolute right-4 top-4 rounded-full px-3 py-1.5 text-sm font-semibold "
                   style={{
                     backgroundImage: `linear-gradient(to right, ${theme.gradientStart}, ${theme.gradientEnd})`,
                     color: theme.fontColor,
@@ -283,7 +224,7 @@ export default function Events() {
                 >
                   Registering
                 </div>
-                <h3 className="absolute bottom-4 left-4 right-4 text-sm font-bold text-white">
+                <h3 className="absolute bottom-4 left-4 right-4 text-sm font-semibold text-white">
                   {event.subtitle}
                 </h3>
               </div>
@@ -291,7 +232,7 @@ export default function Events() {
               <div className="p-5">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <span
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold"
+                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold"
                     style={{
                       backgroundColor: shadeColor(theme.backgroundColor, 2),
                       color: theme.primaryColor,
@@ -300,13 +241,13 @@ export default function Events() {
                     <Users className="h-3.5 w-3.5" />
                     {event.category}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-xs" style={{ color: theme.textColor }}>
+                  <span className="inline-flex items-center gap-1 text-sm" style={{ color: theme.textColor }}>
                     <Users className="h-3.5 w-3.5" />
                     {event.attendees}
                   </span>
                 </div>
 
-                <h4 className="min-h-12 text-base font-bold leading-snug" style={{ color: theme.textColor }}>
+                <h4 className="min-h-12 text-base font-semibold leading-snug" style={{ color: theme.textColor }}>
                   {event.title}
                 </h4>
 
@@ -329,7 +270,7 @@ export default function Events() {
                   <button
                     type="button"
                     onClick={() => openRegisterDialog(event)}
-                    className="inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-bold transition-all duration-200 hover:shadow-lg"
+                    className="inline-flex items-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition-all duration-200 hover:shadow-lg"
                     style={{
                       backgroundColor: theme.buttonColor || theme.primaryColor,
                       color: theme.fontColor,
@@ -339,7 +280,7 @@ export default function Events() {
                     Register Now
                   </button>
                   <div className="text-sm" style={{ color: theme.textColor }}>
-                    Entry: <span className="font-bold">{event.entry}</span>
+                    Entry: <span className="font-semibold">{event.entry}</span>
                   </div>
                 </div>
               </div>
@@ -371,7 +312,7 @@ export default function Events() {
             >
               <div>
                 <p className="text-sm font-semibold opacity-90">Event Registration</p>
-                <h3 id="event-register-title" className="mt-1 text-xl font-bold leading-snug">
+                <h3 id="event-register-title" className="mt-1 text-xl font-semibold leading-snug">
                   {selectedEvent.title}
                 </h3>
               </div>
@@ -440,14 +381,14 @@ export default function Events() {
                 <button
                   type="button"
                   onClick={() => setSelectedEvent(null)}
-                  className="rounded-md border px-5 py-2.5 text-sm font-bold"
+                  className="rounded-md border px-5 py-2.5 text-sm font-semibold"
                   style={{ borderColor: theme.borderColor, color: theme.textColor }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-md px-5 py-2.5 text-sm font-bold"
+                  className="rounded-md px-5 py-2.5 text-sm font-semibold"
                   style={{
                     backgroundColor: theme.buttonColor || theme.primaryColor,
                     color: theme.fontColor,

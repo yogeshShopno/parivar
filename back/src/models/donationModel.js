@@ -16,11 +16,7 @@ const donationSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  location: {
-    type: String,
-    required: true,
-    trim: true
-  },
+
   donation_purpose: {
     type: String,
     required: true,
@@ -30,11 +26,7 @@ const donationSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  whose_possession: {
-    type: String,
-    default: 'direct',
-    trim: true
-  },
+
   status: {
     type: Number,
     default: 1,

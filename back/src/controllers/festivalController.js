@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Festival = require('../models/festivalModel');
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const isObjectId = (id) => mongoose.isValidObjectId(id);
 
@@ -26,7 +27,10 @@ const imageFromRequest = (req, fallback = '') => {
 // --- Member ---
 const getFestivals = async (req, res) => {
   try {
-    const festivals = await Festival.find({}).sort({ _id: -1 }).lean();
+    const { data: festivals, pagination } = await queryHelper(Festival, req.query, {
+      searchFields: ['title', 'description', 'festival_name', 'festival_description', 'button_name'],
+      filterFields: ['status']
+    });
     const data = festivals.map((festival) => ({
       id: festival.id || String(festival._id),
       festival_name: festival.festival_name || festival.title || '',
@@ -37,7 +41,7 @@ const getFestivals = async (req, res) => {
       image: publicUrl(req, festival.image || '')
     }));
 
-    return apiResponse(res, 200, 'Festivals Data fetch successful', data);
+    return apiResponse(res, 200, 'Festivals Data fetch successful', data, pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving festivals', { error: error.message });
   }
@@ -58,8 +62,11 @@ const formatFestival = (req, item) => ({
 
 const adminGetFestivals = async (req, res) => {
   try {
-    const rows = await Festival.find({}).sort({ _id: -1 }).lean();
-    return apiResponse(res, 200, 'Festivals retrieved successfully', rows.map((row) => formatFestival(req, row)));
+    const { data, pagination } = await queryHelper(Festival, req.query, {
+      searchFields: ['title', 'description', 'festival_name', 'festival_description', 'button_name'],
+      filterFields: ['status']
+    });
+    return apiResponse(res, 200, 'Festivals retrieved successfully', data.map((row) => formatFestival(req, row)), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving festivals', { error: error.message });
   }

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Matrimony = require('../models/matrimonyModel');
 const { apiResponse, publicUrl } = require('../utils/apiResponse');
+const queryHelper = require('../utils/queryHelper');
 
 const requestData = (req) => ({
   ...req.query,
@@ -9,13 +10,24 @@ const requestData = (req) => ({
 
 const getMatrimonies = async (req, res) => {
   try {
-    const { full_name, city, gender } = requestData(req);
-    const query = {};
-    if (full_name) query.full_name = new RegExp(full_name, 'i');
-    if (city) query.city = new RegExp(city, 'i');
-    if (gender) query.gender = new RegExp(gender, 'i');
+    let baseQuery = {};
+    const { is_own } = req.query;
+    if (is_own === 'true' && req.user) {
+      baseQuery.member_id = req.user.member_id || String(req.user._id);
+    } else {
+      // By default, for non-own fetches, admins can see all, users only see active ones.
+      // But typically we show status=1 if not specified. Wait, if it's Admin software, they might pass status directly.
+      // If we don't force baseQuery.status = 1 here, Admin can see all (since queryHelper allows filtering by status).
+      // If they explicitly pass status=1 it will filter. Let's not force status=1 here so Admin can see pending.
+      // Wait, user says "bydefault status is pending admin approva kare pachi list ma show thase." This means for normal users, they should only see status=1.
+      // In the admin panel, they might fetch all. We'll rely on the frontend to pass `status=1` if it's the app, or admin will just fetch without `status`.
+    }
 
-    const matrimonies = await Matrimony.find(query).sort({ _id: -1 }).lean();
+    const { data: matrimonies, pagination } = await queryHelper(Matrimony, requestData(req), {
+      baseQuery,
+      searchFields: ['full_name', 'city', 'education', 'occupation', 'father_name', 'mother_name', 'gotra', 'mobile_number'],
+      filterFields: ['full_name', 'city', 'gender', 'marital_status', 'family_type', 'status']
+    });
 
     return res.status(200).json({
       status: 200,
@@ -38,8 +50,13 @@ const getMatrimonies = async (req, res) => {
         mobile_number: item.mobile_number || '',
         city: item.city || '',
         about: item.about || '',
-        status: Number(item.status ?? 1)
-      }))
+        biodata: item.biodata || '',
+        person_image: item.person_image || '',
+        member_id: item.member_id || '',
+        is_own: req.user ? (String(item.member_id) === String(req.user.member_id || req.user._id)) : false,
+        status: Number(item.status ?? 0)
+      })),
+      ...(pagination ? { pagination } : {})
     });
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving matrimony records', { error: error.message });
@@ -81,7 +98,11 @@ const getMatrimonyById = async (req, res) => {
         mobile_number: matrimony.mobile_number || '',
         city: matrimony.city || '',
         about: matrimony.about || '',
-        status: Number(matrimony.status ?? 1)
+        biodata: matrimony.biodata || '',
+        person_image: matrimony.person_image || '',
+        member_id: matrimony.member_id || '',
+        is_own: req.user ? (String(matrimony.member_id) === String(req.user.member_id || req.user._id)) : false,
+        status: Number(matrimony.status ?? 0)
       }
     });
   } catch (error) {
@@ -108,6 +129,8 @@ const addMatrimony = async (req, res) => {
       mobile_number,
       city,
       about,
+      biodata,
+      person_image,
       status
     } = requestData(req);
 
@@ -133,7 +156,10 @@ const addMatrimony = async (req, res) => {
       mobile_number,
       city,
       about: about || '',
-      status: status === undefined ? 1 : Number(status),
+      biodata: biodata || '',
+      person_image: person_image || '',
+      member_id: req.user ? (req.user.member_id || String(req.user._id)) : '',
+      status: status === undefined ? 0 : Number(status),
       cdate: new Date().toISOString().slice(0, 10)
     };
 
@@ -159,7 +185,10 @@ const addMatrimony = async (req, res) => {
         mobile_number: matrimonial.mobile_number,
         city: matrimonial.city,
         about: matrimonial.about || '',
-        status: Number(matrimonial.status ?? 1)
+        biodata: matrimonial.biodata || '',
+        person_image: matrimonial.person_image || '',
+        member_id: matrimonial.member_id || '',
+        status: Number(matrimonial.status ?? 0)
       }
     });
   } catch (error) {
@@ -198,7 +227,9 @@ const updateMatrimony = async (req, res) => {
       'family_type',
       'mobile_number',
       'city',
-      'about'
+      'about',
+      'biodata',
+      'person_image'
     ];
 
     fields.forEach((field) => {
@@ -230,7 +261,10 @@ const updateMatrimony = async (req, res) => {
       mobile_number: matrimony.mobile_number,
       city: matrimony.city,
       about: matrimony.about || '',
-      status: Number(matrimony.status ?? 1)
+      biodata: matrimony.biodata || '',
+      person_image: matrimony.person_image || '',
+      member_id: matrimony.member_id || '',
+      status: Number(matrimony.status ?? 0)
     });
   } catch (error) {
     return apiResponse(res, 500, 'Error updating matrimony record', { error: error.message });

@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Shield, Eye, EyeOff, Key } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext'
+import { toast } from '../lib/toast'
 
 export default function Login() {
   const { login } = useContext(AuthContext)
@@ -15,16 +16,21 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!email || !password) {
-      setError('Please provide all credentials.')
+      const message = 'Please provide all credentials.'
+      setError(message)
+      toast.error(message)
       return
     }
     setError('')
     setLoading(true)
     try {
       await login(email, password)
+      toast.success('Login successful')
       navigate('/admin')
     } catch (err) {
-      setError(err.message || 'Access Denied: Invalid administrator credentials.')
+      const message = err.message || 'Access Denied: Invalid administrator credentials.'
+      setError(message)
+      toast.error(message)
     } finally {
       setLoading(false)
     }
@@ -45,14 +51,13 @@ export default function Login() {
             <Shield className="w-6 h-6 text-white" />
           </div>
           <h1 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-indigo-600 bg-clip-text text-transparent">
-            Parivar Console
+            Parivar
           </h1>
-          <p className="text-[10px] text-primary font-bold uppercase tracking-widest mt-1">Platform Control Room</p>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-xs flex items-center gap-2 mb-6 animate-fade-in shadow-sm">
+          <div className="bg-error-bg border border-error-border text-error-text p-4 rounded-2xl text-sm flex items-center gap-2 mb-6 animate-fade-in shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>
             <span>{error}</span>
           </div>
@@ -61,12 +66,12 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Email input */}
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-2 tracking-wider">Email Address</label>
+            <label className="block text-sm  font-semibold text-text-secondary mb-2 tracking-wider">Email Address</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-input-bg text-text placeholder-text-secondary/40 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-2xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
+              className="w-full px-4 py-3 bg-input-bg text-text placeholder-text-secondary/40 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
               placeholder="admin@example.com"
               disabled={loading}
             />
@@ -74,13 +79,13 @@ export default function Login() {
 
           {/* Password Input */}
           <div>
-            <label className="block text-[10px] uppercase font-bold text-text-secondary mb-2 tracking-wider">Password</label>
+            <label className="block text-sm  font-semibold text-text-secondary mb-2 tracking-wider">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-input-bg text-text placeholder-text-secondary/40 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-2xl text-xs outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
+                className="w-full px-4 py-3 bg-input-bg text-text placeholder-text-secondary/40 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all duration-300"
                 placeholder="••••••••"
                 disabled={loading}
               />
@@ -98,26 +103,11 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 bg-primary hover:bg-primary-hover hover:shadow-glow-primary text-white py-3.5 rounded-2xl font-bold text-xs tracking-wider uppercase transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full mt-2 bg-primary hover:bg-primary-hover hover:shadow-glow-primary text-white py-3.5 rounded-2xl font-semibold text-sm tracking-wider  transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? 'Verifying authority keys...' : 'Establish Secure Connection'}
+            {loading ? 'Login...' : 'Login'}
           </button>
         </form>
-
-        {/* Credentials helper card */}
-        <div className="mt-8 p-4 rounded-2xl bg-surface-secondary border border-border text-[10px] text-text-secondary flex gap-3 items-start animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <Key className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-          <div>
-            <div className="font-bold text-text">Onboarding Quick Connect:</div>
-            <div className="mt-1 font-mono text-[9px] text-text-secondary">
-              <span className="text-primary font-semibold">User:</span> bhavikwala@gmail.com
-              <br />
-              <span className="text-primary font-semibold">Pass:</span> Bhavik@123
-            </div>
-            <div className="mt-1 text-[9px] leading-snug">Ramesh is flagged as a committee President in seeds, granting full administration access.</div>
-          </div>
-        </div>
-
       </div>
     </div>
   )

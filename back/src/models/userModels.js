@@ -31,10 +31,7 @@ const userSchema = new mongoose.Schema({
     trim: true,
     lowercase: true
   },
-  password: {
-    type: String,
-    default: "12345" // Fallback password
-  },
+
   number: {
     type: String,
     required: [true, 'Primary phone number is required'],
@@ -53,11 +50,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  relation: {
-    type: String,
-    default: 'Self', // 'Self', 'Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Brother', 'Sister', etc.
-    trim: true
-  },
+
   is_committee: {
     type: Boolean,
     default: false,
@@ -95,15 +88,26 @@ const userSchema = new mongoose.Schema({
     default: '',
     trim: true
   },
+   family_head: {
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      index: true
+    },
+    name: { type: String, default: '' }
+  },
+    relation: {
+    type: String,
+    default: 'Self', // 'Self', 'Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Brother', 'Sister', etc.
+    trim: true
+  },
+
   parent_id: {
     type: String,
     default: null,
     index: true
   },
-  family_code: {
-    type: String,
-    default: ''
-  },
+
   district_id: {
     type: String,
     default: ''
@@ -119,27 +123,20 @@ const userSchema = new mongoose.Schema({
   image: {
     type: String,
     default: ''
+  },
+  status:{
+    type: Number,
+    default: 0,
+    index: true
   }
+ 
+  
 }, {
   timestamps: true,
   strict: false
 });
 
-// Pre-save hook to hash password if it was modified
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
 
-// Method to compare passwords
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
+
 
 module.exports = mongoose.model('User', userSchema);

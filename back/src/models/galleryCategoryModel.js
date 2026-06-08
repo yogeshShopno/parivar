@@ -14,6 +14,5 @@ const galleryCategorySchema = new mongoose.Schema({
   strict: false
 });
 
-galleryCategorySchema.index({ created_by_admin_id: 1, category: 1 }, { unique: true });
 
 module.exports = mongoose.model('GalleryCategory', galleryCategorySchema);
