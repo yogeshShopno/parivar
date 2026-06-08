@@ -19,7 +19,7 @@ router.get('/permissions', protect, requirePermission('roles.list'), roleControl
 router.use('/roles', require('./roleRoutes'));
 router.use('/businesses', require('./businessRoutes'));
 router.use('/business-categories', require('./businessCategoryRoutes'));
-router.use('/students', require('./studentRoutes'));
+router.use('/students', require('../studentRoutes'));
 router.use('/festivals', require('./festivalRoutes'));
 router.use('/matrimonies', require('./matrimonyRoutes'));
 router.use('/donations', require('./donationRoutes'));
@@ -36,6 +36,8 @@ router.use('/events', require('./eventRoutes'));
 router.use('/feedback', require('../feedbackRoutes'));
 router.use('/job-vacancy', require('../jobVacancyRoutes'));
 router.use('/committee-members', require('../committeeMemberRoutes'));
+router.use('/students',require('../studentRoutes'))
+router.use('/event-registrations', require('../eventRegistrationRoutes'));
 
 
 

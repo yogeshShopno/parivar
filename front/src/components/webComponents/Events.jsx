@@ -24,18 +24,20 @@ const getDatePart = (value, part) => {
 }
 
 const normalizeEvent = (event, index) => ({
+  _id: event._id || event.id || '',   // add this line
   title: event.event_name || event.title || 'Community Event',
   subtitle: event.title || event.event_name || 'Upcoming Event',
   category: event.event_category_name || 'Community Event',
-  location: event.event_location || ' Parivar',
+  location: event.event_location || 'Parivar',
   time: [event.start_time, event.end_time].filter(Boolean).join(' - ') || 'Time will be announced',
   date: formatEventDate(event.start_time),
-day: getDatePart(event.start_time, 'day'),
-month: getDatePart(event.start_time, 'month'),
+  day: getDatePart(event.start_time, 'day'),
+  month: getDatePart(event.start_time, 'month'),
   entry: event.entry_type || 'Free',
   attendees: 0,
   image: event.image || `/${(index % 4) + 1}.png`,
 })
+
 
 const getStoredWebTheme = () => {
   const colorKeys = [
@@ -69,16 +71,20 @@ const shadeColor = (color, percent) => {
 }
 
 export default function Events() {
-  const [theme, setTheme] = useState(getStoredWebTheme() )
+  const [theme, setTheme] = useState(getStoredWebTheme())
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     phone: '',
+    email:'',
     members: '1',
-    note: '',
   })
+
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   useEffect(() => {
     const loadTheme = () => {
@@ -95,7 +101,7 @@ export default function Events() {
       try {
         setLoading(true)
         const response = await memberApi.get('/events')
-        
+
         const rows = Array.isArray(response.data?.data) ? response.data.data : []
         const normalizedEvents = normalizeEvent
         console.log(normalizedEvents)
@@ -129,12 +135,30 @@ export default function Events() {
 
   const openRegisterDialog = (event) => {
     setSelectedEvent(event)
-    setFormData({ name: '', phone: '', members: '1', note: '' })
+    setFormData({ name: '', email: '', phone: '', members: '1' })
+    setSubmitError('')
   }
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    setSelectedEvent(null)
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSubmitting(true)
+    setSubmitError('')
+    try {
+      await memberApi.post('/event-registrations', {
+        name: formData.name,
+        email: formData.email,
+        number: formData.phone,
+        email: formData.email,
+        total_attendee: Number(formData.members),
+        event_id: selectedEvent._id,
+        entry_type: selectedEvent.entry,
+      })
+      setSelectedEvent(null)
+    } catch (error) {
+      setSubmitError(error?.response?.data?.message || 'Registration failed. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const visibleEvents = events.length > 0 ? events : []
@@ -345,11 +369,24 @@ export default function Events() {
                 <input
                   type="tel"
                   required
+                  maxLength={10}
                   value={formData.phone}
                   onChange={(event) => setFormData({ ...formData, phone: event.target.value })}
                   className="mt-2 w-full rounded-md border px-3 py-2.5 text-sm outline-none"
                   style={{ borderColor: theme.borderColor, color: theme.textColor }}
                   placeholder="Enter phone number"
+                />
+              </label>
+               <label className="block">
+                <span className="text-sm font-semibold" style={{ color: theme.textColor }}>Email</span>
+                <input
+                  type="tel"
+                  required
+                  value={formData.email}
+                  onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+                  className="mt-2 w-full rounded-md border px-3 py-2.5 text-sm outline-none"
+                  style={{ borderColor: theme.borderColor, color: theme.textColor }}
+                  placeholder="Enter email number"
                 />
               </label>
 
@@ -366,37 +403,23 @@ export default function Events() {
                 />
               </label>
 
-              <label className="block">
-                <span className="text-sm font-semibold" style={{ color: theme.textColor }}>Note</span>
-                <textarea
-                  value={formData.note}
-                  onChange={(event) => setFormData({ ...formData, note: event.target.value })}
-                  className="mt-2 min-h-24 w-full resize-none rounded-md border px-3 py-2.5 text-sm outline-none"
-                  style={{ borderColor: theme.borderColor, color: theme.textColor }}
-                  placeholder="Any special note"
-                />
-              </label>
 
-              <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  onClick={() => setSelectedEvent(null)}
-                  className="rounded-md border px-5 py-2.5 text-sm font-semibold"
-                  style={{ borderColor: theme.borderColor, color: theme.textColor }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-md px-5 py-2.5 text-sm font-semibold"
-                  style={{
-                    backgroundColor: theme.buttonColor || theme.primaryColor,
-                    color: theme.fontColor,
-                  }}
-                >
-                  Submit Registration
-                </button>
-              </div>
+
+              {submitError && (
+                <p className="text-sm font-semibold" style={{ color: '#dc2626' }}>{submitError}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="rounded-md px-5 py-2.5 text-sm font-semibold disabled:opacity-60"
+                style={{
+                  backgroundColor: theme.buttonColor || theme.primaryColor,
+                  color: theme.fontColor,
+                }}
+              >
+                {submitting ? 'Submitting...' : 'Submit Registration'}
+              </button>
             </form>
           </div>
         </div>

@@ -15,10 +15,6 @@ router.post('/festivals', protect, requirePermission('festivals.add'), parseForm
 router.put('/festivals/:id', protect, requirePermission('festivals.edit'), parseForm, festivalController.saveFestival);
 router.delete('/festivals/:id', protect, requirePermission('festivals.delete'), festivalController.deleteFestival);
 
-router.get('/students', protect, requirePermission('students.list'), adminController.getStudents);
-router.post('/students', protect, requirePermission('students.add'), parseForm, adminController.saveStudent);
-router.put('/students/:id', protect, requirePermission('students.edit'), parseForm, adminController.saveStudent);
-router.delete('/students/:id', protect, requirePermission('students.delete'), adminController.deleteStudent);
 
 
 // Banner routes

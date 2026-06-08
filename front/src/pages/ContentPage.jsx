@@ -9,10 +9,10 @@ const definitions = {
     endpoint: '/content/festivals',
     fields: [
       { name: 'title', label: 'Title' },
-      { name: 'description', label: 'Description', type: 'textarea' },
       { name: 'festival_date', label: 'Festival Date', type: 'date' },
       { name: 'button_name', label: 'Button Name' },
       { name: 'button_link', label: 'Button Link' },
+      { name: 'description', label: 'Description', type: 'textarea' },
       { name: 'image', label: 'Image', type: 'file' }
     ],
     columns: [

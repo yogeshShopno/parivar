@@ -284,7 +284,7 @@ export default function Users() {
             <div className="p-16 text-center flex flex-col items-center justify-center gap-4">
               <UsersIcon className="w-12 h-12 text-text-secondary" />
               <div>
-                <h4 className="font-semibold text-text">No registry matches found</h4>
+                <h4 className="font-semibold text-text">No Memers found</h4>
                 <p className="text-text-secondary text-sm mt-1">Try expanding your search criteria or register a new member</p>
               </div>
             </div>
@@ -296,7 +296,7 @@ export default function Users() {
                     <th className="p-4">Name</th>
                     <th className="p-4">Contact Info</th>
                     <th className="p-4">Status</th>
-                    <th className="p-4">Status &amp; Role</th>
+                    <th className="p-4">Role</th>
                     <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -314,7 +314,7 @@ export default function Users() {
                           </div>
                           <div>
                             <div className="font-semibold text-text">{user.name}</div>
-                            <div className="text-sm text-text-secondary mt-0.5 capitalize">{user.relation || 'Self'}</div>
+                            <div className="text-sm text-text-secondary mt-0.5 capitalize">{user.relation == 'Self' && "Family Head"}</div>
                           </div>
                         </div>
                       </td>

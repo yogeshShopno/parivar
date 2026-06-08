@@ -11,15 +11,15 @@ const requestData = (req) => ({
 const getStudents = async (req, res) => {
   try {
     const { data: students, pagination } = await queryHelper(Student, requestData(req), {
-      searchFields: ['surname', 'student_name', 'father_name', 'school_name', 'standard', 'mobile_number'],
-      filterFields: ['standard', 'student_name', 'school_name', 'status']
+      searchFields: ['surname', 'student_name', 'father_name', 'school_name', 'standard', 'mobile_number','year'],
+      filterFields: ['standard', 'student_name', 'school_name', 'status','year']
     });
     
     return res.status(200).json({
       status: 200,
       message: 'Students retrieved successfully',
       data: students.map(s => ({
-        id: s.id || String(s._id),
+        id: s._id || String(s._id),
         surname: s.surname || '',
         student_name: s.student_name || '',
         father_name: s.father_name || '',
@@ -30,6 +30,7 @@ const getStudents = async (req, res) => {
         mobile_number_2: s.mobile_number_2 || '',
         result_image: publicUrl(req, s.result_image || ''),
         student_image: publicUrl(req, s.student_image || ''),
+        year: s.year || '',
         status: Number(s.status ?? 0),
         createdAt: s.createdAt || s.cdate || ''
       })),
@@ -58,10 +59,11 @@ const addStudent = async (req, res) => {
       mobile_number_2,
       result_image,
       student_image,
+      year,
       status
     } = requestData(req);
 
-    if (!surname || !student_name || !father_name || !school_name || !standard || !percentage || !mobile_number) {
+    if (!surname || !student_name || !school_name || !standard || !percentage || !mobile_number || !year) {
       return res.status(400).json({
         status: 400,
         message: 'All required fields are mandatory',
@@ -70,7 +72,7 @@ const addStudent = async (req, res) => {
     }
 
     const studentData = {
-      id: `STD${Date.now()}`,
+      
       surname,
       student_name,
       father_name,
@@ -81,6 +83,7 @@ const addStudent = async (req, res) => {
       mobile_number_2: mobile_number_2 || '',
       result_image: result_image || '',
       student_image: student_image || '',
+      year: year || '',
       status: status === undefined ? 0 : Number(status),
       cdate: new Date().toISOString().slice(0, 10)
     };
@@ -90,7 +93,7 @@ const addStudent = async (req, res) => {
       status: 201,
       message: 'Student added successfully',
       data: {
-        id: student.id || String(student._id),
+        id: student._id || String(student._id),
         surname: student.surname || '',
         student_name: student.student_name || '',
         father_name: student.father_name || '',
@@ -101,6 +104,7 @@ const addStudent = async (req, res) => {
         mobile_number_2: student.mobile_number_2 || '',
         result_image: publicUrl(req, student.result_image || ''),
         student_image: publicUrl(req, student.student_image || ''),
+        year: student.year || '',
         status: Number(student.status ?? 0),
         createdAt: student.createdAt || student.cdate || ''
       }
@@ -147,7 +151,8 @@ const updateStudent = async (req, res) => {
       mobile_number_2,
       result_image,
       student_image,
-      status
+      year,
+      status,
     } = requestData(req);
 
     if (surname) student.surname = surname;
@@ -160,6 +165,7 @@ const updateStudent = async (req, res) => {
     if (mobile_number_2 !== undefined) student.mobile_number_2 = mobile_number_2;
     if (result_image) student.result_image = result_image;
     if (student_image) student.student_image = student_image;
+    if (year) student.year = year;
     if (status !== undefined) student.status = Number(status);
 
     await student.save();
@@ -178,6 +184,7 @@ const updateStudent = async (req, res) => {
         mobile_number_2: student.mobile_number_2 || '',
         result_image: publicUrl(req, student.result_image || ''),
         student_image: publicUrl(req, student.student_image || ''),
+        year: student.year || '',
         status: Number(student.status ?? 0),
         createdAt: student.createdAt || student.cdate || ''
       }

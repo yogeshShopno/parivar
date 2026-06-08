@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
+import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 ,Eye } from 'lucide-react'
 import api, { assetUrl, getEventsList } from '../lib/api'
 import Modal from '../components/Modal'
+import { useNavigate } from 'react-router-dom'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 const limit = 10
@@ -51,6 +52,8 @@ export default function Events() {
     if (!value) return ''
     return new Date(value).toISOString().slice(0, 16)
   }
+
+  const navigate = useNavigate()
 
 
   const fetchRows = useCallback(async () => {
@@ -312,6 +315,9 @@ export default function Events() {
                     <td className="p-4">{row.event_location || '-'}</td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => navigate(`/admin/event-registrations?event_id=${row._id || row.id}`)} className="p-2 text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl" title="View Registrations">
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
                         <button onClick={() => openEdit(row)} className="p-2 text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl" title="Edit">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -449,7 +455,7 @@ export default function Events() {
               </select>
             </div>
           </div>
-           <div>
+          <div>
             <label className="block text-sm font-semibold text-text-secondary mb-1.5">Venue / Location</label>
             <input type="text" value={formData.event_location} onChange={(e) => setFormData({ ...formData, event_location: e.target.value })} className={fieldClass} disabled={saving} />
           </div>
@@ -495,7 +501,7 @@ export default function Events() {
               </select>
             </div>
           </div>
-         
+
 
 
           <div>

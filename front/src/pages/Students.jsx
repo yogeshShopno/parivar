@@ -10,31 +10,33 @@ export default function Students() {
   const [students, setStudents] = useState([])
   const { page, totalPages, total, setPage, setPaginationData, getParams, resetPage } = usePagination(limit)
   const [loading, setLoading] = useState(false)
-  const [activeFilters, setActiveFilters] = useState({
-    student_name: '',
-    school_name: '',
-    standard: '',
-    status: '1'
-  })
+
   const [formLoading, setFormLoading] = useState(false)
-  const [localFilters, setLocalFilters] = useState({
-    student_name: '',
-    school_name: '',
-    standard: '',
-    status: '1'
-  })
+
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [search, setSearchValue] = useState('')
+
+
+  const [existingStudentImage, setExistingStudentImage] = useState('')
+  const [existingResultImage, setExistingResultImage] = useState('')
+  const [imageData, setImageData] = useState({ student_image: null, result_image: null, remove_student_image: false, remove_result_image: false })
 
   const currentPage = Math.min(Math.max(page || 1, 1), totalPages)
   const pageNumbers = Array.from({ length: totalPages }, (_, index) => index + 1)
 
+  const setSearch = (value) => {
+    setSearchValue(value)
+    setPage(1)
+  }
+
+
   const fetchStudents = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await getStudentsList(getParams(activeFilters))
+      const res = await getStudentsList(getParams({ search }))
       const rows = res.data?.data || res.data || []
       const pg = res.data?.pagination || {}
       setStudents(Array.isArray(rows) ? rows : [])
@@ -46,7 +48,7 @@ export default function Students() {
     } finally {
       setLoading(false)
     }
-  }, [activeFilters, page])
+  }, [search, page])
 
   useEffect(() => {
     fetchStudents()
@@ -55,7 +57,7 @@ export default function Students() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this student?')) return
     try {
-      await api.delete(`/content/students/${id}`)
+      await api.delete(`/students/${id}`)
       await fetchStudents()
       setSuccess('Student deleted successfully')
       setTimeout(() => setSuccess(''), 3000)
@@ -64,31 +66,50 @@ export default function Students() {
     }
   }
 
-  const handleEdit = (student) => {
-    setSelectedStudent(student)
+  const handleCreate = () => {
+    setSelectedStudent(null)
+    setExistingStudentImage('')
+    setExistingResultImage('')
+    setImageData({ student_image: null, result_image: null, remove_student_image: false, remove_result_image: false })
     setIsModalOpen(true)
   }
 
-  const handleCreate = () => {
-    setSelectedStudent(null)
+  const handleEdit = (student) => {
+    setSelectedStudent(student)
+    setExistingStudentImage(student.student_image || '')
+    setExistingResultImage(student.result_image || '')
+    setImageData({ student_image: null, result_image: null, remove_student_image: false, remove_result_image: false })
     setIsModalOpen(true)
   }
 
   const handleCloseModal = () => {
     setIsModalOpen(false)
     setSelectedStudent(null)
+    setExistingStudentImage('')
+    setExistingResultImage('')
+    setImageData({ student_image: null, result_image: null, remove_student_image: false, remove_result_image: false })
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setFormLoading(true)
     setError('')
-    const formData = new FormData(e.target)
+    const fields = new FormData(e.target)
+    const payload = new FormData()
+      ;['surname', 'student_name', 'father_name', 'school_name', 'standard', 'percentage', 'mobile_number', 'year', 'status'].forEach(k => payload.append(k, fields.get(k) ?? ''))
+
+    const hasStudentImg = imageData.student_image instanceof FileList ? imageData.student_image.length > 0 : imageData.student_image instanceof File
+    const hasResultImg = imageData.result_image instanceof FileList ? imageData.result_image.length > 0 : imageData.result_image instanceof File
+    if (hasStudentImg) payload.append('student_image', imageData.student_image instanceof FileList ? imageData.student_image[0] : imageData.student_image)
+    if (imageData.remove_student_image) payload.append('remove_student_image', 'true')
+    if (hasResultImg) payload.append('result_image', imageData.result_image instanceof FileList ? imageData.result_image[0] : imageData.result_image)
+    if (imageData.remove_result_image) payload.append('remove_result_image', 'true')
+
     try {
       if (selectedStudent) {
-        await api.put(`/content/students/${selectedStudent.id}`, formData)
+        await api.put(`/students/${selectedStudent.id}`, payload)
       } else {
-        await api.post('/content/students', formData)
+        await api.post('/students', payload)
       }
       await fetchStudents()
       setSuccess(`Student ${selectedStudent ? 'updated' : 'created'} successfully`)
@@ -102,21 +123,9 @@ export default function Students() {
     }
   }
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target
-    setLocalFilters(prev => ({ ...prev, [name]: value }))
-  }
 
-  const applyFilters = () => {
-    setActiveFilters({ ...localFilters })
-    resetPage()
-  }
 
-  const resetFilters = () => {
-    setLocalFilters({ student_name: '', school_name: '', standard: '', status: '' })
-    setActiveFilters({ student_name: '', school_name: '', standard: '', status: '' })
-    resetPage()
-  }
+
 
   const groupedStudents = React.useMemo(() => {
     return students.reduce((acc, student) => {
@@ -145,6 +154,16 @@ export default function Students() {
           >
             <RefreshCw className="w-4 h-4" />
           </button>
+          <div className="relative flex-1 sm:w-64">
+            <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-text-secondary/60" />
+            <input
+              type="search"
+              placeholder="Search students..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary/50"
+            />
+          </div>
           <button
             onClick={handleCreate}
             className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary"
@@ -154,71 +173,7 @@ export default function Students() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-card border border-border rounded-2xl p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div>
-            <label className="text-sm text-text-secondary mb-1.5 block">Student Name</label>
-            <input
-              type="text"
-              name="student_name"
-              value={localFilters.student_name}
-              onChange={handleFilterChange}
-              placeholder="Search by student name"
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
-            />
-          </div>
-          <div>
-            <label className="text-sm text-text-secondary mb-1.5 block">School Name</label>
-            <input
-              type="text"
-              name="school_name"
-              value={localFilters.school_name}
-              onChange={handleFilterChange}
-              placeholder="Search by school name"
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
-            />
-          </div>
-          <div>
-            <label className="text-sm text-text-secondary mb-1.5 block">Standard</label>
-            <input
-              type="text"
-              name="standard"
-              value={localFilters.standard}
-              onChange={handleFilterChange}
-              placeholder="Search by standard"
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
-            />
-          </div>
-          <div>
-            <label className="text-sm text-text-secondary mb-1.5 block">Status</label>
-            <select
-              name="status"
-              value={localFilters.status}
-              onChange={handleFilterChange}
-              className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
-            >
-              <option value="">All</option>
-              <option value="1">Active</option>
-              <option value="0">Pending</option>
-            </select>
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <button
-            onClick={applyFilters}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-glow-primary"
-          >
-            Apply Filters
-          </button>
-          <button
-            onClick={resetFilters}
-            className="flex items-center gap-2 bg-surface-secondary hover:bg-surface text-text px-4 py-2 rounded-xl text-sm font-semibold transition-all border border-border"
-          >
-            Reset
-          </button>
-        </div>
-      </div>
+
 
       {/* Alerts */}
       {error && (
@@ -249,92 +204,78 @@ export default function Students() {
           </div>
         </div>
       ) : (
-        <div className="space-y-10">
-          {sortedYears.map(year => (
-            <div key={year}>
-              <h3 className="text-xl font-semibold text-text mb-4 border-b border-border pb-2 inline-block">
-                {year === 'Unknown' ? 'Unknown Year' : `Year ${year}`}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {groupedStudents[year].map(student => (
-                  <div key={student.id} className="relative overflow-hidden bg-card border border-border hover:border-text-secondary/20 rounded-2xl p-6 shadow-glass-sm hover:shadow-glass-md transition-all duration-300 flex flex-col justify-between group">
-                    <div>
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          {student.student_image ? (
-                            <img src={assetUrl(student.student_image)} alt={student.student_name} className="w-16 h-16 rounded-full object-cover border border-border" />
-                          ) : (
-                            <div className="w-16 h-16 rounded-full bg-surface-secondary border border-border flex items-center justify-center text-text-secondary">
-                              <GraduationCap className="w-8 h-8" />
-                            </div>
-                          )}
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-semibold text-sm  tracking-wide">
-                                Standard {student.standard}
-                              </span>
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-semibold ${Number(student.status) === 1 ? 'bg-success-bg text-success-text border border-success-border' : 'bg-warning/10 text-warning border border-warning/20'}`}>
-                                {Number(student.status) === 1 ? 'Active' : 'Pending'}
-                              </span>
-                            </div>
-                            <h3 className="text-base font-semibold text-text mt-2.5 tracking-tight group-hover:text-primary transition-colors">
-                              {student.surname} {student.student_name}
-                            </h3>
-                            <p className="text-sm text-text-secondary mt-1">Father: {student.father_name}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => handleEdit(student)}
-                            className="p-2.5 text-primary hover:text-primary-hover bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl transition-all"
-                            title="Edit"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(student.id)}
-                            className="p-2.5 text-error-text hover:text-error bg-error-bg hover:bg-error/20 border border-error-border rounded-xl transition-all"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 space-y-2 text-sm text-text-secondary">
-                        <div className="flex items-center gap-2">
-                          <span className="text-text-secondary/70">School:</span>
-                          <span className="text-text">{student.school_name}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-text-secondary/70">Percentage:</span>
-                          <span className="text-text">{student.percentage}%</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-3.5 h-3.5 text-primary" />
-                          <span className="font-semibold text-text font-mono">{student.mobile_number}</span>
-                          {student.mobile_number_2 && (
-                            <span className="text-text-secondary/70">/ {student.mobile_number_2}</span>
-                          )}
-                        </div>
-                        {student.result_image && (
-                          <div className="mt-3">
-                            <img
-                              src={assetUrl(student.result_image)}
-                              alt="Result"
-                              className="w-full h-32 object-cover rounded-xl border border-border"
-                            />
+        <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-glass-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-semibold tracking-wider">
+                  <th className="p-4">Student</th>
+                  <th className="p-4">Father</th>
+                  <th className="p-4">School</th>
+                  <th className="p-4">Std / %</th>
+                  <th className="p-4">Mobile</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4">Year </th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {students.map((student) => (
+                  <tr key={student.id} className="hover:bg-surface-secondary/40 text-sm text-text">
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        {student.student_image ? (
+                          <img src={assetUrl(student.student_image)} alt={student.student_name}
+                            className="w-9 h-9 rounded-full object-cover border border-border shrink-0" />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-surface-secondary border border-border flex items-center justify-center shrink-0">
+                            <GraduationCap className="w-4 h-4 text-text-secondary" />
                           </div>
                         )}
+                        <span className="font-semibold">{student.surname} {student.student_name}</span>
                       </div>
-                    </div>
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-success opacity-25 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
+                    </td>
+                    <td className="p-4 text-text-secondary">{student.father_name}</td>
+                    <td className="p-4 text-text-secondary max-w-[160px] truncate">{student.school_name}</td>
+                    <td className="p-4">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+                        {student.standard}
+                      </span>
+                      <span className="ml-2 text-text-secondary text-xs">{student.percentage}%</span>
+                    </td>
+                    <td className="p-4 font-mono text-text-secondary text-xs">
+                      {student.mobile_number}
+                    </td>
+                    
+                    <td className="p-4">
+                      <span className={`inline-flex px-2.5 py-1 rounded-lg border text-xs font-semibold ${Number(student.status) === 1
+                        ? 'bg-success-bg border-success-border text-success-text'
+                        : 'bg-warning/10 border-warning/20 text-warning'
+                        }`}>
+                        {Number(student.status) === 1 ? 'Active' : 'Pending'}
+                      </span>
+                    </td>
+                    <td className="p-4">
+
+                      <span className="ml-2 text-text-secondary text-xs">{student.year}</span>
+                    </td>
+                    <td className="p-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => handleEdit(student)}
+                          className="p-2 text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl" title="Edit">
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => handleDelete(student.id)}
+                          className="p-2 text-error-text bg-error-bg hover:bg-error/20 border border-error-border rounded-xl" title="Delete">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </div>
-            </div>
-          ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -353,11 +294,10 @@ export default function Students() {
                 type="button"
                 disabled={loading || item === currentPage}
                 onClick={() => setPage(item)}
-                className={`min-w-10 px-3 py-2 rounded-lg border transition-all ${
-                  item === currentPage
-                    ? 'border-primary bg-primary/10 text-primary font-semibold disabled:opacity-100 disabled:cursor-default'
-                    : 'border-border bg-card text-text hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed'
-                }`}
+                className={`min-w-10 px-3 py-2 rounded-lg border transition-all ${item === currentPage
+                  ? 'border-primary bg-primary/10 text-primary font-semibold disabled:opacity-100 disabled:cursor-default'
+                  : 'border-border bg-card text-text hover:bg-surface-secondary disabled:opacity-50 disabled:cursor-not-allowed'
+                  }`}
               >
                 {item}
               </button>
@@ -397,26 +337,30 @@ export default function Students() {
               />
             </div>
           </div>
-          <div>
-            <label className="text-sm text-text-secondary mb-1.5 block">Father Name *</label>
-            <input
-              type="text"
-              name="father_name"
-              defaultValue={selectedStudent?.father_name || ''}
-              required
-              className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div>
+              <label className="text-sm text-text-secondary mb-1.5 block">Father Name *</label>
+              <input
+                type="text"
+                name="father_name"
+                defaultValue={selectedStudent?.father_name || ''}
+
+                className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-text-secondary mb-1.5 block">School Name *</label>
+              <input
+                type="text"
+                name="school_name"
+                defaultValue={selectedStudent?.school_name || ''}
+                required
+                className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
+              />
+            </div>
           </div>
-          <div>
-            <label className="text-sm text-text-secondary mb-1.5 block">School Name *</label>
-            <input
-              type="text"
-              name="school_name"
-              defaultValue={selectedStudent?.school_name || ''}
-              required
-              className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
-            />
-          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm text-text-secondary mb-1.5 block">Standard *</label>
@@ -447,43 +391,68 @@ export default function Students() {
                 name="mobile_number"
                 defaultValue={selectedStudent?.mobile_number || ''}
                 required
+                maxLength={10}
                 className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
               />
             </div>
             <div>
-              <label className="text-sm text-text-secondary mb-1.5 block">Mobile Number 2</label>
+              <label className="text-sm text-text-secondary mb-1.5 block">Year *</label>
               <input
                 type="text"
-                name="mobile_number_2"
-                defaultValue={selectedStudent?.mobile_number_2 || ''}
+                name="year"
+                maxLength={4}
+                required
+                placeholder="2026"
+                defaultValue={selectedStudent?.year || ''}
                 className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
               />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm text-text-secondary mb-1.5 block">Result Image</label>
-              <input
-                type="file"
-                name="result_image"
-                accept="image/*"
-                className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
-              />
-              {selectedStudent?.result_image && (
-                <p className="text-sm text-text-secondary mt-2">Current result image exists</p>
-              )}
+            {/* Student Image */}
+            <div className="flex flex-col bg-input-bg border border-border rounded-xl p-3">
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Student Image</label>
+              {(imageData.student_image instanceof File || (imageData.student_image instanceof FileList && imageData.student_image.length > 0)) ? (
+                <div className="relative w-20 h-20 mb-2">
+                  <img src={URL.createObjectURL(imageData.student_image instanceof FileList ? imageData.student_image[0] : imageData.student_image)}
+                    alt="preview" className="w-20 h-20 rounded-lg object-cover border border-border" />
+                  <button type="button" onClick={() => setImageData({ ...imageData, student_image: null, remove_student_image: false })}
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold" disabled={formLoading}>×</button>
+                </div>
+              ) : existingStudentImage && !imageData.remove_student_image ? (
+                <div className="relative w-20 h-20 mb-2">
+                  <img src={assetUrl(existingStudentImage)} alt="current" className="w-20 h-20 rounded-lg object-cover border border-border" />
+                  <button type="button" onClick={() => setImageData({ ...imageData, remove_student_image: true })}
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold" disabled={formLoading}>×</button>
+                </div>
+              ) : null}
+              <input type="file" accept="image/*"
+                onChange={(e) => setImageData({ ...imageData, student_image: e.target.files, remove_student_image: false })}
+                className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
+                disabled={formLoading} />
             </div>
-            <div>
-              <label className="text-sm text-text-secondary mb-1.5 block">Student Image</label>
-              <input
-                type="file"
-                name="student_image"
-                accept="image/*"
-                className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
-              />
-              {selectedStudent?.student_image && (
-                <p className="text-sm text-text-secondary mt-2">Current student image exists</p>
-              )}
+
+            {/* Result Image */}
+            <div className="flex flex-col bg-input-bg border border-border rounded-xl p-3">
+              <label className="block text-sm font-semibold text-text-secondary mb-1.5">Result Image</label>
+              {(imageData.result_image instanceof File || (imageData.result_image instanceof FileList && imageData.result_image.length > 0)) ? (
+                <div className="relative w-20 h-20 mb-2">
+                  <img src={URL.createObjectURL(imageData.result_image instanceof FileList ? imageData.result_image[0] : imageData.result_image)}
+                    alt="preview" className="w-20 h-20 rounded-lg object-cover border border-border" />
+                  <button type="button" onClick={() => setImageData({ ...imageData, result_image: null, remove_result_image: false })}
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold" disabled={formLoading}>×</button>
+                </div>
+              ) : existingResultImage && !imageData.remove_result_image ? (
+                <div className="relative w-20 h-20 mb-2">
+                  <img src={assetUrl(existingResultImage)} alt="current" className="w-20 h-20 rounded-lg object-cover border border-border" />
+                  <button type="button" onClick={() => setImageData({ ...imageData, remove_result_image: true })}
+                    className="absolute -top-1.5 -right-1.5 bg-error text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-semibold" disabled={formLoading}>×</button>
+                </div>
+              ) : null}
+              <input type="file" accept="image/*"
+                onChange={(e) => setImageData({ ...imageData, result_image: e.target.files, remove_result_image: false })}
+                className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-primary hover:file:bg-primary/20"
+                disabled={formLoading} />
             </div>
           </div>
           <div>
@@ -497,22 +466,15 @@ export default function Students() {
               <option value={0}>Pending</option>
             </select>
           </div>
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={handleCloseModal}
-              className="flex-1 bg-surface-secondary hover:bg-surface text-text px-4 py-2.5 rounded-xl text-sm font-semibold transition-all border border-border"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={formLoading}
-              className="flex-1 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-50 shadow-glow-primary"
-            >
-              {formLoading ? 'Saving...' : selectedStudent ? 'Update' : 'Create'}
-            </button>
-          </div>
+
+          <button
+            type="submit"
+            disabled={formLoading}
+            className="flex justify-self-end bg-primary hover:bg-primary-hover text-white p-3 rounded-xl font-semibold text-sm tracking-wider  disabled:opacity-50 shadow-glow-primary"
+          >
+            {formLoading ? 'Saving...' : selectedStudent ? 'Update Student' : 'Add Student'}
+          </button>
+
         </form>
       </Modal>
     </div>

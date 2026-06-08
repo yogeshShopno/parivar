@@ -459,7 +459,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
       </div>
       
       <div>
-        <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Listing Status</label>
+        <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Status</label>
         <select
           value={formData.status}
           onChange={(e) => setFormData({ ...formData, status: Number(e.target.value) })}
@@ -474,9 +474,9 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-xl font-semibold text-sm tracking-wider  transition-all duration-300 disabled:opacity-50 shadow-glow-primary"
+        className="flex justify-self-end bg-primary hover:bg-primary-hover text-white p-3 rounded-xl font-semibold text-sm tracking-wider  transition-all duration-300 disabled:opacity-50 shadow-glow-primary"
       >
-        {isLoading ? 'Saving business...' : 'Save Business Listing'}
+        {isLoading ? 'Saving business...' : 'Save Business'}
       </button>
     </form>
   )

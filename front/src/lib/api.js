@@ -81,7 +81,7 @@ setupInterceptors(memberApi)
 
 export const getEventsList = (params = {}) => api.get('/events', { params })
 export const getUsersList = (params = {}) => api.get('/users', { params })
-export const getStudentsList = (params = {}) => api.get('/content/students', { params })
+export const getStudentsList = (params = {}) => api.get('/students', { params })
 export const getBusinessesList = (params = {}) => api.get('/businesses', { params })
 export const getPostsList = (params = {}) => api.get('/posts', { params })
 export const getNewsList = (params = {}) => api.get('/news', { params })
