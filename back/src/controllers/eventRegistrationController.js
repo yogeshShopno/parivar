@@ -1,10 +1,10 @@
-const EventRegistration = require('../models/EventRegistration');
 const Event = require('../models/eventModel');
+const eventRegistration = require('../models/eventRegistration');
 const { apiResponse, fullName } = require('../utils/apiResponse');
 const queryHelper = require('../utils/queryHelper');
 const isObjectId = (id) => require('mongoose').isValidObjectId(id);
 
-const findRegistration = (id) => EventRegistration.findOne(
+const findRegistration = (id) => eventRegistration.findOne(
   isObjectId(id) ? { _id: id } : { _id: String(id) }
 );
 
