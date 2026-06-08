@@ -38,8 +38,9 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
   const [profilePreview, setProfilePreview] = useState(null)
   const [galleryPreviews, setGalleryPreviews] = useState([])
 
-  const existingGalleryImages = (formData.gallery_images || []).filter((img) => typeof img === 'string' && img.trim())
+  const [existingGalleryImages, setExistingGalleryImages] = useState([])
   const newGalleryFiles = (formData.gallery_images || []).filter((img) => img instanceof File)
+
 
   const removeNewGalleryImage = (newIndex) => {
     let currentFileIndex = -1
@@ -54,13 +55,10 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
     setFormData({ ...formData, gallery_images: nextGalleryImages })
   }
 
-  const removeExistingGalleryImage = (image) => {
-    setFormData({
-      ...formData,
-      gallery_images: formData.gallery_images.filter((item) => item !== image),
-      _deletedImages: [...(formData._deletedImages || []), image]
-    })
+  const removeExistingGalleryImage = (idx) => {
+    setExistingGalleryImages((prev) => prev.filter((_, i) => i !== idx))
   }
+
 
   useEffect(() => {
     fetchBusinessCategories()
@@ -148,8 +146,11 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
       gallery_images: business?.gallery_images || [],
       status: Number(business?.status ?? 0)
     })
-    setGalleryPreviews([])  
-    setProfilePreview(null)    
+    setGalleryPreviews([])
+    setExistingGalleryImages(
+      (business?.gallery_images || []).filter((img) => typeof img === 'string' && img.trim())
+    )
+    setProfilePreview(null)
   }, [business])
 
   const validate = () => {
@@ -172,12 +173,12 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
       setErrors(nextErrors)
       return
     }
-    onSubmit(formData)
+    onSubmit({ ...formData, gallery_images: [...existingGalleryImages, ...newGalleryFiles] })
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 max-h-[76vh] overflow-y-auto pr-1 select-none text-text">
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Business Name *</label>
@@ -244,7 +245,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           />
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Country *</label>
@@ -375,14 +376,14 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           />
         </div>
       </div>
-      
+
       <div>
         <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Profile Image</label>
         {(profilePreview || formData.image) && (
           <div className="relative w-20 h-20 mb-3 rounded-lg overflow-hidden border border-border">
-            <img 
-              src={profilePreview || formData.image} 
-              alt="preview" 
+            <img
+              src={profilePreview || formData.image}
+              alt="preview"
               className="w-full h-full object-cover"
             />
             <button
@@ -433,7 +434,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
                 <img src={img} alt={`gallery-${idx}`} className="w-full h-full object-cover" />
                 <button
                   type="button"
-                  onClick={() => removeExistingGalleryImage(img)}
+                  onClick={() => removeExistingGalleryImage(idx)}
                   className="absolute top-1 right-1 bg-error rounded-full p-1 text-white text-sm hover:bg-error-bg hover:text-error-text"
                 >
                   ✕
@@ -457,7 +458,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           accept="image/*"
         />
       </div>
-      
+
       <div>
         <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Status</label>
         <select

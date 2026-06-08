@@ -77,7 +77,6 @@ export default function Events() {
   const [selectedEvent, setSelectedEvent] = useState(null)
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
     phone: '',
     email:'',
     members: '1',
@@ -148,7 +147,6 @@ export default function Events() {
         name: formData.name,
         email: formData.email,
         number: formData.phone,
-        email: formData.email,
         total_attendee: Number(formData.members),
         event_id: selectedEvent._id,
         entry_type: selectedEvent.entry,
