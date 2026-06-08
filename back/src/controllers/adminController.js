@@ -376,14 +376,22 @@ const createUser = async (req, res) => {
       return apiResponse(res, 400, 'Committee image must be 1 MB or smaller');
     }
 
+    const familyData = await familyUtil.prepareFamilyFields({
+      relation,
+      family_head_id: req.body.family_head_id,
+      status
+    }, {});
 
-    const users = await User.find({ _id: /^\d+$/ }).select('_id');
+    const assignedRoleId = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
+
+    const users = await User.find({ member_id: /^\d+$/ }).select('member_id');
     const highestId = users.reduce((max, u) => {
-      const num = Number(u._id);
+      const num = Number(u.member_id);
       return Number.isFinite(num) && num > max ? num : max;
     }, 0);
 
     const newUser = new User({
+      member_id: String(highestId + 1),
       first_name: first_name,
       middle_name: middle_name || '',
       last_name: last_name || '',
