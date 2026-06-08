@@ -150,9 +150,9 @@ export default function BusinessProfile() {
       <main className="mx-auto max-w-6xl space-y-6 px-0 py-0 sm:px-4 sm:py-6">
         <section className="overflow-hidden rounded-lg border border-[#E5E5E5] bg-[#FFFFFF] shadow-sm">
           <div className="relative aspect-video w-full overflow-hidden bg-[#F9F9F9]">
-            {business?.image ? (
+            {galleryImages?.[0] ? (
               <img
-                src={assetUrl(business.image)}
+                src={assetUrl(galleryImages?.[0])}
                 alt={`${normalizeValue(business.business_name, 'Business')} cover`}
                 className="h-full w-full object-cover"
               />
