@@ -49,7 +49,7 @@ const EventRegistrationSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-EventRegistrationSchema.index({ event_id: 1, 'user.id': 1 }, { unique: true, sparse: true });
 EventRegistrationSchema.index({ event_id: 1, email: 1 }, { unique: true });
+EventRegistrationSchema.index({ event_id: 1, number: 1 }, { unique: true, sparse: true }); 
 
 module.exports = mongoose.model('EventRegistration', EventRegistrationSchema);

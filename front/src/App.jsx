@@ -15,6 +15,7 @@ import CommitteeMembers from './pages/CommitteeMembers'
 import Roles from './pages/Roles'
 import ContentPage from './pages/ContentPage'
 import Events from './pages/Events'
+import EventRegistrations from './pages/EventRegistration'
 import MasterPage from './pages/MasterPage'
 import News from './pages/News'
 import { hasPermission } from './lib/permissions'
@@ -42,6 +43,9 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/businesses/:id" element={<BusinessProfile />} />
 
+
+
+
         {/* Admin Dashboard Routes */}
         <Route
           path="/admin/*"
@@ -58,6 +62,8 @@ export default function App() {
           <Route path="users" element={<PermissionRoute permission="members.list"><Users /></PermissionRoute>} />
           <Route path="festivals" element={<PermissionRoute permission="festivals.list"><ContentPage type="festivals" /></PermissionRoute>} />
           <Route path="events" element={<PermissionRoute permission="events.list"><Events /></PermissionRoute>} />
+        <Route path="event-registrations" element={<PermissionRoute permission="events.list"><EventRegistrations /></PermissionRoute>} />
+
           <Route path="gallery" element={<PermissionRoute permission="gallery.list"><ContentPage type="gallery" /></PermissionRoute>} />
           {/* <Route path="banners" element={<PermissionRoute permission="banners.list"><ContentPage type="banners" /></PermissionRoute>} /> */}
           <Route path="matrimonies" element={<PermissionRoute permission="matrimonies.list"><ContentPage type="matrimonies" /></PermissionRoute>} />
@@ -75,8 +81,10 @@ export default function App() {
 
           <Route path="masters/:type" element={<MasterRoute />} />
           <Route path="settings" element={<PermissionRoute permission="settings.edit"><Settings /></PermissionRoute>} />
+
+
         </Route>
-        
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>

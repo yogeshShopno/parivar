@@ -78,19 +78,34 @@ const getRegistrationById = async (req, res) => {
 
 const addRegistration = async (req, res) => {
   try {
-    const { event_id } = req.body;
+    const { event_id, email, number } = req.body;
     if (!event_id || !isObjectId(event_id)) return apiResponse(res, 400, 'Valid event_id is required');
 
     const event = await Event.findById(event_id);
     if (!event) return apiResponse(res, 404, 'Event not found');
+
+    // explicit duplicate checks
+    if (email) {
+      const emailExists = await EventRegistration.findOne({ event_id, email: email.trim().toLowerCase() })
+      if (emailExists) return apiResponse(res, 409, 'This email is already registered for this event')
+    }
+    if (number) {
+      const numberExists = await EventRegistration.findOne({ event_id, number: number.trim() })
+      if (numberExists) return apiResponse(res, 409, 'This mobile number is already registered for this event')
+    }
 
     const data = registrationPayload(req, {}, event);
     const registration = new EventRegistration(data);
     await registration.save();
     return apiResponse(res, 201, 'Registration saved successfully', formatRegistration(registration.toObject()));
   } catch (error) {
-    if (error.code === 11000) return apiResponse(res, 409, 'Already registered for this event');
-    return apiResponse(res, 400, error.message || 'Error saving registration');
+    if (error.code === 11000) {
+      const key = Object.keys(error.keyPattern || {})[0] || ''
+      if (key.includes('email')) return apiResponse(res, 409, 'This email is already registered for this event')
+      if (key.includes('number')) return apiResponse(res, 409, 'This mobile number is already registered for this event')
+      return apiResponse(res, 409, 'Already registered for this event')
+    }
+    return apiResponse(res, 400, error.message || 'Error saving registration')
   }
 };
 
@@ -104,8 +119,13 @@ const updateRegistration = async (req, res) => {
     await registration.save();
     return apiResponse(res, 200, 'Registration updated successfully', formatRegistration(registration.toObject()));
   } catch (error) {
-    if (error.code === 11000) return apiResponse(res, 409, 'Already registered for this event');
-    return apiResponse(res, 400, error.message || 'Error updating registration');
+    if (error.code === 11000) {
+      const key = Object.keys(error.keyPattern || {})[0] || ''
+      if (key.includes('email')) return apiResponse(res, 409, 'This email is already registered for this event')
+      if (key.includes('number')) return apiResponse(res, 409, 'This mobile number is already registered for this event')
+      return apiResponse(res, 409, 'Already registered for this event')
+    }
+    return apiResponse(res, 400, error.message || 'Error updating registration')
   }
 };
 
