@@ -37,6 +37,7 @@ router.use('/feedback', require('../feedbackRoutes'));
 router.use('/job-vacancy', require('../jobVacancyRoutes'));
 router.use('/committee-members', require('../committeeMemberRoutes'));
 router.use('/students',require('../studentRoutes'))
+router.use('/event-registrations', require('../eventRegistrationRoutes'));
 
 
 
