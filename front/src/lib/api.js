@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from './toast'
 
 export const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
 
@@ -49,13 +50,27 @@ const setupInterceptors = (axiosInstance) => {
 
   // Handle 401 responses
   axiosInstance.interceptors.response.use(
-    (response) => response,
+    (response) => {
+      const method = response.config?.method?.toLowerCase()
+      const shouldToastSuccess = ['post', 'put', 'patch', 'delete'].includes(method)
+      const message = response.data?.message
+
+      if (shouldToastSuccess && message) {
+        toast.success(message)
+      }
+
+      return response
+    },
     (error) => {
       if (error.response?.status === 401) {
         localStorage.removeItem('auth_token')
         localStorage.removeItem('auth_user')
         window.location.href = '/login'
       }
+
+      const message = error.response?.data?.message || error.message || 'Something went wrong'
+      toast.error(message)
+
       return Promise.reject(error)
     }
   )

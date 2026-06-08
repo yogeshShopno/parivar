@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Shield, Eye, EyeOff, Key } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext'
+import { toast } from '../lib/toast'
 
 export default function Login() {
   const { login } = useContext(AuthContext)
@@ -15,16 +16,21 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!email || !password) {
-      setError('Please provide all credentials.')
+      const message = 'Please provide all credentials.'
+      setError(message)
+      toast.error(message)
       return
     }
     setError('')
     setLoading(true)
     try {
       await login(email, password)
+      toast.success('Login successful')
       navigate('/admin')
     } catch (err) {
-      setError(err.message || 'Access Denied: Invalid administrator credentials.')
+      const message = err.message || 'Access Denied: Invalid administrator credentials.'
+      setError(message)
+      toast.error(message)
     } finally {
       setLoading(false)
     }

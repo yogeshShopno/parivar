@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { Suspense, lazy, useContext } from 'react'
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { AuthContext, AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -24,6 +24,8 @@ import { activeTheme, applyTheme } from './theme/theme'
 
 import Home from './pages/websitePages/Home'
 
+const ReactToaster = lazy(() => import('./components/ReactToaster'))
+
 
 // Bootstrap selected design system theme
 applyTheme(activeTheme)
@@ -31,6 +33,9 @@ applyTheme(activeTheme)
 export default function App() {
   return (
     <AuthProvider>
+      <Suspense fallback={null}>
+        <ReactToaster />
+      </Suspense>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
