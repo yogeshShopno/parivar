@@ -49,6 +49,9 @@ const userSchema = new mongoose.Schema({
   dob: {
     type: Date
   },
+  anniversary: {
+    type: Date
+  },
   blood_group: {
     type: String,
     trim: true
@@ -91,7 +94,7 @@ const userSchema = new mongoose.Schema({
     default: '',
     trim: true
   },
-   family_head: {
+  family_head: {
     id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -99,7 +102,7 @@ const userSchema = new mongoose.Schema({
     },
     name: { type: String, default: '' }
   },
-    relation: {
+  relation: {
     type: String,
     default: 'Self', // 'Self', 'Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Brother', 'Sister', etc.
     trim: true
@@ -127,20 +130,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  status:{
+  status: {
     type: Number,
     default: 0,
     index: true
   }
- 
-  
+
+
 }, {
   timestamps: true,
   strict: false
 });
 
 // Pre-save hook to hash password if it was modified
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   try {
     const salt = await bcrypt.genSalt(10);
@@ -152,7 +155,7 @@ userSchema.pre('save', async function(next) {
 });
 
 // Method to compare passwords
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 

@@ -26,7 +26,7 @@ const register = async (req, res) => {
   try {
     const {
       first_name, middle_name, last_name, email, password,
-      number, gender, dob, blood_group, relation, is_committee, committee_role,
+      number, gender, dob,anniversary, blood_group, relation, is_committee, committee_role,
       profile_image, country_id, state_id, city_id, address
     } = req.body;
 
@@ -57,6 +57,7 @@ const register = async (req, res) => {
       number,
       gender,
       dob,
+      anniversary,
       blood_group,
       relation: familyData.relation,
       is_committee,

@@ -10,8 +10,6 @@ const definitions = {
     fields: [
       { name: 'title', label: 'Title' },
       { name: 'festival_date', label: 'Festival Date', type: 'date' },
-      { name: 'button_name', label: 'Button Name' },
-      { name: 'button_link', label: 'Button Link' },
       { name: 'description', label: 'Description', type: 'textarea' },
       { name: 'image', label: 'Image', type: 'file' }
     ],
@@ -19,7 +17,6 @@ const definitions = {
       { key: 'image', label: 'Image', type: 'image' },
       { key: 'title', label: 'Title' },
       { key: 'festival_date', label: 'Date' },
-      { key: 'button_name', label: 'Action' }
     ]
   },
   events: {
@@ -157,10 +154,12 @@ const definitions = {
     title: 'Birthdays',
     subtitle: 'View and manage member birthdays',
     endpoint: '/users?birthday',
-    fields: [{ name: 'name', label: 'Name' }, { name: 'dob', label: 'Date of Birth', type: 'date' }],
+    fields: [{ name: 'name', label: 'Name' }, { name: 'dob', label: 'Date of Birth', type: 'date' }, { name: 'anniversary', label: 'Anniversary', type: 'date' }],
     columns: [
       { key: 'name', label: 'Name' },
-      { key: 'dob', label: 'Date of Birth', render: (row) => row.dob ? new Date(row.dob).toLocaleDateString('en-IN') : '-' }
+      { key: 'dob', label: 'Date of Birth', render: (row) => row.dob ? new Date(row.dob).toLocaleDateString('en-IN') : '-' },
+      { key: 'anniversary', label: 'Anniversary', render: (row) => row.anniversary ? new Date(row.anniversary).toLocaleDateString('en-IN') : '-' }
+
     ]
   },
   'job-vacancy': {
