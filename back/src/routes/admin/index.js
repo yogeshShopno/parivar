@@ -28,7 +28,7 @@ router.use('/posts', require('./postRoutes'));
 router.use('/get_app_theme', require('./configRoutes'));
 router.use('/update_app_theme', require('./configRoutes'));
 router.use('/content', require('./contentRoutes'));
-router.use('/gallery', require('./galleryRoutes'));
+router.use('/gallery', require('../galleryRoutes'));
 router.use('/gallery-categories', require('./galleryCategoryRoutes'));
 router.use('/masters', require('./masterRoutes'));
 router.use('/news', require('./newsRoutes'));
