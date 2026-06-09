@@ -1,7 +1,7 @@
 const express = require('express');
+const { protect, requirePermission } = require('../middleware/auth');
 const { parseForm } = require('../middleware/upload');
 const { getGallery ,saveGallery ,deleteGallery} = require('../controllers/GalleryController');
-const { protect, requirePermission } = require('../middleware/auth');
 
 const router = express.Router();
 
