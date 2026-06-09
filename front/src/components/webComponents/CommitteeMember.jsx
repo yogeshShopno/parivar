@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { memberApi } from '../../lib/api'
 
 
@@ -83,7 +83,7 @@ export default function Members() {
 
   const visibleMembers = members.length > 0 ? members : []
  
-
+const doubled = [...visibleMembers, ...visibleMembers]  
   return (
     <section
       id="members"
@@ -136,46 +136,65 @@ export default function Members() {
             Loading committee members...
           </div>
         )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {visibleMembers?.map((member) => (
-            <article
-              key={member.id || member.name}
-              className="group overflow-hidden rounded-lg border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-              style={{
-                borderColor: theme.borderColor,
-              }}
-            >
-              <div className="aspect-[4/4] overflow-hidden">
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-              </div>
-
-              <div className="px-5 py-5 text-center">
-                <h3
-                  className="text-lg font-semibold"
-                  style={{ color: theme.textColor }}
-                >
-                  {member.name}
-                </h3>
-                <span
-                  className="inline-flex items-center rounded-full border px-4 py-1.5 mt-2 text-sm font-semibold"
-                  style={{
-                    borderColor: theme.primaryColor,
-                    color: theme.primaryColor,
-                    backgroundColor: shadeColor(theme.backgroundColor, 3),
-                  }}
-                >
-                  {member.role}
-                </span>
-              </div>
-            </article>
-          ))}
+<div style={{ overflow: 'hidden', position: 'relative',
+  maskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+  WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+}}>
+  <div
+    style={{
+      display: 'flex',
+      gap: '24px',
+      width: 'max-content',
+      animation: 'scroll-left 28s linear infinite',
+    }}
+    onMouseEnter={e => e.currentTarget.style.animationPlayState = 'paused'}
+    onMouseLeave={e => e.currentTarget.style.animationPlayState = 'running'}
+  >
+    {doubled.map((member, i) => (
+      <article
+        key={`${member.id}-${i}`}
+        style={{
+          width: '220px',
+          flexShrink: 0,
+          borderRadius: '12px',
+          border: `1px solid ${theme.borderColor}`,
+          overflow: 'hidden',
+          backgroundColor: theme.backgroundColor,
+          transition: 'transform 0.3s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+        onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+      >
+        <div style={{ aspectRatio: '1/1', overflow: 'hidden' }}>
+          <img
+            src={member.image}
+            alt={member.name}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            loading="lazy"
+          />
         </div>
+        <div style={{ padding: '14px 16px', textAlign: 'center' }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 600, color: theme.textColor, margin: '0 0 6px' }}>
+            {member.name}
+          </h3>
+          <span style={{
+            display: 'inline-block',
+            fontSize: '12px',
+            fontWeight: 600,
+            padding: '3px 14px',
+            borderRadius: '999px',
+            border: `1px solid ${theme.primaryColor}`,
+            color: theme.primaryColor,
+            backgroundColor: shadeColor(theme.backgroundColor, 3),
+          }}>
+            {member.role}
+          </span>
+        </div>
+      </article>
+    ))}
+  </div>
+</div>
+
       </div>
     </section>
   )
