@@ -28,15 +28,13 @@ const imageFromRequest = (req, fallback = '') => {
 const getFestivals = async (req, res) => {
   try {
     const { data: festivals, pagination } = await queryHelper(Festival, req.query, {
-      searchFields: ['title', 'description', 'festival_name', 'festival_description', 'button_name'],
+      searchFields: ['title', 'description', 'festival_name', 'festival_description', ],
       filterFields: ['status']
     });
     const data = festivals.map((festival) => ({
       id: festival.id || String(festival._id),
       festival_name: festival.festival_name || festival.title || '',
       festival_date: festival.festival_date || festival.date || '',
-      button_name: festival.button_name || '',
-      button_link: festival.button_link || '',
       festival_description: festival.festival_description || festival.description || '',
       image: publicUrl(req, festival.image || '')
     }));
@@ -54,8 +52,7 @@ const formatFestival = (req, item) => ({
   description: item.description || item.festival_description || '',
   festival_name: item.festival_name || item.title || '',
   festival_date: item.festival_date || item.date || '',
-  button_name: item.button_name || '',
-  button_link: item.button_link || '',
+
   status: Number(item.status ?? 1),
   image: publicUrl(req, item.image || '')
 });
@@ -63,7 +60,7 @@ const formatFestival = (req, item) => ({
 const adminGetFestivals = async (req, res) => {
   try {
     const { data, pagination } = await queryHelper(Festival, req.query, {
-      searchFields: ['title', 'description', 'festival_name', 'festival_description', 'button_name'],
+      searchFields: ['title', 'description', 'festival_name', 'festival_description',],
       filterFields: ['status']
     });
     return apiResponse(res, 200, 'Festivals retrieved successfully', data.map((row) => formatFestival(req, row)), pagination);
