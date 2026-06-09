@@ -33,14 +33,6 @@ const festivalSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
-  button_name: {
-    type: String,
-    default: ''
-  },
-  button_link: {
-    type: String,
-    default: ''
-  },
   festival_description: {
     type: String,
     default: ''
