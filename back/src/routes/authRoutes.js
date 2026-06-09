@@ -1,13 +1,10 @@
 const express = require('express');
-const { login, selectAccountLogin, versionCode } = require('../controllers/authController');
-const { protect } = require('../middleware/auth');
+const { login } = require('../controllers/adminController');
 const { parseForm } = require('../middleware/upload');
 
 const router = express.Router();
 
-router.post('/login', parseForm, login);
-router.post('/select_account_login', parseForm, selectAccountLogin);
-router.post('/version_code', protect, parseForm, versionCode);
-router.get('/version_code', protect, versionCode);
+router.post('/', parseForm, login);
+
 
 module.exports = router;
