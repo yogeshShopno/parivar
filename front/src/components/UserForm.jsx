@@ -12,6 +12,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
     number: '',
     gender: '',
     dob: '',
+    anniversary: '',
     blood_group: '',
     relation: 'Self',
     is_committee: false,
@@ -26,10 +27,17 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
     if (user) {
       // Format ISO date to YYYY-MM-DD for date inputs
       let formattedDob = ''
+      let formattedAnniversary
       if (user.dob) {
         const d = new Date(user.dob)
         if (!isNaN(d.getTime())) {
           formattedDob = d.toISOString().slice(0, 10)
+        }
+      }
+      if (user.anniversary) {
+        const d = new Date(user.anniversary)
+        if (!isNaN(d.getTime())) {
+          formattedAnniversary = d.toISOString().slice(0, 10)
         }
       }
 
@@ -41,6 +49,7 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
         number: user.number || '',
         gender: user.gender || '',
         dob: formattedDob,
+        anniversary: formattedAnniversary ,
         blood_group: user.blood_group || '',
         relation: user.relation || 'Self',
         is_committee: user.is_committee || false,
@@ -58,6 +67,8 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
         number: '',
         gender: '',
         dob: '',
+        anniversary: '',
+        anniversary: '',
         blood_group: '',
         relation: 'Self',
         is_committee: false,
@@ -229,24 +240,34 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
               disabled={isLoading}
             />
           </div>
+          <div>
+            <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Anniversary</label>
+            <input
+              type="date"
+              value={formData.anniversary}
+              onChange={(e) => setFormData({ ...formData, anniversary: e.target.value })}
+              className="w-full px-3 py-2 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all cursor-pointer"
+              disabled={isLoading}
+            />
+          </div>
 
-          
+
 
           <div className="" >
             <label className="block text-sm font-semibold text-text-secondary mb-1.5">Status</label>
             <div className="flex align-center item-center gap-2">
-            <input
-            className="h-5 w-5 px-3 py-2 self-end"
-              type="checkbox"
-              id="status"
-              name="Approved"
-              checked={formData.status == 1 || formData.status == '1'}
-              onChange={(e) => setFormData({ ...formData, status: e.target.checked ? 1 : 0 })}
-              disabled={isLoading}
-            /> <span className=''>
-              {formData.status == 1 ? 'Approved' : 'Pending'}
-            </span>
-             </div>
+              <input
+                className="h-5 w-5 px-3 py-2 self-end"
+                type="checkbox"
+                id="status"
+                name="Approved"
+                checked={formData.status == 1 || formData.status == '1'}
+                onChange={(e) => setFormData({ ...formData, status: e.target.checked ? 1 : 0 })}
+                disabled={isLoading}
+              /> <span className=''>
+                {formData.status == 1 ? 'Approved' : 'Pending'}
+              </span>
+            </div>
           </div>
         </div>
       </div>

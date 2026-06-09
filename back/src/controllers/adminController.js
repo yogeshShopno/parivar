@@ -265,6 +265,8 @@ const getStats = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const birthday = 'birthday' in req.query;
+    const anniversary = 'anniversary' in req.query;
+
     const query = {};
     const requestPermissions = getRolePermissions(req.user);
     const canListMembers = requestPermissions.includes('members.list') || requestPermissions.includes('users.manage');
@@ -283,11 +285,16 @@ const getUsers = async (req, res) => {
       query.dob = { $exists: true };
     }
 
+    if(anniversary){
+      query.anniversary = { $exists: true };
+
+    }
+
     const { data: users, pagination } = await queryHelper(User, req.query, {
       baseQuery: query,
       searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email'],
       filterFields: ['gender', 'blood_group', 'is_committee', 'committee_role', 'role_id', 'status'],
-      select: birthday ? 'first_name middle_name last_name number dob' : '-password',
+      select: birthday ? 'first_name middle_name last_name number dob anniversary' : '-password',
       populate: birthday ? '' : 'role_id',
       defaultSort: { createdAt: -1 },
       lean: false
@@ -297,7 +304,17 @@ const getUsers = async (req, res) => {
       const formatted = users.map(u => ({
         name: fullName(u),
         number: u.number,
-        dob: u.dob || null
+        dob: u.dob || null.$exists,
+        anniversary: u.anniversary || null
+      }));
+      return apiResponse(res, 200, 'Users birthday list retrieved successfully', formatted, pagination);
+    }
+
+        if (anniversary) {
+      const formatted = users.map(u => ({
+        name: fullName(u),
+        number: u.number,
+        anniversary: u.anniversary || null
       }));
       return apiResponse(res, 200, 'Users birthday list retrieved successfully', formatted, pagination);
     }
@@ -313,6 +330,7 @@ const getUsers = async (req, res) => {
       number: u.number,
       gender: u.gender || '',
       dob: u.dob || null,
+      anniversary: u.anniversary || null,
       blood_group: u.blood_group || '',
       relation: u.relation || 'Self',
       is_committee: u.is_committee || false,
@@ -345,6 +363,7 @@ const createUser = async (req, res) => {
       password,
       gender,
       dob,
+      anniversary,
       blood_group,
       relation,
       is_committee,
@@ -353,7 +372,9 @@ const createUser = async (req, res) => {
       address,
       designation,
       status,
-      image
+      image,
+      family_head_id,
+      
     } = req.body;
 
 
@@ -400,6 +421,7 @@ const createUser = async (req, res) => {
       number: number,
       gender: gender || '',
       dob: dob || null,
+      anniversary: anniversary || null,
       blood_group: blood_group || '',
       relation: familyData.relation,
       is_committee: is_committee === true || is_committee === 'true',
@@ -409,6 +431,7 @@ const createUser = async (req, res) => {
       designation: designation || '',
       status: familyData.status,
       family_head: familyData.family_head,
+
       image: imageFromRequest(req),
     });
 
@@ -434,6 +457,7 @@ const createUser = async (req, res) => {
       number: newUser.number,
       gender: newUser.gender || '',
       dob: newUser.dob || null,
+      anniversary: newUser.anniversary || null,
       blood_group: newUser.blood_group || '',
       relation: newUser.relation || 'Self',
       is_committee: newUser.is_committee || false,
@@ -478,6 +502,7 @@ const updateUser = async (req, res) => {
       number,
       gender,
       dob,
+      anniversary,
       blood_group,
       relation,
       is_committee,
@@ -513,6 +538,7 @@ const updateUser = async (req, res) => {
     if (number !== undefined) user.number = number;
     if (gender !== undefined) user.gender = gender;
     if (dob !== undefined) user.dob = dob;
+    if (anniversary !== undefined) user.anniversary = anniversary;
     if (blood_group !== undefined) user.blood_group = blood_group;
     if (relation !== undefined) user.relation = familyData.relation;
     if (is_committee !== undefined) user.is_committee = is_committee === true || is_committee === 'true';
@@ -536,6 +562,7 @@ const updateUser = async (req, res) => {
       number: user.number,
       gender: user.gender || '',
       dob: user.dob || null,
+      anniversary: user.anniversary || null,
       blood_group: user.blood_group || '',
       relation: user.relation || 'Self',
       is_committee: user.is_committee || false,
