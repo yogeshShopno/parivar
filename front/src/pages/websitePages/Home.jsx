@@ -7,6 +7,7 @@ import Memories from '../../components/webComponents/Memories'
 import Events from '../../components/webComponents/Events'
 import TopStudents from '../../components/webComponents/TopStudents'
 import Donors from '../../components/webComponents/Donors'
+import Businesses from '../../components/webComponents/Businesses'
 
 /**
  * Home Page - Website Landing Page
@@ -36,7 +37,9 @@ export default function Home() {
         <Memories />
         <Events />
         <TopStudents />
+        <Businesses />
         <Donors />
+
       </main>
     </div>
   )
