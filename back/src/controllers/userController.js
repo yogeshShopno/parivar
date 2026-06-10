@@ -69,11 +69,19 @@ const register = async (req, res) => {
     }
 
     const owner = req.user ? req.user : {};
+
     const familyData = await prepareFamilyFields({
       relation,
       family_head_id: req.body.family_head_id,
       status: req.body.status
     });
+
+    const users = await User.find({ member_id: /^\d+$/ }).select('member_id');
+
+    const highestId = users.reduce((max, u) => {
+      const num = Number(u.member_id);
+      return Number.isFinite(num) && num > max ? num : max;
+    }, 0);
 
     const newUser = new User({
       first_name,
@@ -123,167 +131,41 @@ const register = async (req, res) => {
   }
 };
 
-//admin resgister
-const createUser = async (req, res) => {
-
-  try {
-    const {
-      first_name,
-      middle_name,
-      last_name,
-      email,
-      password,
-      number,
-      gender,
-      dob,
-      anniversary,
-      blood_group,
-      relation,
-      is_committee,
-      committee_role,
-      profile_image,
-      role_id,
-      address,
-      designation,
-      status,
-      image,
-      family_head_id,
-
-    } = req.body;
-
-
-
-    if (!first_name || !number) {
-      return apiResponse(res, 400, 'First name and number are required');
-    }
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return apiResponse(res, 400, 'Invalid email format');
-    }
-
-    if (await User.findOne({ email: email ? email.toLowerCase() : undefined })) {
-      return apiResponse(res, 400, 'Email already exists');
-    }
-    if (await User.findOne({ number: number ? number : undefined })) {
-      return apiResponse(res, 400, 'Number already exists');
-    }
-
-    if ((is_committee === true || is_committee === 'true') && req.file?.size > 1024 * 1024) {
-      return apiResponse(res, 400, 'Committee image must be 1 MB or smaller');
-    }
-
-    const familyData = await familyUtil.prepareFamilyFields({
-      relation,
-      family_head_id: req.body.family_head_id,
-      status
-    }, {});
-
-    const assignedRoleId = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
-
-    const users = await User.find({ member_id: /^\d+$/ }).select('member_id');
-    const highestId = users.reduce((max, u) => {
-      const num = Number(u.member_id);
-      return Number.isFinite(num) && num > max ? num : max;
-    }, 0);
-
-    const newUser = new User({
-      member_id: String(highestId + 1),
-      first_name: first_name,
-      middle_name: middle_name || '',
-      last_name: last_name || '',
-      email: email ? email.toLowerCase() : '',
-      password: password || '12345',
-      number: number,
-      gender: gender || '',
-      dob: dob || null,
-      anniversary: anniversary || null,
-      blood_group: blood_group || '',
-      relation: familyData.relation,
-      is_committee: is_committee === true || is_committee === 'true',
-      committee_role: committee_role || '',
-      role_id: assignedRoleId,
-      address: address || '',
-      designation: designation || '',
-      status: familyData.status,
-      family_head: familyData.family_head,
-
-      image: imageFromRequest(req),
-    });
-
-    await newUser.save();
-
-    if (familyData.relation === 'Self') {
-      newUser.family_head = {
-        id: newUser._id,
-        name: familyUtil.fullName(newUser)
-      };
-      if (status === undefined) {
-        newUser.status = 0;
-      }
-      await newUser.save();
-    }
-
-    return apiResponse(res, 201, 'User created successfully', {
-      _id: newUser._id,
-      first_name: newUser.first_name,
-      middle_name: newUser.middle_name || '',
-      last_name: newUser.last_name || '',
-      email: newUser.email,
-      number: newUser.number,
-      gender: newUser.gender || '',
-      dob: newUser.dob || null,
-      anniversary: newUser.anniversary || null,
-      blood_group: newUser.blood_group || '',
-      relation: newUser.relation || 'Self',
-      is_committee: newUser.is_committee || false,
-      committee_role: newUser.committee_role || '',
-      role_id: newUser.role_id ? String(newUser.role_id) : '',
-      address: newUser.address || '',
-      designation: newUser.designation || '',
-      status: Number(newUser.status ?? 1),
-      image: publicUrl(req, newUser.image || ''),
-
-
-    });
-  } catch (error) {
-    return apiResponse(res, 500, 'Error creating user', { error: error.message });
-  }
-};
-
 // Login user and return JWT
-const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+// const login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
-    }
+//     if (!email || !password) {
+//       return res.status(400).json({ message: 'Email and password are required' });
+//     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
+//     const user = await User.findOne({ email: email.toLowerCase() });
+//     if (!user) {
+//       return res.status(401).json({ message: 'Invalid email or password' });
+//     }
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
+//     const isMatch = await user.comparePassword(password);
+//     if (!isMatch) {
+//       return res.status(401).json({ message: 'Invalid email or password' });
+//     }
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user._id },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+//     // Generate JWT token
+//     const token = jwt.sign(
+//       { id: user._id },
+//       JWT_SECRET,
+//       { expiresIn: JWT_EXPIRES_IN }
+//     );
 
-    res.status(200).json({
-      message: 'Login successful',
-      token,
-      data: sanitizeUser(user)
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Error logging in', error: error.message });
-  }
-};
+//     res.status(200).json({
+//       message: 'Login successful',
+//       token,
+//       data: sanitizeUser(user)
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: 'Error logging in', error: error.message });
+//   }
+// };
 
 // Get authenticated user profile
 const getProfile = async (req, res) => {
@@ -516,10 +398,9 @@ const deleteUser = async (req, res) => {
 
 module.exports = {
   register,
-  login,
+  // login,
   getProfile,
   getUsers,
-  createUser,
   updateUser,
   deleteUser
 };
