@@ -32,7 +32,7 @@ router.use('/update_app_theme', require('./configRoutes'));
 // Admin Only Routes (previously under /api/admin)
 // Now exposed at /api/ directly but still protected by permissions.
 router.post('/admin_login', parseForm, adminLogin);
-router.post('/register_admin', parseForm, require('../controllers/adminController').createUser);
+router.post('/register_admin', parseForm, require('../controllers/userController').createUser);
 router.put('/update_admin', parseForm, updateAdminRecovery);
 
 router.use('/stats', require('./dashboardRoutes'));
