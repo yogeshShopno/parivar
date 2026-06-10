@@ -57,7 +57,24 @@ const registrationPayload = (req, existing = {}, event = {}) => {
 
 const getRegistrationsList = async (req, res) => {
   try {
+    const userId = String(req.user?._id || req.user?.id || '');
+    const permissions = req.user ? getRolePermissions(req.user) : [];
+    const isPrivileged = permissions.includes('events.manage') || permissions.includes('users.manage');
+
+    let baseQuery = {};
+    if (!isPrivileged) {
+      const ownedEvents = await Event.find({ 'created_by.id': userId }).select('_id').lean();
+      const ownedEventIds = ownedEvents.map((event) => event._id);
+      baseQuery = {
+        $or: [
+          { 'user.id': userId },
+          { event_id: { $in: ownedEventIds } }
+        ]
+      };
+    }
+
     const { data, pagination } = await queryHelper(EventRegistration, req.query, {
+      baseQuery,
       searchFields: ['name', 'email', 'number', 'event_name'],
       filterFields: ['event_id', 'status']
     });
