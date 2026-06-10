@@ -12,7 +12,7 @@ const getStudents = async (req, res) => {
   try {
     const { data: students, pagination } = await queryHelper(Student, requestData(req), {
       searchFields: ['surname', 'student_name', 'father_name', 'school_name', 'standard', 'mobile_number','year'],
-      filterFields: ['standard', 'student_name', 'school_name', 'status','year']
+      filterFields: ['standard', 'student_name', 'school_name', 'status','year','user_id']
     });
     
     return res.status(200).json({
@@ -31,6 +31,7 @@ const getStudents = async (req, res) => {
         result_image: publicUrl(req, s.result_image || ''),
         student_image: publicUrl(req, s.student_image || ''),
         year: s.year || '',
+        is_own: req.user ? String(s.user_id) === String(req.user._id) : false,
         status: Number(s.status ?? 0),
         createdAt: s.createdAt || s.cdate || ''
       })),
@@ -84,6 +85,7 @@ const addStudent = async (req, res) => {
       result_image: result_image || '',
       student_image: student_image || '',
       year: year || '',
+      user_id: req.user ? req.user._id : null,
       status: status === undefined ? 0 : Number(status),
       cdate: new Date().toISOString().slice(0, 10)
     };
@@ -105,6 +107,7 @@ const addStudent = async (req, res) => {
         result_image: publicUrl(req, student.result_image || ''),
         student_image: publicUrl(req, student.student_image || ''),
         year: student.year || '',
+        is_own: true,
         status: Number(student.status ?? 0),
         createdAt: student.createdAt || student.cdate || ''
       }
@@ -185,6 +188,7 @@ const updateStudent = async (req, res) => {
         result_image: publicUrl(req, student.result_image || ''),
         student_image: publicUrl(req, student.student_image || ''),
         year: student.year || '',
+        is_own: req.user ? String(student.user_id) === String(req.user._id) : false,
         status: Number(student.status ?? 0),
         createdAt: student.createdAt || student.cdate || ''
       }

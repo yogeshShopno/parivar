@@ -2,9 +2,7 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 
-const memberRoutes = require('./src/routes/member');
-const adminRoutes = require('./src/routes/admin');
-const adminUserRoutes = require('./src/routes/admin/userRoutes');
+const routes = require('./src/routes/index');
 const connectDB = require('./src/config/database');
 connectDB();
 
@@ -45,12 +43,8 @@ app.post('/test', (req, res) => {
   });
 });
 
-// Admin/software APIs.
-
-app.use('/api/admin', adminRoutes);
-
-// Member/mobile APIs.
-app.use('/api', memberRoutes);
+// Unified API Routes
+app.use('/api', routes);
 
 app.use((req, res) => {
   res.status(404).json({
@@ -75,3 +69,5 @@ app.use((error, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
 });
+
+

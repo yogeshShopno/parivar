@@ -68,7 +68,6 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
         gender: '',
         dob: '',
         anniversary: '',
-        anniversary: '',
         blood_group: '',
         relation: 'Self',
         is_committee: false,

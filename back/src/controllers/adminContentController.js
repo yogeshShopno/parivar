@@ -1,11 +1,8 @@
 const mongoose = require('mongoose');
-const Festival = require('../models/festivalModel');
-const Gallery = require('../models/galleryModel');
 const GalleryCategory = require('../models/galleryCategoryModel');
 const Banner = require('../models/bannerModel');
 const ContactInquiry = require('../models/contactInquiryModel');
 const BusinessCategory = require('../models/businessCategoryModel');
-const newsModel = require('../models/newsModel');
 const Country = require('../models/countryModel');
 const State = require('../models/stateModel');
 const City = require('../models/cityModel');
@@ -164,10 +161,10 @@ const saveInquiry = async (req, res) => {
 };
 
 const masterConfig = {
-  business: { Model: BusinessCategory, nameKeys: ['business', 'name'], parentKey: 'state_id' },
-  country: { Model: Country, nameKeys: ['country', 'name'] },
-  state: { Model: State, nameKeys: ['state', 'name'], parentKey: 'country_id' },
-  city: { Model: City, nameKeys: ['city', 'name'], parentKey: 'state_id' },
+  business: { Model: BusinessCategory, nameKeys: ['business', 'name'], parentKey: 'state_id', skipCustomId: true },
+  country: { Model: Country, nameKeys: ['country', 'name'], skipCustomId: true },
+  state: { Model: State, nameKeys: ['state', 'name'], parentKey: 'country_id', skipCustomId: true },
+  city: { Model: City, nameKeys: ['city', 'name'], parentKey: 'state_id', skipCustomId: true },
   district: { Model: Master, type: 'district' },
   taluka: { Model: Master, type: 'taluka' },
   village: { Model: Master, type: 'village' },
