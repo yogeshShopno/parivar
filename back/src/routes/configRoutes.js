@@ -1,10 +1,9 @@
 const express = require('express');
-const {
-  getConfig,
-  updateConfig
-} = require('../controllers/adminController');
+
+
 const { protect, requirePermission } = require('../middleware/auth');
 const { parseForm } = require('../middleware/upload');
+const { getConfig, updateConfig } = require('../controllers/configController');
 
 const router = express.Router();
 

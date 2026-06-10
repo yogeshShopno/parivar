@@ -84,6 +84,7 @@ const register = async (req, res) => {
     }, 0);
 
     const newUser = new User({
+      member_id: String(highestId + 1),
       first_name,
       middle_name,
       last_name,
