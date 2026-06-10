@@ -134,6 +134,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0,
     index: true
+  },
+  fcm_token: {
+    type: String,
+    default: ''
   }
 
 

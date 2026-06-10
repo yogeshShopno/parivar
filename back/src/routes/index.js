@@ -8,6 +8,7 @@ const roleController = require('../controllers/roleController');
 
 // Unified Routes we updated
 router.use('/users', require('./userRoutes'));
+router.use('/notifications', require('./notificationRoutes'));
 router.use('/students', require('./studentRoutes'));
 router.use('/matrimonies', require('./matrimonyRoutes'));
 router.use('/festivals', require('./festivalRoutes'));
