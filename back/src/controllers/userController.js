@@ -278,6 +278,47 @@ const getUsers = async (req, res) => {
   }
 };
 
+// Get single user by id
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return apiResponse(res, 400, 'User id is required');
+
+    const user = await User.findById(id).populate('role_id');
+    if (!user) return apiResponse(res, 404, 'User not found');
+
+    const formatted = {
+      id: user.id || String(user._id),
+      _id: user._id,
+      first_name: user.first_name,
+      middle_name: user.middle_name || '',
+      last_name: user.last_name || '',
+      name: fullName(user),
+      email: user.email || '',
+      number: user.number,
+      gender: user.gender || '',
+      dob: user.dob || null,
+      anniversary: user.anniversary || null,
+      blood_group: user.blood_group || '',
+      relation: user.relation || 'Self',
+      is_committee: user.is_committee || false,
+      committee_role: user.committee_role || '',
+      designation: user.designation || '',
+      role_id: user.role_id?._id ? String(user.role_id._id) : '',
+      role_name: user.role_id?.name || '',
+      permissions: getRolePermissions(user),
+      address: user.address || '',
+      status: Number(user.status ?? 1),
+      image: publicUrl(req, user.image || user.profile_image || ''),
+      role: user.is_committee ? 'admin' : 'user'
+    };
+
+    return apiResponse(res, 200, 'User retrieved successfully', formatted);
+  } catch (error) {
+    return apiResponse(res, 500, 'Error retrieving user', { error: error.message });
+  }
+};
+
 
 
 const updateUser = async (req, res) => {
@@ -402,6 +443,7 @@ module.exports = {
   // login,
   getProfile,
   getUsers,
+  getUserById,
   updateUser,
   deleteUser
 };
