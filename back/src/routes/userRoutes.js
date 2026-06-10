@@ -57,8 +57,7 @@ router.get('/', protect, (req, res, next) => {
 });
 
 router.get('/:id', protect, (req, res, next) => {
-    req.query.id = req.params.id;
-    return userController.getUsers(req, res, next);
+    return userController.getUserById(req, res, next);
 });
 
 
