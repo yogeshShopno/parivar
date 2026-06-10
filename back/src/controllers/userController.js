@@ -29,14 +29,32 @@ const sanitizeUser = (user) => {
   return data;
 };
 
-// Register a new user
+// Register a new user member
 const register = async (req, res) => {
 
   try {
     const {
-      first_name, middle_name, last_name, email, password,
-      number, gender, dob,anniversary, blood_group, relation, is_committee, committee_role,
-      profile_image, country_id, state_id, city_id, address
+      first_name,
+      middle_name,
+      last_name,
+      email,
+      password,
+      number,
+      gender,
+      dob,
+      anniversary,
+      blood_group,
+      relation,
+      is_committee,
+      committee_role,
+      profile_image,
+      country_id,
+      state_id,
+      city_id,
+      address,
+      image,
+      family_head_id,
+
     } = req.body;
 
     if (!first_name || !number) {
@@ -78,7 +96,7 @@ const register = async (req, res) => {
       address,
       family_head: familyData.family_head,
       status: familyData.status,
-   
+
     });
 
     await newUser.save();
@@ -105,152 +123,7 @@ const register = async (req, res) => {
   }
 };
 
-// Login user and return JWT
-const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
-    }
-
-    const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: user._id },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
-
-    res.status(200).json({
-      message: 'Login successful',
-      token,
-      data: sanitizeUser(user)
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Error logging in', error: error.message });
-  }
-};
-
-// Get authenticated user profile
-const getProfile = async (req, res) => {
-  try {
-    // req.user is populated by the protect middleware
-    res.status(200).json({
-      message: 'Profile retrieved successfully',
-      data: sanitizeUser(req.user)
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Error retrieving profile', error: error.message });
-  }
-};
-
-const mongooseQueryForUser = (id) => {
-  if (id.match(/^[0-9a-fA-F]{24}$/)) {
-    return { _id: id  };
-  }
-
-  return { _id: id };
-};
-
-const getUsers = async (req, res) => {
-  try {
-    const birthday = 'birthday' in req.query;
-    const anniversary = 'anniversary' in req.query;
-
-    const query = {};
-    const requestPermissions = getRolePermissions(req.user);
-    const canListMembers = requestPermissions.includes('members.list') || requestPermissions.includes('users.manage');
-    const canListCommittee = requestPermissions.includes('committee.list') || requestPermissions.includes('committee.manage');
-
-    if (req.query.gender) query.gender = req.query.gender;
-    if (req.query.blood_group) query.blood_group = req.query.blood_group;
-    if (req.query.is_committee !== undefined) {
-      query.is_committee = req.query.is_committee === 'true';
-    }
-    if (!canListMembers && canListCommittee) {
-      query.is_committee = true;
-    }
-
-    if (birthday) {
-      query.dob = { $exists: true };
-    }
-
-    if(anniversary){
-      query.anniversary = { $exists: true };
-
-    }
-
-    const { data: users, pagination } = await queryHelper(User, req.query, {
-      baseQuery: query,
-      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email'],
-      filterFields: ['gender', 'blood_group', 'is_committee', 'committee_role', 'role_id', 'status'],
-      select: birthday ? 'first_name middle_name last_name number dob anniversary' : '-password',
-      populate: birthday ? '' : 'role_id',
-      defaultSort: { createdAt: -1 },
-      lean: false
-    });
-
-    if (birthday) {
-      const formatted = users.map(u => ({
-        name: fullName(u),
-        number: u.number,
-        dob: u.dob || null.$exists,
-        anniversary: u.anniversary || null
-      }));
-      return apiResponse(res, 200, 'Users birthday list retrieved successfully', formatted, pagination);
-    }
-
-        if (anniversary) {
-      const formatted = users.map(u => ({
-        name: fullName(u),
-        number: u.number,
-        anniversary: u.anniversary || null
-      }));
-      return apiResponse(res, 200, 'Users birthday list retrieved successfully', formatted, pagination);
-    }
-    // Map backend user to the fields expected by standard layout or user forms
-    const formatted = users.map(u => ({
-      id: u.id || String(u._id),
-      _id: u._id,
-      first_name: u.first_name,
-      middle_name: u.middle_name || '',
-      last_name: u.last_name || '',
-      name: fullName(u),
-      email: u.email || '',
-      number: u.number,
-      gender: u.gender || '',
-      dob: u.dob || null,
-      anniversary: u.anniversary || null,
-      blood_group: u.blood_group || '',
-      relation: u.relation || 'Self',
-      is_committee: u.is_committee || false,
-      committee_role: u.committee_role || '',
-      designation: u.designation || '',
-      role_id: u.role_id?._id ? String(u.role_id._id) : '',
-      role_name: u.role_id?.name || '',
-      permissions: getRolePermissions(u),
-      address: u.address || '',
-      status: Number(u.status ?? 1),
-      image: publicUrl(req, u.image || u.profile_image || ''),
-      role: u.is_committee ? 'admin' : 'user'
-    }));
-
-    return apiResponse(res, 200, 'Users retrieved successfully', formatted, pagination);
-  } catch (error) {
-    return apiResponse(res, 500, 'Error retrieving users', { error: error.message });
-  }
-};
-
+//admin resgister
 const createUser = async (req, res) => {
 
   try {
@@ -259,8 +132,8 @@ const createUser = async (req, res) => {
       middle_name,
       last_name,
       email,
-      number,
       password,
+      number,
       gender,
       dob,
       anniversary,
@@ -268,13 +141,14 @@ const createUser = async (req, res) => {
       relation,
       is_committee,
       committee_role,
+      profile_image,
       role_id,
       address,
       designation,
       status,
       image,
       family_head_id,
-      
+
     } = req.body;
 
 
@@ -374,6 +248,154 @@ const createUser = async (req, res) => {
     return apiResponse(res, 500, 'Error creating user', { error: error.message });
   }
 };
+
+// Login user and return JWT
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user._id },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    );
+
+    res.status(200).json({
+      message: 'Login successful',
+      token,
+      data: sanitizeUser(user)
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error logging in', error: error.message });
+  }
+};
+
+// Get authenticated user profile
+const getProfile = async (req, res) => {
+  try {
+    // req.user is populated by the protect middleware
+    res.status(200).json({
+      message: 'Profile retrieved successfully',
+      data: sanitizeUser(req.user)
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error retrieving profile', error: error.message });
+  }
+};
+
+const mongooseQueryForUser = (id) => {
+  if (id.match(/^[0-9a-fA-F]{24}$/)) {
+    return { _id: id };
+  }
+
+  return { _id: id };
+};
+
+const getUsers = async (req, res) => {
+  try {
+    const birthday = 'birthday' in req.query;
+    const anniversary = 'anniversary' in req.query;
+
+    const query = {};
+    const requestPermissions = getRolePermissions(req.user);
+    const canListMembers = requestPermissions.includes('members.list') || requestPermissions.includes('users.manage');
+    const canListCommittee = requestPermissions.includes('committee.list') || requestPermissions.includes('committee.manage');
+
+    if (req.query.gender) query.gender = req.query.gender;
+    if (req.query.blood_group) query.blood_group = req.query.blood_group;
+    if (req.query.is_committee !== undefined) {
+      query.is_committee = req.query.is_committee === 'true';
+    }
+    if (!canListMembers && canListCommittee) {
+      query.is_committee = true;
+    }
+
+    if (birthday) {
+      query.dob = { $exists: true };
+    }
+
+    if (anniversary) {
+      query.anniversary = { $exists: true };
+
+    }
+
+    const { data: users, pagination } = await queryHelper(User, req.query, {
+      baseQuery: query,
+      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email'],
+      filterFields: ['gender', 'blood_group', 'is_committee', 'committee_role', 'role_id', 'status'],
+      select: birthday ? 'first_name middle_name last_name number dob anniversary' : '-password',
+      populate: birthday ? '' : 'role_id',
+      defaultSort: { createdAt: -1 },
+      lean: false
+    });
+
+    if (birthday) {
+      const formatted = users.map(u => ({
+        name: fullName(u),
+        number: u.number,
+        dob: u.dob || null.$exists,
+        anniversary: u.anniversary || null
+      }));
+      return apiResponse(res, 200, 'Users birthday list retrieved successfully', formatted, pagination);
+    }
+
+    if (anniversary) {
+      const formatted = users.map(u => ({
+        name: fullName(u),
+        number: u.number,
+        anniversary: u.anniversary || null
+      }));
+      return apiResponse(res, 200, 'Users birthday list retrieved successfully', formatted, pagination);
+    }
+    // Map backend user to the fields expected by standard layout or user forms
+    const formatted = users.map(u => ({
+      id: u.id || String(u._id),
+      _id: u._id,
+      first_name: u.first_name,
+      middle_name: u.middle_name || '',
+      last_name: u.last_name || '',
+      name: fullName(u),
+      email: u.email || '',
+      number: u.number,
+      gender: u.gender || '',
+      dob: u.dob || null,
+      anniversary: u.anniversary || null,
+      blood_group: u.blood_group || '',
+      relation: u.relation || 'Self',
+      is_committee: u.is_committee || false,
+      committee_role: u.committee_role || '',
+      designation: u.designation || '',
+      role_id: u.role_id?._id ? String(u.role_id._id) : '',
+      role_name: u.role_id?.name || '',
+      permissions: getRolePermissions(u),
+      address: u.address || '',
+      status: Number(u.status ?? 1),
+      image: publicUrl(req, u.image || u.profile_image || ''),
+      role: u.is_committee ? 'admin' : 'user'
+    }));
+
+    return apiResponse(res, 200, 'Users retrieved successfully', formatted, pagination);
+  } catch (error) {
+    return apiResponse(res, 500, 'Error retrieving users', { error: error.message });
+  }
+};
+
+
 
 const updateUser = async (req, res) => {
   try {
@@ -482,7 +504,7 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await User.deleteOne({_id: id });
+    const result = await User.deleteOne({ _id: id });
     if (result.deletedCount === 0) {
       return apiResponse(res, 404, 'User not found');
     }
