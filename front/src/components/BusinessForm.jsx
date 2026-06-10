@@ -257,7 +257,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           >
             <option value="" className="bg-surface text-text">Select Country</option>
             {countries.map((country) => (
-              <option key={country.id} value={country.id} className="bg-surface text-text">{country.name}</option>
+              <option key={country._id} value={country._id} className="bg-surface text-text">{country.name}</option>
             ))}
           </select>
           {errors.country_id && <p className="text-error-text text-sm mt-1 font-semibold">{errors.country_id}</p>}
@@ -272,7 +272,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           >
             <option value="" className="bg-surface text-text">Select State</option>
             {states.map((state) => (
-              <option key={state.id} value={state.id} className="bg-surface text-text">{state.name}</option>
+              <option key={state._id} value={state._id} className="bg-surface text-text">{state.name}</option>
             ))}
           </select>
           {errors.state_id && <p className="text-error-text text-sm mt-1 font-semibold">{errors.state_id}</p>}
@@ -287,7 +287,7 @@ export default function BusinessForm({ business, onSubmit, isLoading }) {
           >
             <option value="" className="bg-surface text-text">Select City</option>
             {cities.map((city) => (
-              <option key={city.id} value={city.id} className="bg-surface text-text">{city.name}</option>
+              <option key={city._id} value={city._id} className="bg-surface text-text">{city.name}</option>
             ))}
           </select>
           {errors.city_id && <p className="text-error-text text-sm mt-1 font-semibold">{errors.city_id}</p>}
