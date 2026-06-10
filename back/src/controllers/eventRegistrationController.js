@@ -132,8 +132,6 @@ const addRegistration = async (req, res) => {
     const registration = new EventRegistration(data);
     await registration.save();
     const formatted = formatRegistration(registration.toObject());
-    
-     event = await Event.findById(formatted.event_id).lean();
 
     const ticket = {
       ticket_id: formatted.id,
