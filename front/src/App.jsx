@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useContext } from 'react'
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { AuthContext, AuthProvider } from './context/AuthContext'
+import { NotificationProvider } from './context/NotificationContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import Login from './pages/Login'
@@ -34,6 +35,7 @@ applyTheme(activeTheme)
 export default function App() {
   return (
     <AuthProvider>
+      <NotificationProvider>
       <Suspense fallback={null}>
         <ReactToaster />
       </Suspense>
@@ -87,6 +89,7 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </NotificationProvider>
     </AuthProvider>
   )
 }

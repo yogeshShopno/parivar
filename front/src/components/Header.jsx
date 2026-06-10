@@ -1,10 +1,11 @@
 import React, { useContext } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LogOut, Search, Bell, Sparkles } from 'lucide-react'
+import { LogOut, Search, Sparkles } from 'lucide-react'
 import { AuthContext } from '../context/AuthContext'
 import { masterLabels, routeTitles } from '../config/navigation'
 import GoogleTranslate from './GoogleTranslate'
 import { getUserRoleLabel } from '../lib/roles'
+import NotificationDropdown from './NotificationDropdown'
 
 export default function Header() {
   const { logout, user } = useContext(AuthContext)
@@ -44,8 +45,8 @@ export default function Header() {
       </div>
 
       {/* Control bar */}
-      <div className="flex items-center gap-6">
-       
+      <div className="flex items-center gap-4">
+        <NotificationDropdown variant="dark" />
 
         {/* Vertical divider */}
         <span className="w-px h-6 bg-border"></span>

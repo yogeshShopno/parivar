@@ -26,7 +26,7 @@ export default function News() {
     status: 1,
     image: null,
     remove_image: false,
-
+    send_notification: false,
   })
 
   const totalPages = Math.max(Number(pagination.totalPages) || 1, 1)
@@ -80,7 +80,7 @@ const openCreate = () => {
   setSelected(null)
   setSelectedId('')  
   setExistingImage('')
-  setFormData({ title: '', description: '', status: 1, image: null, remove_image: false })
+  setFormData({ title: '', description: '', status: 1, image: null, remove_image: false, send_notification: false })
   setIsModalOpen(true)
 }
 
@@ -93,7 +93,8 @@ const openCreate = () => {
       description: newsItem.description || '',
       status: Number(newsItem.status ?? 1),
       image: null,
-      remove_image: false
+      remove_image: false,
+      send_notification: false,
     })
     setIsModalOpen(true)
   }
@@ -111,6 +112,7 @@ const openCreate = () => {
       payload.append('title', formData.title)
       payload.append('description', formData.description)
       payload.append('status', formData.status)
+      if (formData.send_notification) payload.append('send_notification', 'true')
       if (hasFile) {
         payload.append('image', formData.image instanceof FileList ? formData.image[0] : formData.image)
       }
@@ -351,6 +353,20 @@ const openCreate = () => {
             </div>
           </div>
 
+
+          {/*NOTIFICATIONS */}
+          {!selected && (
+            <label className="flex items-center gap-3 cursor-pointer p-3 bg-input-bg border border-border rounded-xl">
+              <input
+                type="checkbox"
+                checked={formData.send_notification}
+                onChange={(e) => setFormData({ ...formData, send_notification: e.target.checked })}
+                disabled={saving}
+                className="w-4 h-4 accent-primary"
+              />
+              <span className="text-sm font-semibold text-text-secondary">Send as Push Notification to all users</span>
+            </label>
+          )}
 
           <button type="submit" disabled={saving} className="flex justify-self-end bg-primary hover:bg-primary-hover text-white p-3 rounded-xl font-semibold text-sm tracking-wider  disabled:opacity-50 shadow-glow-primary">
             {saving ? 'Saving...' : 'Save Feed News'}

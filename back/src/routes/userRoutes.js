@@ -2,6 +2,8 @@ const express = require('express');
 const userController = require('../controllers/userController');
 const { authorizeUserUpdate, protect, requirePermission, getTokenFromRequest } = require('../middleware/auth');
 const { parseForm } = require('../middleware/upload');
+const User = require('../models/userModels');
+const { apiResponse } = require('../utils/apiResponse');
 
 const router = express.Router();
 
@@ -19,6 +21,17 @@ const isAdminCall = (req) => {
 
 router.post('/login', parseForm, userController.login);
 router.get('/profile', protect, userController.getProfile);
+
+router.post('/fcm-token', protect, async (req, res) => {
+  try {
+    const token = req.body.fcm_token || req.query.fcm_token;
+    if (!token) return apiResponse(res, 400, 'FCM token required');
+    await User.findByIdAndUpdate(req.user._id || req.user.id, { fcm_token: token });
+    return apiResponse(res, 200, 'FCM token saved');
+  } catch (e) {
+    return apiResponse(res, 500, 'Error saving FCM token');
+  }
+});
 
 router.get('/', protect, (req, res, next) => {
     if (isAdminCall(req)) {

@@ -1,6 +1,7 @@
 const News = require('../models/newsModel');
 const { apiResponse, fullName, publicUrl } = require('../utils/apiResponse');
 const queryHelper = require('../utils/queryHelper');
+const { createAndBroadcast } = require('./notificationController');
 
 
 const imageFromRequest = (req, fallback = '') => {
@@ -41,7 +42,7 @@ const newsPayload = (req, existing = {}) => {
 
     return {
         ...data,
-        id: existing.id || String(existing._id),
+        id: existing.id || (existing._id ? String(existing._id) : undefined),
         title,
         description,
         content: req.body.content || description,
@@ -85,6 +86,18 @@ const addNews = async (req, res) => {
             ...data
         });
         await news.save();
+
+        if (req.body.send_notification === 'true' || req.body.send_notification === true) {
+            const imageUrl = news.image ? publicUrl(req, news.image) : '';
+            createAndBroadcast({
+                title: news.title,
+                body: news.description?.slice(0, 150) || '',
+                image: imageUrl,
+                type: 'news',
+                ref_id: String(news._id)
+            });
+        }
+
         return apiResponse(res, 201, 'News saved successfully', formatNews(req, news.toObject()));
     } catch (error) {
         return apiResponse(res, 400, error.message || 'Error saving news');

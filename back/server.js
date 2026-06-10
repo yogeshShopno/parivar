@@ -1,12 +1,18 @@
 const express = require('express');
+const http = require('http');
 const path = require('path');
 require('dotenv').config();
 
 const routes = require('./src/routes/index');
 const connectDB = require('./src/config/database');
+const socketManager = require('./src/config/socket');
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
+
+socketManager.init(server);
+
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
@@ -66,7 +72,7 @@ app.use((error, req, res, next) => {
   return next();
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
 });
 
