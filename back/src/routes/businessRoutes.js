@@ -1,19 +1,15 @@
 const express = require('express');
-const { protect } = require('../middleware/auth');
-const { businessUpload, parseForm } = require('../middleware/upload');
-const { getBusinessCategoryList, addBusinessDetails, getBusinesses, getBusinessById, deleteBusiness } = require('../controllers/businessController');
 
+const { protect, requirePermission } = require('../middleware/auth');
+const { parseForm } = require('../middleware/upload');
+const { getBusinesses,getBusinessById, addBusinessDetails ,deleteBusiness, getBusinessCategoryList } = require('../controllers/businessController');
 
 const router = express.Router();
 
-router.get('/business_category_list',  getBusinessCategoryList);
-router.post('/', protect, parseForm, addBusinessDetails);
-router.put('/:id', protect, parseForm, addBusinessDetails);
-
 router.get('/', getBusinesses);
-router.get('/:id',getBusinessById);
-// Protected actions
-router.delete('/:id', protect, deleteBusiness);
-
+router.get('/:id', getBusinessById);
+router.post('/', protect, requirePermission('businesses.add'), parseForm, addBusinessDetails);
+router.put('/:id', protect, requirePermission('businesses.edit'), parseForm, addBusinessDetails);
+router.delete('/:id', protect, requirePermission('businesses.delete'), deleteBusiness);
 
 module.exports = router;

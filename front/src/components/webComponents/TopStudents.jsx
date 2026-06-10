@@ -78,7 +78,6 @@ export default function TopStudents() {
         const response = await memberApi.get('/students')
         const rows = Array.isArray(response.data?.data) ? response.data.data : []
         const activeRows = rows
-          .filter((student) => Number(student.status ?? 1) === 1)
           .sort((a, b) => normalizePercentage(b.percentage) - normalizePercentage(a.percentage))
           .slice(0, 4)
 
