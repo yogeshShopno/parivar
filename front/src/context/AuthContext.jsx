@@ -63,7 +63,8 @@ const fetchWebTheme = async () => {
 
     if (themeData) {
       storeWebTheme(themeData)
-      window.dispatchEvent(new Event('storage'))
+      window.dispatchEvent(new Event('web-theme-updated'))
+            window.dispatchEvent(new Event('storage'))
     }
   } catch (err) {
     console.error('Failed to fetch web theme:', err.message)

@@ -177,7 +177,7 @@ const Carousel = ({
       {showArrows && images.length > 1 && (
         <button
           onClick={prevSlide}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 active:scale-95 backdrop-blur-sm"
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 active:scale-95 backdrop-blur-sm"
           style={{
             backgroundColor: `${theme.primaryColor}cc`,
             color: theme.fontColor,
@@ -192,7 +192,7 @@ const Carousel = ({
       {showArrows && images.length > 1 && (
         <button
           onClick={nextSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 active:scale-95 backdrop-blur-sm"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 active:scale-95 backdrop-blur-sm"
           style={{
             backgroundColor: `${theme.primaryColor}cc`,
             color: theme.fontColor,

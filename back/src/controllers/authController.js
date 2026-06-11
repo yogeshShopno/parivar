@@ -65,6 +65,12 @@ const login = async (req, res) => {
       });
     }
 
+    const { fcm_token } = requestData(req);
+    if (fcm_token) {
+      users[0].fcm_token = fcm_token;
+      await users[0].save();
+    }
+
     const payload = tokenPayloadFor(users[0]);
     const token = signArchiveToken(payload);
 
@@ -95,6 +101,16 @@ const selectAccountLogin = async (req, res) => {
 
     if (!user) {
       return apiResponse(res, 400, 'Invalid member');
+    }
+
+    if (user.status === 0) {
+      // Just an extra safety check in case inactive user tries to select
+    }
+
+    const { fcm_token } = requestData(req);
+    if (fcm_token) {
+      user.fcm_token = fcm_token;
+      await user.save();
     }
 
     const payload = tokenPayloadFor(user);
