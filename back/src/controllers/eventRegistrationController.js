@@ -5,6 +5,23 @@ const queryHelper = require('../utils/queryHelper');
 const { getRolePermissions } = require('../middleware/auth');
 const isObjectId = (id) => require('mongoose').isValidObjectId(id);
 
+const normalizeNumber = (num) => {
+  if (!num && num !== 0) return '';
+  return String(num).trim();
+};
+
+const canActOnRegistration = (user, registration, permissions = []) => {
+  if (!user) return false;
+  if (!registration) return false;
+
+  const isOwner = registration.user && registration.user.id && String(registration.user.id) === String(user._id);
+  const emailMatch = registration.email && user.email && String(registration.email).toLowerCase() === String(user.email).toLowerCase();
+  const numberMatch = registration.number && user.number && normalizeNumber(registration.number) === normalizeNumber(user.number);
+  const privileged = permissions.includes('events.manage') || permissions.includes('users.manage');
+
+  return isOwner || emailMatch || numberMatch || privileged;
+};
+
 const findRegistration = (id) => EventRegistration.findOne(
   isObjectId(id) ? { _id: id } : { _id: String(id) }
 );
@@ -25,7 +42,7 @@ const formatRegistration = (item = {}) => {
     _id: String(item._id),
     name: item.name || '',
     email: item.email || '',
-    number: item.number || '',
+    number: normalizeNumber(item.number || ''),
     total_attendee: item.total_attendee ?? 1,
     status: item.status || 'confirmed',
     event_id: String(item.event_id || ''),
@@ -47,7 +64,7 @@ const registrationPayload = (req, existing = {}, event = {}) => {
   return {
     name: req.body.name || existing.name || '',
     email: req.body.email || existing.email || '',
-    number: req.body.number || existing.number || '',
+    number: normalizeNumber(req.body.number ?? existing.number ?? ''),
     total_attendee: Number(req.body.total_attendee ?? existing.total_attendee ?? 1),
     event_id: existing.event_id || req.body.event_id || '',
     event_name: existing.event_name || event.event_name || event.title || '',
@@ -73,11 +90,13 @@ const getRegistrationsList = async (req, res) => {
       };
     }
 
+    // allow searching by normalized number as well
     const { data, pagination } = await queryHelper(EventRegistration, req.query, {
       baseQuery,
       searchFields: ['name', 'email', 'number', 'event_name'],
       filterFields: ['event_id', 'status']
     });
+
     return apiResponse(res, 200, 'Registrations retrieved successfully', data.map(formatRegistration), pagination);
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving registrations', { error: error.message });
@@ -91,11 +110,8 @@ const getRegistrationById = async (req, res) => {
     // ownership check: only owner or users with event permissions can view
     const user = req.user;
     const permissions = user ? getRolePermissions(user) : [];
-    const isOwner = user && registration.user && registration.user.id && String(registration.user.id) === String(user._id);
-    const emailMatch = user && registration.email && user.email && String(registration.email).toLowerCase() === String(user.email).toLowerCase();
-    const numberMatch = user && registration.number && user.number && String(registration.number) === String(user.number);
 
-    if (!(isOwner || emailMatch || numberMatch || permissions.includes('events.manage') || permissions.includes('users.manage'))) {
+    if (!canActOnRegistration(user, registration.toObject(), permissions)) {
       return apiResponse(res, 403, 'Forbidden: You do not have permission to view this registration');
     }
 
