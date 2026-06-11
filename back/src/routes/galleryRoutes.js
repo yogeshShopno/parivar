@@ -5,7 +5,7 @@ const { getGallery ,saveGallery ,deleteGallery} = require('../controllers/Galler
 
 const router = express.Router();
 
-router.get('/',  requirePermission('gallery.list'), getGallery);
+router.get('/',   getGallery);
 router.post('/', protect, requirePermission('gallery.add'), parseForm,saveGallery);
 router.put('/:id', protect, requirePermission('gallery.edit'), parseForm,saveGallery);
 router.delete('/:id', protect, requirePermission('gallery.delete'),deleteGallery);

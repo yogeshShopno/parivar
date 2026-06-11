@@ -11,8 +11,8 @@ const { postUpload } = require('../middleware/upload');
 
 const router = express.Router();
 
-router.get('/', protect,  getEventsList);
-router.get('/:id', protect,getEventById);
+router.get('/',   getEventsList);
+router.get('/:id', getEventById);
 router.post('/', protect, requirePermission('events.add'), postUpload, addEvent);
 router.put('/:id', protect, requirePermission('events.edit'), postUpload, updateEvent);
 router.delete('/:id', protect, requirePermission('events.delete'), deleteEvent);
