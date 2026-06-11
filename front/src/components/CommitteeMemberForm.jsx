@@ -114,7 +114,7 @@ export default function CommitteeMemberForm({ member, onSubmit, isLoading }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Last Name *</label>
-          <input type="text" placeholder="Enter Last Name" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} className={fieldClass} disabled={isLoading} />
+          <input type="text" placeholder="Enter Last Name" value={formData.last_name} onChange={(e) => setFormData({ ...formData, last_name: e.target.value })} className={`${fieldClass} disabled:opacity-50 disabled:cursor-not-allowed`} disabled={isLoading || !!(member && member.last_name)} />
           {errors.last_name && <p className="text-error-text text-sm mt-1 font-semibold">{errors.last_name}</p>}
         </div>
 

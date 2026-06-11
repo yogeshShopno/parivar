@@ -156,8 +156,8 @@ export default function UserForm({ user, roles = [], onSubmit, isLoading }) {
               type="text"
               value={formData.last_name}
               onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all"
-              disabled={isLoading}
+              className="w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || !!(user && user.last_name)}
             />
           </div>
         </div>
