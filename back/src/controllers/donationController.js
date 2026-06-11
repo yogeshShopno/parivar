@@ -217,7 +217,6 @@ const adminGetDonations = async (req, res) => {
 
 const adminSaveDonation = async (req, res) => {
   try {
-    console.log(req)
     const { id } = req.params;
     let existing = null;
     if (id) {
@@ -246,11 +245,7 @@ const adminSaveDonation = async (req, res) => {
       status
     } = requestData(req);
 
-    console.log(donator_name,
-      donate_amount,
-      donation_purpose,
-      date,
-      status)
+
 
     // For new donation, check mandatory fields
     if (!existing && (!donator_name || !donate_amount || !donation_purpose || !date)) {

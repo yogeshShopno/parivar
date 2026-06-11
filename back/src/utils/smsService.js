@@ -33,8 +33,6 @@ const sendSMS = async (number, otp) => {
     const mobile = `91${number}`;
     const message = `${otp} is your OTP to register for security reasons, do not share this OTP with anyone. Parivar SHOPNO`;
 
-    console.log(`[SMS] Sending OTP to ${mobile}...`);
-
     const response = await axios.get(baseUrl, {
       params: {
         APIKey: apiKey,
@@ -52,7 +50,6 @@ const sendSMS = async (number, otp) => {
     });
 
     if (response.data && response.data.ErrorCode === "000") {
-      console.log(`[SMS] Successfully sent OTP to ${mobile}`);
       return { success: true, data: response.data };
     } else {
       const errorMsg = response.data ? response.data.ErrorMessage : "Unknown API Error";
