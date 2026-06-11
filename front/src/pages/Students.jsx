@@ -323,7 +323,8 @@ export default function Students() {
                 name="surname"
                 defaultValue={selectedStudent?.surname || ''}
                 required
-                className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
+                className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!!(selectedStudent && selectedStudent.surname)}
               />
             </div>
             <div>
