@@ -5,7 +5,7 @@ const { getCategories, saveCategory, deleteCategory } = require('../controllers/
 
 const router = express.Router();
 
-router.get('/', protect, requirePermission('gallery.list'), getCategories);
+router.get('/',  requirePermission('gallery.list'), getCategories);
 router.post('/', protect, requirePermission('gallery.add'), parseForm, saveCategory);
 router.put('/:id', protect, requirePermission('gallery.edit'), parseForm, saveCategory);
 router.delete('/:id', protect, requirePermission('gallery.delete'), deleteCategory);
