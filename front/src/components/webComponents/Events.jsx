@@ -103,7 +103,6 @@ export default function Events() {
 
         const rows = Array.isArray(response.data?.data) ? response.data.data : []
         const normalizedEvents = normalizeEvent
-        console.log(normalizedEvents)
 
         setEvents(rows.map(normalizeEvent))
       } catch (error) {

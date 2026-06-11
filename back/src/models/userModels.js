@@ -138,7 +138,13 @@ const userSchema = new mongoose.Schema({
   fcm_token: {
     type: String,
     default: ''
-  }
+  },
+  otp: { type: String, default: null },
+  otp_expiry: { type: Date, default: null },
+  otp_last_sent: { type: Date, default: null },
+  otp_count: { type: Number, default: 0 },
+  otp_reset_day: { type: Date, default: null },
+  fcm_token: { type: String, default: '' }
 
 
 }, {

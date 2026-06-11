@@ -7,8 +7,8 @@ const router = express.Router();
 
 const masterPermission = (action) => (req) => `${req.params.type === 'business' ? 'businesses' : req.params.type}.${action}`;
 
-router.get('/:type', protect, requirePermission(masterPermission('list')), adminContent.getMasters);
-router.get('/:type/:id', protect, requirePermission(masterPermission('list')), adminContent.getMasterById);
+router.get('/:type', adminContent.getMasters);
+router.get('/:type/:id', adminContent.getMasterById);
 router.post('/:type', protect, requirePermission(masterPermission('add')), parseForm, adminContent.saveMaster);
 router.put('/:type/:id', protect, requirePermission(masterPermission('edit')), parseForm, adminContent.saveMaster);
 router.delete('/:type/:id', protect, requirePermission(masterPermission('delete')), adminContent.deleteMaster);

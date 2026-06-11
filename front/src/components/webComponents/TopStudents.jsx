@@ -93,7 +93,6 @@ export default function TopStudents() {
   }, [])
 
   const visibleStudents = students.length > 0 ? students : []
-console.log(visibleStudents)
   return (
     <section
       id="students"
