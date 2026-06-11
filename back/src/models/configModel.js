@@ -53,13 +53,11 @@ const configSchema = new mongoose.Schema({
 
   name: {
     type: String,
-    default: "",
-    required: true,
+    default: "Parivar",
   },
   bannerImages: {
     type: [String],
     default: [],
-    required: true,
   },
   email: {
     type: String,

@@ -1,13 +1,21 @@
 const express = require('express');
 const router = express.Router();
 
-const { login: adminLogin, updateAdminRecovery } = require('../controllers/adminController');
+const { loginAdmin, updateAdminRecovery, createAdmin } = require('../controllers/adminController');
 const { parseForm } = require('../middleware/upload');
 const { protect, requirePermission } = require('../middleware/auth');
 const roleController = require('../controllers/roleController');
 
+// Admin Only Routes (previously under /api/admin)
+// Now exposed at /api/ directly but still protected by permissions.
+router.post('/register_admin', parseForm, createAdmin);
+router.post('/admin_login', parseForm, loginAdmin);
+router.put('/update_admin', parseForm, updateAdminRecovery);
+
+
 // Unified Routes we updated
 router.use('/users', require('./userRoutes'));
+router.use('/notifications', require('./notificationRoutes'));
 router.use('/students', require('./studentRoutes'));
 router.use('/matrimonies', require('./matrimonyRoutes'));
 router.use('/festivals', require('./festivalRoutes'));
@@ -29,11 +37,7 @@ router.use('/event-registrations', require('./eventRegistrationRoutes'));
 router.use('/get_app_theme', require('./configRoutes'));
 router.use('/update_app_theme', require('./configRoutes'));
 
-// Admin Only Routes (previously under /api/admin)
-// Now exposed at /api/ directly but still protected by permissions.
-router.post('/admin_login', parseForm, adminLogin);
-router.post('/register_admin', parseForm, require('../controllers/userController').createUser);
-router.put('/update_admin', parseForm, updateAdminRecovery);
+
 
 router.use('/stats', require('./dashboardRoutes'));
 router.use('/dashboard', require('./dashboardRoutes'));

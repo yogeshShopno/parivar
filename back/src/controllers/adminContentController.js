@@ -170,8 +170,7 @@ const masterConfig = {
   village: { Model: Master, type: 'village' },
   area: { Model: Master, type: 'area' },
   'blood-group': { Model: Master, type: 'blood-group' },
-  'event-category': { Model: Master, type: 'event-category' }
-  ,
+  'event-category': { Model: Master, type: 'event-category' },
   'gallery-category': { Model: GalleryCategory, nameKeys: ['category'], skipCustomId: true }
 };
 

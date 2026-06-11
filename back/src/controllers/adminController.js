@@ -89,8 +89,139 @@ const resolveRecoveryRoleId = async ({ role_id, role_name }) => {
   return role._id;
 };
 
+
+//admin resgister
+const createAdmin = async (req, res) => {
+
+  try {
+    const {
+      first_name,
+      middle_name,
+      last_name,
+      email,
+      password,
+      number,
+      gender,
+      dob,
+      anniversary,
+      blood_group,
+      relation,
+      is_committee,
+      committee_role,
+      profile_image,
+      role_id,
+      address,
+      designation,
+      status,
+      image,
+      family_head_id,
+
+    } = req.body;
+
+
+
+    if (!first_name || !number) {
+      return apiResponse(res, 400, 'First name and number are required');
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return apiResponse(res, 400, 'Invalid email format');
+    }
+
+    if (await User.findOne({ email: email ? email.toLowerCase() : undefined })) {
+      return apiResponse(res, 400, 'Email already exists');
+    }
+    if (await User.findOne({ number: number ? number : undefined })) {
+      return apiResponse(res, 400, 'Number already exists');
+    }
+
+    if ((is_committee === true || is_committee === 'true') && req.file?.size > 1024 * 1024) {
+      return apiResponse(res, 400, 'Committee image must be 1 MB or smaller');
+    }
+
+    const familyData = await familyUtil.prepareFamilyFields({
+      relation,
+      family_head_id: req.body.family_head_id,
+      status
+    }, {});
+
+    const assignedRoleId = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
+
+    const users = await User.find({ member_id: /^\d+$/ }).select('member_id');
+    
+
+    const highestId = users.reduce((max, u) => {
+      const num = Number(u.member_id);
+      return Number.isFinite(num) && num > max ? num : max;
+    }, 0);
+
+    const newUser = new User({
+      member_id: String(highestId + 1),
+      first_name: first_name,
+      middle_name: middle_name || '',
+      last_name: last_name || '',
+      email: email ? email.toLowerCase() : '',
+      password: password || '12345',
+      number: number,
+      gender: gender || '',
+      dob: dob || null,
+      anniversary: anniversary || null,
+      blood_group: blood_group || '',
+      relation: familyData.relation,
+      is_committee: is_committee === true || is_committee === 'true',
+      committee_role: committee_role || '',
+      role_id: assignedRoleId,
+      address: address || '',
+      designation: designation || '',
+      status: familyData.status,
+      family_head: familyData.family_head,
+
+      image: imageFromRequest(req),
+    });
+
+    await newUser.save();
+
+    if (familyData.relation === 'Self') {
+      newUser.family_head = {
+        id: newUser._id,
+        name: familyUtil.fullName(newUser)
+      };
+      if (status === undefined) {
+        newUser.status = 0;
+      }
+      await newUser.save();
+    }
+
+    return apiResponse(res, 201, 'User created successfully', {
+      _id: newUser._id,
+      first_name: newUser.first_name,
+      middle_name: newUser.middle_name || '',
+      last_name: newUser.last_name || '',
+      email: newUser.email,
+      number: newUser.number,
+      gender: newUser.gender || '',
+      dob: newUser.dob || null,
+      anniversary: newUser.anniversary || null,
+      blood_group: newUser.blood_group || '',
+      relation: newUser.relation || 'Self',
+      is_committee: newUser.is_committee || false,
+      committee_role: newUser.committee_role || '',
+      role_id: newUser.role_id ? String(newUser.role_id) : '',
+      address: newUser.address || '',
+      designation: newUser.designation || '',
+      status: Number(newUser.status ?? 1),
+      image: publicUrl(req, newUser.image || ''),
+
+
+    });
+  } catch (error) {
+    return apiResponse(res, 500, 'Error creating user', { error: error.message });
+  }
+};
+
 // Admin login (email + password, checks is_committee)
-const login = async (req, res) => {
+//tested
+
+const loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -142,6 +273,8 @@ const login = async (req, res) => {
     return apiResponse(res, 500, 'Error in login', { error: error.message });
   }
 };
+
+//tested
 
 const updateAdminRecovery = async (req, res) => {
   try {
@@ -263,151 +396,10 @@ const getStats = async (req, res) => {
 
 
 
-// const getStudents = async (req, res) => {
-//   try {
-//     const { data: students, pagination } = await queryHelper(Student, req.query, {
-//       searchFields: ['surname', 'student_name', 'father_name', 'school_name', 'standard', 'mobile_number'],
-//       filterFields: ['standard', 'student_name', 'school_name', 'status']
-//     });
-//     return apiResponse(res, 200, 'Students retrieved successfully', students.map(s => ({
-//       id: s.id || String(s._id),
-//       surname: s.surname || '',
-//       student_name: s.student_name || '',
-//       father_name: s.father_name || '',
-//       school_name: s.school_name || '',
-//       standard: s.standard || '',
-//       percentage: s.percentage || '',
-//       mobile_number: s.mobile_number || '',
-//       mobile_number_2: s.mobile_number_2 || '',
-//       result_image: publicUrl(req, s.result_image || ''),
-//       student_image: publicUrl(req, s.student_image || ''),
-//       status: Number(s.status ?? 0),
-//       createdAt: s.createdAt || s.cdate || ''
-//     })), pagination);
-//   } catch (error) {
-//     return apiResponse(res, 500, 'Error retrieving students', { error: error.message });
-//   }
-// };
-
-// const studentPayload = (req, existing = {}) => ({
-//   ...req.body,
-//   surname: req.body.surname || existing.surname || '',
-//   student_name: req.body.student_name || existing.student_name || '',
-//   father_name: req.body.father_name || existing.father_name || '',
-//   school_name: req.body.school_name || existing.school_name || '',
-//   standard: req.body.standard || existing.standard || '',
-//   percentage: req.body.percentage || existing.percentage || '',
-//   mobile_number: req.body.mobile_number || existing.mobile_number || '',
-//   mobile_number_2: req.body.mobile_number_2 || existing.mobile_number_2 || '',
-//   result_image: req.body.result_image || existing.result_image || '',
-//   student_image: req.body.student_image || existing.student_image || '',
-//   status: req.body.status === undefined ? Number(existing.status ?? 0) : Number(req.body.status)
-// });
-
-// const saveStudent = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     let existing = null;
-//     if (id) {
-//       const orConditions = [];
-//       orConditions.push({ id });
-//       if (mongoose.isValidObjectId(id)) {
-//         orConditions.push({ _id: id });
-//       }
-//       existing = await Student.findOne({ $or: orConditions });
-//     }
-
-//     if (id && !existing) {
-//       return apiResponse(res, 404, 'Student not found');
-//     }
-
-//     const payload = studentPayload(req, existing || {});
-//     if (!payload.surname || !payload.student_name || !payload.father_name || !payload.school_name || !payload.standard || !payload.percentage || !payload.mobile_number) {
-//       return apiResponse(res, 400, 'All required fields are mandatory');
-//     }
-
-//     const student = existing || new Student({
-    
-//       cdate: new Date().toISOString().slice(0, 10)
-//     });
-
-//     student.set({ ...payload });
-//     await student.save();
-
-//     return apiResponse(res, existing ? 200 : 201, 'Student saved successfully', {
-//       id: student._id || String(student._id),
-//       surname: student.surname || '',
-//       student_name: student.student_name || '',
-//       father_name: student.father_name || '',
-//       school_name: student.school_name || '',
-//       standard: student.standard || '',
-//       percentage: student.percentage || '',
-//       mobile_number: student.mobile_number || '',
-//       mobile_number_2: student.mobile_number_2 || '',
-//       result_image: publicUrl(req, student.result_image || ''),
-//       student_image: publicUrl(req, student.student_image || ''),
-//       status: Number(student.status ?? 0),
-//       createdAt: student.createdAt || student.cdate || ''
-//     });
-//   } catch (error) {
-//     return apiResponse(res, 500, 'Error saving student', { error: error.message });
-//   }
-// };
-
-// const deleteStudent = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-// const result = await Student.deleteOne({
-//   $or: [{ id }, { _id: mongoose.isValidObjectId(id) ? id : undefined }]
-// });
-//     if (result.deletedCount === 0) {
-//       return apiResponse(res, 404, 'Student not found');
-//     }
-//     return apiResponse(res, 200, 'Student deleted successfully');
-//   } catch (error) {
-//     return apiResponse(res, 500, 'Error deleting student', { error: error.message });
-//   }
-// };
-
-// --- Config/Theme Management ---
-
-const getConfig = async (req, res) => {
-  try {
-    let config = await Config.findOne();
-    if (!config) {
-      config = await Config.create({});
-    }
-    return apiResponse(res, 200, 'Config retrieved successfully', {
-      _id: String(config._id),
-      ...config.toObject()
-    });
-  } catch (error) {
-    return apiResponse(res, 500, 'Error retrieving configuration', { error: error.message });
-  }
-};
-const updateConfig = async (req, res) => {
-  try {
-    const config = await Config.findOneAndUpdate(
-      {},
-      req.body,
-      { new: true, upsert: true, runValidators: true }
-    );
-    return apiResponse(res, 200, 'Configuration updated successfully', {
-      _id: String(config._id),
-      ...config.toObject()
-    });
-  } catch (error) {
-    return apiResponse(res, 500, 'Error updating configuration', { error: error.message });
-  }
-};
-
 module.exports = {
-  login,
+  createAdmin,
+  loginAdmin,
   updateAdminRecovery,
   getStats,
-  // getStudents,
-  // saveStudent,
-  // deleteStudent,
-  getConfig,
-  updateConfig
+
 };

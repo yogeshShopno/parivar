@@ -1,14 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Phone, Mail, Facebook, Instagram, Twitter, Youtube, MessageCircle, Globe, Menu, X, LogIn } from 'lucide-react'
-
+import { Phone, Mail, Facebook, Instagram, Twitter, Youtube, MessageCircle, Menu, X, LogIn } from 'lucide-react'
+import NotificationDropdown from '../NotificationDropdown'
 
 export default function WebHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isLanguageOpen, setIsLanguageOpen] = useState(false)
   const [theme, setTheme] = useState({})
   const mobileMenuRef = useRef(null)
-  const languageRef = useRef(null)
-  // Load theme colors from localStorage
+
   useEffect(() => {
     const loadTheme = () => {
       const colorKeys = [
@@ -20,9 +18,7 @@ export default function WebHeader() {
       const loadedTheme = {}
       colorKeys.forEach((key) => {
         const value = localStorage.getItem(`web_${key}`)
-        if (value) {
-          loadedTheme[key] = value
-        }
+        if (value) loadedTheme[key] = value
       })
 
     
@@ -43,11 +39,7 @@ export default function WebHeader() {
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
         setIsMobileMenuOpen(false)
       }
-      if (languageRef.current && !languageRef.current.contains(event.target)) {
-        setIsLanguageOpen(false)
-      }
     }
-
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
@@ -55,10 +47,7 @@ export default function WebHeader() {
   // Close mobile menu on escape key
   useEffect(() => {
     const handleEscape = (event) => {
-      if (event.key === 'Escape') {
-        setIsMobileMenuOpen(false)
-        setIsLanguageOpen(false)
-      }
+      if (event.key === 'Escape') setIsMobileMenuOpen(false)
     }
 
     document.addEventListener('keydown', handleEscape)
@@ -76,20 +65,13 @@ export default function WebHeader() {
   ]
 
   const socialLinks = [
-    { icon: Facebook, href: theme?.facebook || '#facebook', label: 'Facebook', color: 'hover:text-blue-600' },
-    { icon: Instagram, href: theme?.instagram || '#instagram', label: 'Instagram', color: 'hover:text-pink-600' },
-    { icon: Twitter, href: theme?.twitter || '#twitter', label: 'Twitter', color: 'hover:text-sky-500' },
-    { icon: Youtube, href: theme?.youtube || '#youtube', label: 'YouTube', color: 'hover:text-red-600' },
-    { icon: MessageCircle, href: theme?.whatsapp || '#whatsapp', label: 'WhatsApp', color: 'hover:text-green-600' },
+    { icon: Facebook, href: theme?.facebook || '#facebook', label: 'Facebook' },
+    { icon: Instagram, href: theme?.instagram || '#instagram', label: 'Instagram' },
+    { icon: Twitter, href: theme?.twitter || '#twitter', label: 'Twitter' },
+    { icon: Youtube, href: theme?.youtube || '#youtube', label: 'YouTube' },
+    { icon: MessageCircle, href: theme?.whatsapp || '#whatsapp', label: 'WhatsApp' },
   ]
 
-  const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'gu', name: 'Gujarati' },
-    { code: 'hi', name: 'Hindi' },
-  ]
-
-  // Calculate lighter shade for gradients and borders
   const shadeColor = (color, percent) => {
     if (!color) return '#000000'
     const num = parseInt(color.replace('#', ''), 16)
@@ -190,27 +172,13 @@ export default function WebHeader() {
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo & Title */}
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          
-                {theme?.webLogo ? (
-                  <img src={theme.webLogo} alt={`${theme.name} logo`} className="h-12  object-contain" />
-                ) : (theme.name ? theme.name.charAt(0).to() : 'P')}
-              
+              {theme?.webLogo ? (
+                <img src={theme.webLogo} alt={`${theme.name} logo`} className="h-12 object-contain" />
+              ) : null}
               <div className="hidden sm:block">
-                <h1
-                  className="text-lg sm:text-xl font-semibold tracking-tight"
-                  style={{
-                    color: theme.textColor || '#123524'
-                  }}
-                >
-                 {theme?.name} Parivar
+                <h1 className="text-lg sm:text-xl font-semibold tracking-tight" style={{ color: theme.textColor || '#123524' }}>
+                  {theme?.name} Parivar
                 </h1>
-                <p
-                  className="text-sm"
-                  style={{
-                    color: shadeColor(theme.textColor || '#123524', 30)
-                  }}
-                >
-                </p>
               </div>
             </div>
 
@@ -236,11 +204,17 @@ export default function WebHeader() {
               ))}
             </nav>
 
-            {/* Right Side: Language Selector & Login */}
-            <div className="flex items-center gap-2 sm:gap-4">
-              
+            {/* Right Side */}
+            <div className="flex items-center gap-2 sm:gap-3">
 
-              {/* Login Button - Desktop */}
+              {/* Notification Bell - uses socket + DB */}
+              <NotificationDropdown
+                variant="light"
+                iconColor={theme.textColor || '#123524'}
+                badgeColor={theme.primaryColor || '#ef4444'}
+              />
+
+              {/* Login Button */}
               <a
                 href="/login"
                 className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200"

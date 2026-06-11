@@ -9,12 +9,14 @@ const {
 } = require('../controllers/eventRegistrationController');
 const { protect } = require('../middleware/auth');
 
+
+
 router.get('/', protect, getRegistrationsList);
 router.get('/download', protect, downloadRegistrations);  
-router.get('/:id', getRegistrationById);
-router.post('/', addRegistration);
-router.put('/:id', updateRegistration);
-router.patch('/:id/cancel', cancelRegistration);
+router.get('/:id', protect, getRegistrationById);
+router.post('/',  addRegistration);
+router.put('/:id', protect, updateRegistration);
+router.patch('/:id/cancel', protect, cancelRegistration);
 
 
 module.exports = router;

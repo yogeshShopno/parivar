@@ -17,12 +17,7 @@ const isAdminCall = (req) => {
     return req.user && (req.user.is_committee || req.user.role_id || req.user.role === 'admin');
 };
 
-router.get('/', protect, (req, res, next) => {
-    if (isAdminCall(req)) {
-        return requirePermission('news.list')(req, res, () => getNewsList(req, res, next));
-    }
-    return getNewsList(req, res, next);
-});
+router.get('/', getNewsList);
 
 router.post('/', protect, postUpload, (req, res, next) => {
     if (isAdminCall(req)) {

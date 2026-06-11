@@ -135,7 +135,7 @@ const getCountryList = async (req, res) => {
       filterFields: ['country', 'name', 'status']
     });
     return apiResponse(res, 200, 'Country data fetch successfully', data.map((country) => ({
-      id: country.id || String(country._id),
+      id: country._id || String(country._id),
       country: country.country || country.name || ''
     })), pagination);
   } catch (error) {
@@ -157,7 +157,7 @@ const getStateList = async (req, res) => {
       filterFields: ['state', 'name', 'status']
     });
     return apiResponse(res, 200, 'State data fetch successfully', data.map((state) => ({
-      id: state.id || String(state._id),
+      id: state._id || String(state._id),
       state: state.state || state.name || ''
     })), pagination);
   } catch (error) {
@@ -179,7 +179,7 @@ const getCityList = async (req, res) => {
       filterFields: ['city', 'name', 'status']
     });
     return apiResponse(res, 200, 'City data fetch successfully', data.map((city) => ({
-      id: city.id || String(city._id),
+      id: city._id || String(city._id),
       city: city.city || city.name || ''
     })), pagination);
   } catch (error) {
