@@ -17,39 +17,14 @@ const isAdminCall = (req) => {
     return req.user && (req.user.is_committee || req.user.role_id || req.user.role === 'admin');
 };
 
-router.get('/', optionalProtect, (req, res, next) => {
-    if (isAdminCall(req)) {
-        return requirePermission('matrimonies.list')(req, res, () => getMatrimonies(req, res, next));
-    }
-    return getMatrimonies(req, res, next);
-});
+router.get('/', optionalProtect, getMatrimonies);
 
-router.get('/:id', optionalProtect, (req, res, next) => {
-    if (isAdminCall(req)) {
-        return requirePermission('matrimonies.list')(req, res, () => getMatrimonyById(req, res, next));
-    }
-    return getMatrimonyById(req, res, next);
-});
+router.get('/:id', getMatrimonyById);
+router.get('/:id', getMatrimonyById);
 
-router.post('/', parseForm, (req, res, next) => {
-    const token = getTokenFromRequest(req);
-    if (token) {
-        return protect(req, res, () => {
-            if (isAdminCall(req)) {
-                return requirePermission('matrimonies.add')(req, res, () => addMatrimony(req, res, next));
-            }
-            return addMatrimony(req, res, next);
-        });
-    }
-    return addMatrimony(req, res, next);
-});
+router.post('/', parseForm,  addMatrimony);
 
-router.put('/:id', protect, parseForm, (req, res, next) => {
-    if (isAdminCall(req)) {
-        return requirePermission('matrimonies.edit')(req, res, () => updateMatrimony(req, res, next));
-    }
-    return updateMatrimony(req, res, next);
-});
+router.put('/:id', parseForm, updateMatrimony);
 
 router.delete('/:id', protect, (req, res, next) => {
     if (isAdminCall(req)) {

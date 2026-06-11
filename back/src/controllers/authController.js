@@ -1,111 +1,108 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModels');
-const { apiResponse, memberPublicId } = require('../utils/apiResponse');
+const { apiResponse } = require('../utils/apiResponse');
+const { sendSMS } = require('../utils/smsService');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretfamilykey';
 const MEMBER_TOKEN_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
-const STATIC_OTP = process.env.LOGIN_OTP || '123456';
 
-const requestData = (req) => ({
-  ...req.query,
-  ...req.body
-});
+const requestData = (req) => ({ ...req.query, ...req.body });
 
 const tokenPayloadFor = (member) => ({
-  id: memberPublicId(member),
+  id: member._id,
   first_name: member.first_name || '',
   middle_name: member.middle_name || '',
   last_name: member.last_name || '',
   number: member.number || '',
-  iat: Math.floor(Date.now() / 1000),
-  exp: Math.floor(Date.now() / 1000) + 86400
 });
 
 const signArchiveToken = (payload) => {
-  const { exp, iat, ...claims } = payload;
-  return jwt.sign(claims, JWT_SECRET, {
-    expiresIn: MEMBER_TOKEN_EXPIRES_IN
-  });
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: MEMBER_TOKEN_EXPIRES_IN });
 };
+
+const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
 const login = async (req, res) => {
   try {
-    const { number, otp } = requestData(req);
+    const { number, otp, fcm_token } = requestData(req);
 
-    if (!number) {
-      return apiResponse(res, 400, 'Number is required');
-    }
+    if (!number) return apiResponse(res, 400, 'Number is required');
 
-    const users = await User.find({ number: String(number) }).select('-password').sort({ member_id: 1, _id: 1 });
+    const user = await User.findOne({ number: String(number) }).select('-password');
+    if (!user) return apiResponse(res, 400, 'Invalid number');
 
-    if (!users.length) {
-      return apiResponse(res, 400, 'Invalid number');
-    }
+    const now = new Date();
 
+    // ==========================================
+    // SCENARIO A: REQUEST / RESEND OTP
+    // ==========================================
     if (!otp) {
-      return apiResponse(res, 200, 'OTP send successfully', {
-        multiple_numbers: users.length > 1
-      });
+      // 1. Check & Reset Daily Rate Limit Tracker if 24 hours have passed
+      if (!user.otp_reset_day || now - new Date(user.otp_reset_day) >= 24 * 60 * 60 * 1000) {
+        user.otp_count = 0;
+        user.otp_reset_day = now;
+      }
+
+      // 2. Strict Limit: Only 3 requests per day
+      // if (user.otp_count >= 3) {
+      //   return apiResponse(res, 429, 'Daily OTP request limit reached. Try again tomorrow.');
+      // }
+
+      // 3. Cooldown Control: Must wait 1 minute before requesting a resend
+      if (user.otp_last_sent && (now - new Date(user.otp_last_sent) < 60 * 1000)) {
+        const secondsLeft = Math.ceil((60 * 1000 - (now - new Date(user.otp_last_sent))) / 1000);
+        return apiResponse(res, 429, `Please wait ${secondsLeft} seconds before requesting another OTP.`);
+      }
+
+      const generatedOtp = generateOTP();
+
+      // Update rate limits and 10-minute expiry window
+      user.otp = generatedOtp;
+      user.otp_expiry = new Date(now.getTime() + 10 * 60 * 1000);
+      user.otp_last_sent = now;
+      user.otp_count += 1;
+      await user.save();
+
+      // Dispatch via SMS gateway helper
+      const smsResult = await sendSMS(number, generatedOtp);
+
+      if (!smsResult.success) {
+        console.warn(`[AUTH WARNING] SMS delivery failed for ${number}: ${smsResult.error}`);
+        // Still return 200 but inform user of SMS issue
+        return apiResponse(res, 200, 'OTP generated but SMS delivery may have failed. Please check your network or try again.');
+      }
+
+      return apiResponse(res, 200, 'OTP sent successfully');
     }
 
-    if (String(otp) !== STATIC_OTP) {
+    // ==========================================
+    // SCENARIO B: VERIFY OTP
+    // ==========================================
+    // 1. Check if an OTP transaction exists or matches
+    if (!user.otp || user.otp !== String(otp)) {
       return apiResponse(res, 400, 'Invalid OTP');
     }
 
-    if (users.length > 1) {
-      return apiResponse(res, 200, 'Multiple accounts found', {
-        multiple_numbers: true,
-        users: users.map((user) => ({
-          id: memberPublicId(user),
-          first_name: user.first_name || '',
-          middle_name: user.middle_name || '',
-          last_name: user.last_name || '',
-          number: user.number || ''
-        }))
-      });
+    // 2. Check if the 10-minute expiration has passed
+    if (now > new Date(user.otp_expiry)) {
+      return apiResponse(res, 400, 'OTP has expired');
     }
 
-    const payload = tokenPayloadFor(users[0]);
-    const token = signArchiveToken(payload);
+    // 3. Clear token states immediately to avoid replay attacks
+    user.otp = null;
+    user.otp_expiry = null;
+    
+    if (fcm_token) user.fcm_token = fcm_token;
+    await user.save();
 
-    return apiResponse(res, 200, 'Login successful', {
-      multiple_numbers: false,
-      token,
-      user: payload
-    });
-  } catch (error) {
-    return apiResponse(res, 500, 'Error in login', { error: error.message });
-  }
-};
-
-const selectAccountLogin = async (req, res) => {
-  try {
-    const { member_id } = requestData(req);
-
-    if (!member_id) {
-      return apiResponse(res, 400, 'Member ID is required');
-    }
-
-    const user = await User.findOne({
-      $or: [
-        { member_id: String(member_id) },
-        { id: String(member_id) }
-      ]
-    }).select('-password');
-
-    if (!user) {
-      return apiResponse(res, 400, 'Invalid member');
-    }
-
+    // 4. Issue Session Tokens
     const payload = tokenPayloadFor(user);
     const token = signArchiveToken(payload);
 
-    return apiResponse(res, 200, 'Login successful', {
-      token,
-      user: payload
-    });
+    return apiResponse(res, 200, 'Login successful', { token, user: payload });
+
   } catch (error) {
-    return apiResponse(res, 500, 'Error selecting account', { error: error.message });
+    return apiResponse(res, 500, 'Error in login', { error: error.message });
   }
 };
 
@@ -113,8 +110,4 @@ const versionCode = async (req, res) => {
   return apiResponse(res, 200, 'Version code fetch successfully', []);
 };
 
-module.exports = {
-  login,
-  selectAccountLogin,
-  versionCode
-};
+module.exports = { login, versionCode };

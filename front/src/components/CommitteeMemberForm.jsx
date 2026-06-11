@@ -74,12 +74,10 @@ export default function CommitteeMemberForm({ member, onSubmit, isLoading }) {
   }
 
   const handleSubmit = async (event) => {
-    console.log('Submitting form with data:', formData) // Debug log
     event.preventDefault()
     const nextErrors = await validate()
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors)
-      console.log('Validation errors:', nextErrors) // Debug log
       return
     }
 

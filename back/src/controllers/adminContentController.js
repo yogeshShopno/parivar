@@ -170,8 +170,7 @@ const masterConfig = {
   village: { Model: Master, type: 'village' },
   area: { Model: Master, type: 'area' },
   'blood-group': { Model: Master, type: 'blood-group' },
-  'event-category': { Model: Master, type: 'event-category' }
-  ,
+  'event-category': { Model: Master, type: 'event-category' },
   'gallery-category': { Model: GalleryCategory, nameKeys: ['category'], skipCustomId: true }
 };
 
@@ -200,6 +199,19 @@ const getMasters = async (req, res) => {
       filterFields: ['status']
     });
     return apiResponse(res, 200, 'Master data retrieved successfully', data.map((row) => formatMaster(type, row, config)), pagination);
+  } catch (error) {
+    return apiResponse(res, 500, 'Error retrieving master data', { error: error.message });
+  }
+};
+
+const getMasterById = async (req, res) => {
+  try {
+    const type = req.params.type;
+    const config = masterConfig[type];
+    if (!config) return apiResponse(res, 404, 'Master type not found');
+    const existing = await findById(config.Model, req.params.id);
+    if (!existing) return apiResponse(res, 404, 'Master data not found');
+    return apiResponse(res, 200, 'Master data retrieved successfully', formatMaster(type, existing.toObject(), config));
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving master data', { error: error.message });
   }
@@ -260,6 +272,7 @@ module.exports = {
   saveInquiry,
   deleteInquiry: deleteContent(ContactInquiry, 'Contact inquiry'),
   getMasters,
+  getMasterById,
   saveMaster,
   deleteMaster
 };

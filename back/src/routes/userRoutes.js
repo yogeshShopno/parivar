@@ -49,18 +49,11 @@ router.post('/fcm-token', protect, async (req, res) => {
     }
 });
 
-router.get('/', protect, (req, res, next) => {
-    if (isAdminCall(req)) {
-        return requirePermission('members.list')(req, res, () => userController.getUsers(req, res, next));
-    }
-    return userController.getUsers(req, res, next);
-});
+router.get('/', protect, userController.getUsers);
 
 router.get('/:id', protect, (req, res, next) => {
     return userController.getUserById(req, res, next);
 });
-
-
 
 router.put('/:id', protect, parseForm, (req, res, next) => {
     if (isAdminCall(req)) {

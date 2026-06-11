@@ -9,7 +9,7 @@ const router = express.Router();
 
 // Festival routes are now moved directly to routes/admin/festivalRoutes.js
 // Alias content routes for festivals and students so they can also be accessed under /admin/content
-router.get('/festivals', protect, requirePermission('festivals.list'), festivalController.adminGetFestivals);
+router.get('/festivals', festivalController.adminGetFestivals);
 router.get('/festivals/:id', protect, requirePermission('festivals.list'), festivalController.getFestivalById);
 router.post('/festivals', protect, requirePermission('festivals.add'), parseForm, festivalController.saveFestival);
 router.put('/festivals/:id', protect, requirePermission('festivals.edit'), parseForm, festivalController.saveFestival);

@@ -122,11 +122,9 @@ export default function Donations() {
 
     try {
       if (selectedDonation) {
-        console.log(selectedDonation, formData, "1")
 
         await api.put(`/donations/${selectedDonation.id}`, formData)
       } else {
-        console.log(selectedDonation, formData, "10")
 
         await api.post('/donations', formData)
       }
