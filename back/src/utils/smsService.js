@@ -51,10 +51,16 @@ const sendSMS = async (number, otp) => {
       timeout: 10000
     });
 
-    console.log(`[SMS] Successfully sent OTP to ${mobile}`);
-    console.log("response000",response);
-    
-    return { success: true, data: response.data };
+    if (response.data && response.data.ErrorCode === "000") {
+      console.log(`[SMS] Successfully sent OTP to ${mobile}`);
+      return { success: true, data: response.data };
+    } else {
+      const errorMsg = response.data ? response.data.ErrorMessage : "Unknown API Error";
+      console.error(`[SMS ERROR] Failed to send OTP: ${errorMsg}`);
+      console.error("[SMS ERROR] API Response:", response.data);
+      return { success: false, error: errorMsg };
+    }
+
   } catch (error) {
     const errorMsg = error.response?.data?.message || error.message || 'Unknown error';
     console.error(`[SMS ERROR] Failed to send OTP: ${errorMsg}`);

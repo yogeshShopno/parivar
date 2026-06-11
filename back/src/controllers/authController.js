@@ -55,18 +55,17 @@ const login = async (req, res) => {
       }
 
       const generatedOtp = generateOTP();
-      
+
       // Update rate limits and 10-minute expiry window
       user.otp = generatedOtp;
-      user.otp_expiry = new Date(now.getTime() + 10 * 60 * 1000); 
+      user.otp_expiry = new Date(now.getTime() + 10 * 60 * 1000);
       user.otp_last_sent = now;
       user.otp_count += 1;
       await user.save();
-console.log("0000", number, generatedOtp);
 
       // Dispatch via SMS gateway helper
       const smsResult = await sendSMS(number, generatedOtp);
-      
+
       if (!smsResult.success) {
         console.warn(`[AUTH WARNING] SMS delivery failed for ${number}: ${smsResult.error}`);
         // Still return 200 but inform user of SMS issue
