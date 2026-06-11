@@ -20,7 +20,7 @@ const isAdminCall = (req) => {
     return req.user && (req.user.is_committee || req.user.role_id || req.user.role === 'admin');
 };
 
-router.get('/',  getDonations(req, res, next));
+router.get('/',  getDonations);
 
 router.get('/export', protect, requirePermission('donations.list'), exportDonations);
 
