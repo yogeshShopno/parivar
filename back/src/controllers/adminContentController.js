@@ -205,6 +205,19 @@ const getMasters = async (req, res) => {
   }
 };
 
+const getMasterById = async (req, res) => {
+  try {
+    const type = req.params.type;
+    const config = masterConfig[type];
+    if (!config) return apiResponse(res, 404, 'Master type not found');
+    const existing = await findById(config.Model, req.params.id);
+    if (!existing) return apiResponse(res, 404, 'Master data not found');
+    return apiResponse(res, 200, 'Master data retrieved successfully', formatMaster(type, existing.toObject(), config));
+  } catch (error) {
+    return apiResponse(res, 500, 'Error retrieving master data', { error: error.message });
+  }
+};
+
 const saveMaster = async (req, res) => {
   try {
     const type = req.params.type;
@@ -260,6 +273,7 @@ module.exports = {
   saveInquiry,
   deleteInquiry: deleteContent(ContactInquiry, 'Contact inquiry'),
   getMasters,
+  getMasterById,
   saveMaster,
   deleteMaster
 };
