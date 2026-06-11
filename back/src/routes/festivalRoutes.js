@@ -17,19 +17,8 @@ const isAdminCall = (req) => {
     return req.user && (req.user.is_committee || req.user.role_id || req.user.role === 'admin');
 };
 
-router.get('/', optionalProtect, (req, res, next) => {
-    if (isAdminCall(req)) {
-        return requirePermission('festivals.list')(req, res, () => festivalController.adminGetFestivals(req, res, next));
-    }
-    return festivalController.getFestivals(req, res, next);
-});
-
-router.get('/:id', optionalProtect, (req, res, next) => {
-    if (isAdminCall(req)) {
-        return requirePermission('festivals.list')(req, res, () => festivalController.getFestivalById(req, res, next));
-    }
-    return festivalController.getFestivalById(req, res, next);
-});
+router.get('/', festivalController.getFestivals);
+router.get('/:id', festivalController.getFestivalById);
 
 router.post('/', parseForm, (req, res, next) => {
     const token = getTokenFromRequest(req);

@@ -55,8 +55,6 @@ router.get('/:id', protect, (req, res, next) => {
     return userController.getUserById(req, res, next);
 });
 
-
-
 router.put('/:id', protect, parseForm, (req, res, next) => {
     if (isAdminCall(req)) {
         return requirePermission('members.edit')(req, res, () => userController.updateUser(req, res, next));

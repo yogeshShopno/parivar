@@ -20,12 +20,7 @@ const isAdminCall = (req) => {
     return req.user && (req.user.is_committee || req.user.role_id || req.user.role === 'admin');
 };
 
-router.get('/', optionalProtect, (req, res, next) => {
-    if (isAdminCall(req)) {
-        return requirePermission('donations.list')(req, res, () => adminGetDonations(req, res, next));
-    }
-    return getDonations(req, res, next);
-});
+router.get('/',  getDonations(req, res, next));
 
 router.get('/export', protect, requirePermission('donations.list'), exportDonations);
 
