@@ -20,11 +20,8 @@ router.get('/members/:member_id', protect, (req, res, next) => {
 router.post('/family_members', protect, parseForm, getFamilyMembers);
 router.get('/family_members', protect, getFamilyMembers);
 
-router.post('/country_list', protect, parseForm, getCountryList);
 router.get('/country_list',  getCountryList);
-router.post('/state_list', protect, parseForm, getStateList);
 router.get('/state_list',  getStateList);
-router.post('/city_list', protect, parseForm, getCityList);
 router.get('/city_list',  getCityList);
 
 module.exports = router;
