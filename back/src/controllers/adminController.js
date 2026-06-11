@@ -147,6 +147,7 @@ const createAdmin = async (req, res) => {
     const assignedRoleId = role_id && mongoose.isValidObjectId(role_id) ? role_id : null;
 
     const users = await User.find({ member_id: /^\d+$/ }).select('member_id');
+    
 
     const highestId = users.reduce((max, u) => {
       const num = Number(u.member_id);

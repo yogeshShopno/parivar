@@ -278,6 +278,7 @@ const getUsers = async (req, res) => {
   }
 };
 
+
 // Get single user by id
 const getUserById = async (req, res) => {
   try {
