@@ -25,6 +25,8 @@ import { activeTheme, applyTheme } from './theme/theme'
 // ___________________________________________________________
 
 import Home from './pages/websitePages/Home'
+import PrivacyPolicy from './components/webComponents/PrivacyAndPolicy'
+import TermsAndConditions from './components/webComponents/TermsAndConditions'
 
 const ReactToaster = lazy(() => import('./components/ReactToaster'))
 
@@ -44,6 +46,8 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/businesses/:id" element={<BusinessProfile />} />
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />``
 
 
 

@@ -8,6 +8,7 @@ import Events from '../../components/webComponents/Events'
 import TopStudents from '../../components/webComponents/TopStudents'
 import Donors from '../../components/webComponents/Donors'
 import Businesses from '../../components/webComponents/Businesses'
+import WebFooter from '../../components/webComponents/WebFooter'
 
 /**
  * Home Page - Website Landing Page
@@ -39,6 +40,7 @@ export default function Home() {
         <TopStudents />
         <Businesses />
         <Donors />
+        <WebFooter />
 
       </main>
     </div>
