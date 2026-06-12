@@ -63,7 +63,7 @@ export default function About() {
         <div className="flex justify-center lg:justify-start">
           <img
             src="/mobile.png"
-            alt="r mobile app"
+            alt="mobile app"
             className="w-full max-w-md lg:max-w-lg object-contain"
             loading="lazy"
           />
