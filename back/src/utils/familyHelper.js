@@ -33,14 +33,18 @@ const getFamilyHeadFromParent = async (parentUser) => {
 
 const resolveFamilyHead = async ({ relation, family_head_id }) => {
   if (relation === 'Self') {
+
     return { family_head: null, head: null };
   }
 
   let head = null;
 
+
+  head = await findUserByIdOrMemberId(family_head_id);
+
   if (family_head_id) {
-    head = await findUserByIdOrMemberId(family_head_id);
     if (!head) {
+
       throw new Error('Invalid family_head_id');
     }
   }
@@ -63,8 +67,15 @@ const resolveFamilyHead = async ({ relation, family_head_id }) => {
 };
 
 const prepareFamilyFields = async (payload = {}, existing = {}) => {
-  const relation = payload.relation || existing.relation || 'Self';
+  let relation = payload.relation || existing.relation || 'Self';
+  
+  if (Array.isArray(relation)) {
+    relation = relation.find(r => typeof r === 'string' && r.trim() !== '') || relation[0] || 'Self';
+  }
+
+
   const isSelf = relation === 'Self';
+
   const result = {
     relation,
     family_head: existing.family_head || null,
