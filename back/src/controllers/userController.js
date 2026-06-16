@@ -239,7 +239,7 @@ const getUsers = async (req, res) => {
       const formatted = users.map(u => ({
         name: fullName(u),
         number: u.number,
-        dob: u.dob || null.$exists,
+        dob: u.dob || null,
         anniversary: u.anniversary || null
       }));
       return apiResponse(res, 200, 'Users birthday list retrieved successfully', formatted, pagination);
