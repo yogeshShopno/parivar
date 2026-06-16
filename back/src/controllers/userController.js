@@ -4,6 +4,7 @@ const { apiResponse, publicUrl } = require('../utils/apiResponse');
 const { getRolePermissions } = require('../middleware/auth');
 const familyUtil = require('../utils/familyHelper');
 const jwt = require('jsonwebtoken');
+const { deleteFileFromExternalService } = require('../utils/fileUpload');
 const queryHelper = require('../utils/queryHelper');
 const { prepareFamilyFields, fullName } = require('../utils/familyHelper');
 
@@ -103,6 +104,7 @@ const register = async (req, res) => {
       state_id,
       city_id,
       address,
+      image: image || '',
       family_head: familyData.family_head,
       status: familyData.status,
 
@@ -123,9 +125,12 @@ const register = async (req, res) => {
       await newUser.save();
     }
 
+    const registeredData = sanitizeUser(newUser);
+    registeredData.image = publicUrl(req, registeredData.image || registeredData.profile_image || '');
+
     res.status(201).json({
       message: 'User registered successfully',
-      data: sanitizeUser(newUser)
+      data: registeredData
     });
   } catch (error) {
     res.status(500).json({ message: 'Error registering user', error: error.message });
@@ -172,9 +177,12 @@ const register = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     // req.user is populated by the protect middleware
+    const profileData = sanitizeUser(req.user);
+    profileData.image = publicUrl(req, profileData.image || profileData.profile_image || '');
+
     res.status(200).json({
       message: 'Profile retrieved successfully',
-      data: sanitizeUser(req.user)
+      data: profileData
     });
   } catch (error) {
     res.status(500).json({ message: 'Error retrieving profile', error: error.message });
@@ -395,7 +403,14 @@ const updateUser = async (req, res) => {
     if (status !== undefined) user.status = Number(status);
     user.family_head = familyData.family_head;
     if (password) user.password = password;
-    if (req.file || req.body.image) user.image = imageFromRequest(req, user.image);
+    if (req.body.image) {
+      const oldImage = user.image || '';
+      user.image = imageFromRequest(req, user.image);
+      // Delete old image from external service if it was replaced with a new one
+      if (oldImage && oldImage !== user.image) {
+        deleteFileFromExternalService(oldImage).catch(() => {});
+      }
+    }
 
     await user.save();
 
@@ -428,10 +443,18 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await User.deleteOne({ _id: id });
-    if (result.deletedCount === 0) {
+    const user = await User.findById(id);
+    if (!user) {
       return apiResponse(res, 404, 'User not found');
     }
+
+    // Delete user's image from external service
+    const userImage = user.image || user.profile_image || '';
+    if (userImage) {
+      deleteFileFromExternalService(userImage).catch(() => {});
+    }
+
+    await User.deleteOne({ _id: id });
     return apiResponse(res, 200, 'User deleted successfully');
   } catch (error) {
     return apiResponse(res, 500, 'Error deleting user', { error: error.message });
