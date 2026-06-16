@@ -216,6 +216,18 @@ const getUsers = async (req, res) => {
       query.is_committee = true;
     }
 
+    if (req.query.is_head === 'true' || req.query.heads === 'true') {
+      query.relation = 'Self';
+    }
+
+    if (req.query.family_head_id) {
+      query['family_head.id'] = mongooseQueryForUser(req.query.family_head_id)._id;
+    }
+
+    if (req.query.family_head_name) {
+      query['family_head.name'] = { $regex: req.query.family_head_name, $options: 'i' };
+    }
+
     if (birthday) {
       query.dob = { $exists: true };
     }
@@ -227,7 +239,7 @@ const getUsers = async (req, res) => {
 
     const { data: users, pagination } = await queryHelper(User, req.query, {
       baseQuery: query,
-      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email'],
+      searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email', 'family_head.name'],
       filterFields: ['gender', 'blood_group', 'is_committee', 'committee_role', 'role_id', 'status'],
       select: birthday ? 'first_name middle_name last_name number dob anniversary' : '-password',
       populate: birthday ? '' : 'role_id',
@@ -271,6 +283,10 @@ const getUsers = async (req, res) => {
       is_committee: u.is_committee || false,
       committee_role: u.committee_role || '',
       designation: u.designation || '',
+      family_head: u.family_head ? {
+        id: u.family_head.id ? String(u.family_head.id) : '',
+        name: u.family_head.name || ''
+      } : null,
       role_id: u.role_id?._id ? String(u.role_id._id) : '',
       role_name: u.role_id?.name || '',
       permissions: getRolePermissions(u),
