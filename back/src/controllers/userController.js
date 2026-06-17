@@ -221,7 +221,12 @@ const getUsers = async (req, res) => {
     }
 
     if (req.query.family_head_id) {
-      query['family_head.id'] = mongooseQueryForUser(req.query.family_head_id)._id;
+      const headId = mongooseQueryForUser(req.query.family_head_id)._id;
+      if (mongoose.isValidObjectId(headId)) {
+        query['family_head.id'] = new mongoose.Types.ObjectId(headId);
+      } else {
+        query['family_head.id'] = headId;
+      }
     }
 
     if (req.query.family_head_name) {
@@ -300,6 +305,11 @@ const getUsers = async (req, res) => {
   } catch (error) {
     return apiResponse(res, 500, 'Error retrieving users', { error: error.message });
   }
+};
+
+const getFamilyMembers = async (req, res) => {
+  req.query.family_head_id = req.params.family_head_id;
+  return getUsers(req, res);
 };
 
 
@@ -484,5 +494,6 @@ module.exports = {
   getUsers,
   getUserById,
   updateUser,
-  deleteUser
+  deleteUser,
+  getFamilyMembers
 };
