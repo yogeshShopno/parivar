@@ -51,6 +51,8 @@ router.post('/fcm-token', protect, async (req, res) => {
 
 router.get('/', protect, userController.getUsers);
 
+router.get('/family/:family_head_id', protect, userController.getFamilyMembers);
+
 router.get('/:id', protect, (req, res, next) => {
     return userController.getUserById(req, res, next);
 });
