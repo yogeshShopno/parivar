@@ -3,6 +3,8 @@ import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2, X } from 'l
 import api, { assetUrl, getGalleryList } from '../lib/api'
 import { confirm } from '../lib/confirm'
 import Modal from '../components/Modal'
+// import PageHeader from '../components/PageHeader'
+import DatePicker from '../components/DatePicker'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 const limit = 12
@@ -255,38 +257,40 @@ export default function GalleryPage() {
           <h2 className="text-xl font-semibold text-text">Gallery</h2>
 
         </div>
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center sm:justify-end gap-3 flex-1">
           <button onClick={() => { fetchGallery(); fetchCategories() }} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
             <RefreshCw className="w-4 h-4" />
           </button>
-          <div className="relative flex-1 sm:w-64">
+          <div className="relative w-full sm:w-64 sm:flex-none">
             <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-text-secondary/60" />
             <input
               type="search"
               placeholder="Search gallery..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary/50"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary/50 shadow-sm"
             />
           </div>
-          <input
-            type="month"
-            value={filterYear}
-            onChange={(e) => handleFilterYear(e.target.value)}
-            className="bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50"
-            title="Filter by month & year"
-          />
+          <div className="w-full sm:w-auto flex-none">
+            <DatePicker
+              mode="month"
+              value={filterYear}
+              onChange={(val) => handleFilterYear(val)}
+              placeholder="Month & Year"
+              className="w-full sm:w-40 bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50 shadow-sm"
+            />
+          </div>
           <select
             value={filterCategoryId}
             onChange={handleFilterCategory}
-            className="bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50"
+            className="w-full sm:w-auto bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50 shadow-sm"
           >
             <option value="" className="bg-surface text-text">All Categories</option>
             {filterCategories.map((item) => (
               <option key={item.id} value={item.id} className="bg-surface text-text">{item.category}</option>
             ))}
           </select>
-          <button onClick={openCreate} className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary">
+          <button onClick={openCreate} className="w-full sm:w-auto flex justify-center items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary">
             <Plus className="w-4 h-4" /> Add
           </button>
         </div>
@@ -404,10 +408,11 @@ export default function GalleryPage() {
 
             <div>
               <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Month & Year</label>
-              <input
-                type="month"
+              <DatePicker
+                name="year"
+                mode="month"
                 value={year}
-                onChange={(e) => setYear(e.target.value)}
+                onChange={(val) => setYear(val)}
                 className={fieldClass}
                 disabled={saving}
               />

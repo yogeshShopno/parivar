@@ -16,6 +16,7 @@ import api, { getExpensesList, exportExpensesExcel, getCommitteeMembersList, ass
 import { confirm } from '../lib/confirm'
 import usePagination from '../hooks/usePagination'
 import Modal from '../components/Modal'
+import DatePicker from '../components/DatePicker'
 
 const limit = 10
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10 transition-shadow'
@@ -217,8 +218,8 @@ export default function Expenses() {
     resetPage()
   }
 
-  const handleMonthFilterChange = (e) => {
-    setMonthFilter(e.target.value)
+  const handleMonthFilterChange = (value) => {
+    setMonthFilter(value)
     resetPage()
   }
 
@@ -231,7 +232,7 @@ export default function Expenses() {
         <div>
           <h2 className="text-xl font-semibold text-text">Expenses</h2>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center sm:justify-end gap-3 flex-1">
           <button
             onClick={fetchExpenses}
             className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all shadow-sm"
@@ -240,23 +241,25 @@ export default function Expenses() {
             <RefreshCw className="w-4 h-4" />
           </button>
           
-          <input
-            type="month"
-            value={monthFilter}
-            onChange={handleMonthFilterChange}
-            className="bg-input-bg text-text border border-border rounded-xl py-2 px-3 text-sm outline-none focus:border-primary/50 shadow-sm"
-            title="Filter by month"
-          />
+          <div className="w-full sm:w-auto flex-none">
+            <DatePicker
+              mode="month"
+              value={monthFilter}
+              onChange={handleMonthFilterChange}
+              placeholder="Month"
+              className="w-full sm:w-32 bg-input-bg text-text border border-border rounded-xl py-2 px-3 text-sm outline-none focus:border-primary/50 shadow-sm"
+            />
+          </div>
 
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-border text-text-secondary hover:text-text transition-all shadow-sm"
+            className="w-full sm:w-auto flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl bg-surface border border-border text-text-secondary hover:text-text transition-all shadow-sm"
           >
             <Download className="w-4 h-4" /> Export CSV
           </button>
           <button
             onClick={handleCreate}
-            className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary"
+            className="w-full sm:w-auto flex justify-center items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary"
           >
             <Plus className="w-4 h-4" /> Add Expense
           </button>
@@ -296,7 +299,7 @@ export default function Expenses() {
                 <th className="p-4 py-3">Category</th>
                 <th className="p-4 py-3">Committee Member</th>
                 <th className="p-4 py-3">Description</th>
-                <th className="p-4 py-3 text-center">Proof</th>
+                <th className="p-4 py-3">Proof</th>
                 <th className="p-4 py-3 text-right">Amount</th>
                 <th className="p-4 py-3 text-right">Actions</th>
               </tr>
@@ -340,10 +343,16 @@ export default function Expenses() {
                     <td className="p-4 max-w-xs truncate" title={expense.description}>
                       {expense.description || '-'}
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="p-4 max-w-[100px]">
                       {expense.image ? (
-                        <a href={assetUrl(expense.image)} target="_blank" rel="noopener noreferrer" className="inline-flex p-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg transition-colors" title="View Proof">
-                          <Eye className="w-4 h-4" />
+                        <a href={assetUrl(expense.image)} target="_blank" rel="noopener noreferrer" className="relative inline-block hover:opacity-80 transition-opacity" title="View Proof">
+                          {expense.image.toLowerCase().endsWith('.pdf') ? (
+                             <div className="h-12 w-16 flex justify-center items-center rounded-lg border border-border bg-primary/10 text-primary">
+                               <Paperclip className="w-5 h-5" />
+                             </div>
+                          ) : (
+                             <img src={assetUrl(expense.image)} alt="Proof" className="h-12 w-16 rounded-lg object-cover border border-border" />
+                          )}
                         </a>
                       ) : (
                         <span className="text-text-secondary/50 text-xs">-</span>
@@ -407,12 +416,11 @@ export default function Expenses() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-semibold text-text-secondary mb-1.5">Date <span className="text-red-500">*</span></label>
-              <input
-                type="date"
+              <DatePicker
                 name="date"
+                mode="date"
                 value={formData.date}
-                onChange={handleChange}
-                required
+                onChange={(val) => setFormData(prev => ({ ...prev, date: val }))}
                 className={fieldClass}
                 disabled={formLoading}
               />
