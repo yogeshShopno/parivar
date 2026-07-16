@@ -11,6 +11,7 @@ import Businesses from './pages/Businesses'
 import BusinessProfile from './pages/BusinessProfile'
 import Students from './pages/Students'
 import Donations from './pages/Donations'
+import Expenses from './pages/Expenses'
 import Settings from './pages/Settings'
 import CommitteeMembers from './pages/CommitteeMembers'
 import Roles from './pages/Roles'
@@ -29,6 +30,7 @@ import PrivacyPolicy from './components/webComponents/PrivacyAndPolicy'
 import TermsAndConditions from './components/webComponents/TermsAndConditions'
 
 const ReactToaster = lazy(() => import('./components/ReactToaster'))
+const ConfirmDialog = lazy(() => import('./components/ConfirmDialog'))
 
 
 // Bootstrap selected design system theme
@@ -40,6 +42,7 @@ export default function App() {
       <NotificationProvider>
       <Suspense fallback={null}>
         <ReactToaster />
+        <ConfirmDialog />
       </Suspense>
       <Routes>
         {/* Public Routes */}
@@ -76,6 +79,7 @@ export default function App() {
           <Route path="businesses" element={<PermissionRoute permission="businesses.list"><Businesses /></PermissionRoute>} />
           <Route path="students" element={<PermissionRoute permission="students.list"><Students /></PermissionRoute>} />
           <Route path="donations" element={<PermissionRoute permission="donations.list"><Donations /></PermissionRoute>} />
+          <Route path="expenses" element={<PermissionRoute permission="expenses.list"><Expenses /></PermissionRoute>} />
           <Route path="posts" element={<PermissionRoute permission="posts.list"><Posts /></PermissionRoute>} />
           <Route path="news" element={<PermissionRoute permission="news.list"><News /></PermissionRoute>} />
 

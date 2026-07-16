@@ -72,7 +72,7 @@ app.use((error, req, res, next) => {
   return next();
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`http://localhost:${PORT}`);
 });
 

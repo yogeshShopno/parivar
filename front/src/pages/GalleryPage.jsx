@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
 import api, { assetUrl, getGalleryList } from '../lib/api'
+import { confirm } from '../lib/confirm'
 import Modal from '../components/Modal'
+// import PageHeader from '../components/PageHeader'
+import DatePicker from '../components/DatePicker'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 const limit = 12
@@ -15,6 +18,7 @@ export default function GalleryPage() {
   const [page, setPage] = useState(1)
   const [search, setSearchValue] = useState('')
   const [categories, setCategories] = useState([])
+  const [filterCategories, setFilterCategories] = useState([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -23,6 +27,8 @@ export default function GalleryPage() {
   const [categoryId, setCategoryId] = useState('')
   const [categoryName, setCategoryName] = useState('')
   const [year, setYear] = useState('')
+  const [filterYear, setFilterYear] = useState('')
+  const [filterCategoryId, setFilterCategoryId] = useState('')
   const [existingImages, setExistingImages] = useState([])
   const [newFiles, setNewFiles] = useState([])
   const [filePreviews, setFilePreviews] = useState([])
@@ -43,7 +49,10 @@ export default function GalleryPage() {
   const fetchGallery = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await getGalleryList({ page, limit, search })
+      const params = { page, limit, search }
+      if (filterYear) params.year = filterYear
+      if (filterCategoryId) params.gallery_category_id = filterCategoryId
+      const res = await getGalleryList(params)
       const data = res.data?.data || res.data || []
       const pg = res.data?.pagination || {}
       setRows(Array.isArray(data) ? data : [])
@@ -60,7 +69,7 @@ export default function GalleryPage() {
     } finally {
       setLoading(false)
     }
-  }, [page, search])
+  }, [page, search, filterYear, filterCategoryId])
 
   useEffect(() => {
     fetchGallery()
@@ -72,6 +81,18 @@ export default function GalleryPage() {
 
   const setSearch = (value) => {
     setSearchValue(value)
+    setPage(1)
+  }
+
+  const handleFilterYear = (value) => {
+    setFilterYear(value)
+    setFilterCategoryId('')
+    setPage(1)
+    fetchFilteredCategories(value)
+  }
+
+  const handleFilterCategory = (e) => {
+    setFilterCategoryId(e.target.value)
     setPage(1)
   }
 
@@ -95,9 +116,33 @@ export default function GalleryPage() {
   const fetchCategories = async () => {
     try {
       const categoryRes = await api.get('/gallery-categories')
-      setCategories(categoryRes.data?.data || [])
+      const list = categoryRes.data?.data || []
+      setCategories(list)
+      setFilterCategories(list)
     } catch (err) {
       // ignore category load failure for now
+    }
+  }
+
+  const fetchFilteredCategories = async (year) => {
+    try {
+      if (!year) {
+        // No year selected — show all categories in filter
+        setFilterCategories(categories)
+        return
+      }
+      // Reuse existing gallery API with year filter to find which categories have data
+      const res = await getGalleryList({ year, limit: 999 })
+      const data = res.data?.data || []
+      // Extract distinct category IDs that have gallery entries for this year
+      const categoryIdSet = new Set(
+        data.map((item) => item.gallery_category_id).filter((id) => id && id !== '')
+      )
+      // Filter full categories list to only those with data
+      setFilterCategories(categories.filter((cat) => categoryIdSet.has(cat.id)))
+    } catch (err) {
+      // fallback to full list
+      setFilterCategories(categories)
     }
   }
 
@@ -193,7 +238,7 @@ export default function GalleryPage() {
   }
 
   const handleDelete = async (row) => {
-    if (!window.confirm(`Delete gallery item?`)) return
+    if (!await confirm('Delete gallery item?')) return
     try {
       await api.delete(`/gallery/${row.id}`)
       await fetchGallery()
@@ -212,21 +257,40 @@ export default function GalleryPage() {
           <h2 className="text-xl font-semibold text-text">Gallery</h2>
 
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center sm:justify-end gap-3 flex-1">
           <button onClick={() => { fetchGallery(); fetchCategories() }} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
             <RefreshCw className="w-4 h-4" />
           </button>
-          <div className="relative flex-1 sm:w-64">
+          <div className="relative w-full sm:w-64 sm:flex-none">
             <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-text-secondary/60" />
             <input
               type="search"
               placeholder="Search gallery..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary/50"
+              className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary/50 shadow-sm"
             />
           </div>
-          <button onClick={openCreate} className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary">
+          <div className="w-full sm:w-auto flex-none">
+            <DatePicker
+              mode="month"
+              value={filterYear}
+              onChange={(val) => handleFilterYear(val)}
+              placeholder="Month & Year"
+              className="w-full sm:w-40 bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50 shadow-sm"
+            />
+          </div>
+          <select
+            value={filterCategoryId}
+            onChange={handleFilterCategory}
+            className="w-full sm:w-auto bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50 shadow-sm"
+          >
+            <option value="" className="bg-surface text-text">All Categories</option>
+            {filterCategories.map((item) => (
+              <option key={item.id} value={item.id} className="bg-surface text-text">{item.category}</option>
+            ))}
+          </select>
+          <button onClick={openCreate} className="w-full sm:w-auto flex justify-center items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary">
             <Plus className="w-4 h-4" /> Add
           </button>
         </div>
@@ -248,29 +312,35 @@ export default function GalleryPage() {
                 <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-semibold  tracking-wider">
                   <th className="p-4">Preview</th>
                   <th className="p-4">Category</th>
-                  <th className="p-4">Year</th>
+                  <th className="p-4">Month/Year</th>
+                  <th className="p-4 text-center">Images</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {rows.map((row) => (
-                  <tr key={row.id} className="hover:bg-surface-secondary/40 text-sm text-text">
+                  <tr key={row.id} className="hover:bg-surface-secondary/40 text-sm text-text border-b border-border/50 last:border-0 group">
                     <td className="p-4 max-w-[100px]">
                       {row.images?.[0] ? (
-                        <>
-                          <div className="relative inline-block">
-                            <img src={assetUrl(row.images[0])} alt={row.category || 'Gallery'} className="h-12 w-16 rounded-lg object-cover border border-border" />
-                            <span className="absolute -top-1.5 -right-2.5 bg-primary text-white text-xs font-semibold rounded-full p-1 w-5 h-5 flex items-center justify-center">
-                              {row.images.length}
-                            </span>
-                          </div>
-                        </>
+                        <div className="relative inline-block">
+                          <img src={assetUrl(row.images[0])} alt={row.category || 'Gallery'} className="h-12 w-16 rounded-lg object-cover border border-border" />
+                          <span className="absolute -top-1.5 -right-2.5 bg-primary text-white text-xs font-semibold rounded-full p-1 w-5 h-5 flex items-center justify-center">
+                            {row.images.length}
+                          </span>
+                        </div>
                       ) : (
                         <span className="text-text-secondary">No image</span>
                       )}
                     </td>
-                    <td className="p-4 max-w-xs line-clamp-1">{row.category || 'General'}</td>
-                    <td className="p-4">{row.year || '-'}</td>
+                    <td className="p-4 font-medium max-w-xs line-clamp-1">{row.category || 'General'}</td>
+                    <td className="p-4">
+                      {row.year ? new Date(row.year + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '-'}
+                    </td>
+                    <td className="p-4 text-center">
+                      <span className="inline-flex items-center px-2 py-1 rounded-lg bg-surface border border-border text-xs font-semibold">
+                        {row.images?.length || 0}
+                      </span>
+                    </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => openEdit(row)} className="p-2 text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl" title="Edit">
@@ -325,7 +395,7 @@ export default function GalleryPage() {
 
       <Modal isOpen={isModalOpen} title={selected ? 'Edit Images' : 'Add Images'} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 text-text">
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Category <span className='text-red-500'>*</span></label>
               <select value={categoryId} onChange={handleCategorySelect} className={fieldClass} disabled={saving}>
@@ -337,8 +407,15 @@ export default function GalleryPage() {
             </div>
 
             <div>
-              <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Year</label>
-              <input type="text" value={year} onChange={(e) => setYear(e.target.value)} className={fieldClass} disabled={saving} />
+              <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Month & Year</label>
+              <DatePicker
+                name="year"
+                mode="month"
+                value={year}
+                onChange={(val) => setYear(val)}
+                className={fieldClass}
+                disabled={saving}
+              />
             </div>
           </div>
         <div className="flex flex-col bg-input-bg border border-border rounded-xl p-3">

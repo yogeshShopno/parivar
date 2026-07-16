@@ -171,7 +171,8 @@ const masterConfig = {
   area: { Model: Master, type: 'area' },
   'blood-group': { Model: Master, type: 'blood-group' },
   'event-category': { Model: Master, type: 'event-category' },
-  'gallery-category': { Model: GalleryCategory, nameKeys: ['category'], skipCustomId: true }
+  'gallery-category': { Model: GalleryCategory, nameKeys: ['category'], skipCustomId: true },
+  'expense-category': { Model: Master, type: 'expense-category' }
 };
 
 const formatMaster = (type, item, config) => {

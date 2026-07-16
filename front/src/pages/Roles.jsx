@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Edit2, Plus, RefreshCw, Search, ShieldCheck, Trash2 } from 'lucide-react'
 import api from '../lib/api'
+import { confirm } from '../lib/confirm'
 import { buildPermissionGroups, normalizeRoles, unwrapApiData } from '../lib/roles'
 import Modal from '../components/Modal'
 
@@ -131,7 +132,7 @@ export default function Roles() {
   }
 
   const handleDelete = async (role) => {
-    if (!window.confirm(`Delete ${role.name}?`)) return
+    if (!await confirm(`Delete ${role.name}?`)) return
     try {
       await api.delete(`/roles/${role.id}`)
       setRoles(roles.filter((item) => item.id !== role.id))

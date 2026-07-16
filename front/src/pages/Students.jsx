@@ -1,8 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { GraduationCap, Phone, Trash2, Search, Edit2, RefreshCw, Plus, Image as ImageIcon } from 'lucide-react'
 import api, { assetUrl, getStudentsList } from '../lib/api'
+import { confirm } from '../lib/confirm'
 import Modal from '../components/Modal'
 import usePagination from '../hooks/usePagination'
+import YearSelect from '../components/YearSelect'
 
 const limit = 10
 
@@ -55,7 +57,7 @@ export default function Students() {
   }, [fetchStudents])
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this student?')) return
+    if (!await confirm('Are you sure you want to delete this student?')) return
     try {
       await api.delete(`/students/${id}`)
       await fetchStudents()
@@ -398,12 +400,9 @@ export default function Students() {
             </div>
             <div>
               <label className="text-sm text-text-secondary mb-1.5 block">Year *</label>
-              <input
-                type="text"
+              <YearSelect
                 name="year"
-                maxLength={4}
                 required
-                placeholder="2026"
                 defaultValue={selectedStudent?.year || ''}
                 className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
               />

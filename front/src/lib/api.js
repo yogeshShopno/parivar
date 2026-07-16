@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { toast } from './toast'
 
-export const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+export const API_BASE = import.meta.env.VITE_API_BASE || `http://${window.location.hostname}:5000`
 
 export const assetUrl = (path) => {
   if (!path) return ''
@@ -89,5 +89,9 @@ export const getDonationsList = (params = {}) => api.get('/donations', { params 
 export const getBankDetailsList = (params = {}) => api.get('/bank-details', { params })
 export const getCommitteeMembersList = (params = {}) => api.get('/committee-members', { params })
 export const getGalleryList = (params = {}) => api.get('/gallery', { params })
+export const getExpensesList = (params = {}) => api.get('/expenses', { params })
+
+export const exportExpensesExcel = (params = {}) =>
+  api.get('/expenses/export', { params, responseType: 'blob' })
 
 export default api

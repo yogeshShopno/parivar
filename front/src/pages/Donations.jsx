@@ -13,8 +13,10 @@ import {
   Copy
 } from 'lucide-react'
 import api, { getDonationsList, getBankDetailsList, exportDonationsExcel } from '../lib/api'
+import { confirm } from '../lib/confirm'
 import usePagination from '../hooks/usePagination'
 import Modal from '../components/Modal'
+import DatePicker from '../components/DatePicker'
 
 import { Download } from 'lucide-react'
 const limit = 10
@@ -26,6 +28,7 @@ export default function Donations() {
   const [bankDetails, setBankDetails] = useState([])
 
   const [formLoading, setFormLoading] = useState(false)
+  const [dateValue, setDateValue] = useState(new Date().toISOString().slice(0, 10))
   const [filters, setFilters] = useState({
     donator_name: '',
     donation_purpose: ''
@@ -75,7 +78,7 @@ export default function Donations() {
   }, [])
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this donation?')) return
+    if (!await confirm('Are you sure you want to delete this donation?')) return
     try {
       await api.delete(`/donations/${id}`)
       await fetchDonations()
@@ -88,11 +91,13 @@ export default function Donations() {
 
   const handleEdit = (donation) => {
     setSelectedDonation(donation)
+    setDateValue(donation.date || new Date().toISOString().slice(0, 10))
     setIsModalOpen(true)
   }
 
   const handleCreate = () => {
     setSelectedDonation(null)
+    setDateValue(new Date().toISOString().slice(0, 10))
     setIsModalOpen(true)
   }
 
@@ -463,11 +468,11 @@ export default function Donations() {
 
             <div>
               <label className="text-sm text-text-secondary mb-1.5 block">Date *</label>
-              <input
-                type="date"
+              <DatePicker
                 name="date"
-                defaultValue={selectedDonation?.date || new Date().toISOString().slice(0, 10)}
-                required
+                mode="date"
+                value={dateValue}
+                onChange={setDateValue}
                 className="w-full bg-input-bg text-text border border-border hover:border-text-secondary/30 focus:border-primary/50 rounded-xl py-2.5 px-4 text-sm outline-none"
               />
             </div>

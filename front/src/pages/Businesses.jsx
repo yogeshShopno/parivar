@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Briefcase, MapPin, Phone, Globe, Trash2, Search, Edit2, RefreshCw, Plus, Eye } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import api, { assetUrl, getBusinessesList } from '../lib/api'
+import { confirm } from '../lib/confirm'
 import Modal from '../components/Modal'
 import BusinessForm from '../components/BusinessForm'
 import usePagination from '../hooks/usePagination'
@@ -50,7 +51,7 @@ export default function Businesses() {
   }
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this business listing?')) return
+    if (!await confirm('Are you sure you want to delete this business listing?')) return
     try {
       await api.delete(`/businesses/${id}`)
       await fetchBusinesses()
