@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
 import api, { assetUrl, getGalleryList } from '../lib/api'
+import { confirm } from '../lib/confirm'
 import Modal from '../components/Modal'
+import YearSelect from '../components/YearSelect'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 const limit = 12
@@ -15,6 +17,7 @@ export default function GalleryPage() {
   const [page, setPage] = useState(1)
   const [search, setSearchValue] = useState('')
   const [categories, setCategories] = useState([])
+  const [filterCategories, setFilterCategories] = useState([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -23,6 +26,8 @@ export default function GalleryPage() {
   const [categoryId, setCategoryId] = useState('')
   const [categoryName, setCategoryName] = useState('')
   const [year, setYear] = useState('')
+  const [filterYear, setFilterYear] = useState('')
+  const [filterCategoryId, setFilterCategoryId] = useState('')
   const [existingImages, setExistingImages] = useState([])
   const [newFiles, setNewFiles] = useState([])
   const [filePreviews, setFilePreviews] = useState([])
@@ -43,7 +48,10 @@ export default function GalleryPage() {
   const fetchGallery = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await getGalleryList({ page, limit, search })
+      const params = { page, limit, search }
+      if (filterYear) params.year = filterYear
+      if (filterCategoryId) params.gallery_category_id = filterCategoryId
+      const res = await getGalleryList(params)
       const data = res.data?.data || res.data || []
       const pg = res.data?.pagination || {}
       setRows(Array.isArray(data) ? data : [])
@@ -60,7 +68,7 @@ export default function GalleryPage() {
     } finally {
       setLoading(false)
     }
-  }, [page, search])
+  }, [page, search, filterYear, filterCategoryId])
 
   useEffect(() => {
     fetchGallery()
@@ -72,6 +80,18 @@ export default function GalleryPage() {
 
   const setSearch = (value) => {
     setSearchValue(value)
+    setPage(1)
+  }
+
+  const handleFilterYear = (value) => {
+    setFilterYear(value)
+    setFilterCategoryId('')
+    setPage(1)
+    fetchFilteredCategories(value)
+  }
+
+  const handleFilterCategory = (e) => {
+    setFilterCategoryId(e.target.value)
     setPage(1)
   }
 
@@ -95,9 +115,33 @@ export default function GalleryPage() {
   const fetchCategories = async () => {
     try {
       const categoryRes = await api.get('/gallery-categories')
-      setCategories(categoryRes.data?.data || [])
+      const list = categoryRes.data?.data || []
+      setCategories(list)
+      setFilterCategories(list)
     } catch (err) {
       // ignore category load failure for now
+    }
+  }
+
+  const fetchFilteredCategories = async (year) => {
+    try {
+      if (!year) {
+        // No year selected — show all categories in filter
+        setFilterCategories(categories)
+        return
+      }
+      // Reuse existing gallery API with year filter to find which categories have data
+      const res = await getGalleryList({ year, limit: 999 })
+      const data = res.data?.data || []
+      // Extract distinct category IDs that have gallery entries for this year
+      const categoryIdSet = new Set(
+        data.map((item) => item.gallery_category_id).filter((id) => id && id !== '')
+      )
+      // Filter full categories list to only those with data
+      setFilterCategories(categories.filter((cat) => categoryIdSet.has(cat.id)))
+    } catch (err) {
+      // fallback to full list
+      setFilterCategories(categories)
     }
   }
 
@@ -193,7 +237,7 @@ export default function GalleryPage() {
   }
 
   const handleDelete = async (row) => {
-    if (!window.confirm(`Delete gallery item?`)) return
+    if (!await confirm('Delete gallery item?')) return
     try {
       await api.delete(`/gallery/${row.id}`)
       await fetchGallery()
@@ -212,7 +256,7 @@ export default function GalleryPage() {
           <h2 className="text-xl font-semibold text-text">Gallery</h2>
 
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <button onClick={() => { fetchGallery(); fetchCategories() }} className="p-2.5 rounded-xl bg-surface-secondary hover:bg-surface border border-border text-text-secondary hover:text-text transition-all" title="Refresh">
             <RefreshCw className="w-4 h-4" />
           </button>
@@ -226,6 +270,22 @@ export default function GalleryPage() {
               className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary/50"
             />
           </div>
+          <YearSelect
+            value={filterYear}
+            onChange={handleFilterYear}
+            placeholder="All Years"
+            className="bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50"
+          />
+          <select
+            value={filterCategoryId}
+            onChange={handleFilterCategory}
+            className="bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50"
+          >
+            <option value="" className="bg-surface text-text">All Categories</option>
+            {filterCategories.map((item) => (
+              <option key={item.id} value={item.id} className="bg-surface text-text">{item.category}</option>
+            ))}
+          </select>
           <button onClick={openCreate} className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-glow-primary">
             <Plus className="w-4 h-4" /> Add
           </button>
@@ -338,7 +398,12 @@ export default function GalleryPage() {
 
             <div>
               <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Year</label>
-              <input type="text" value={year} onChange={(e) => setYear(e.target.value)} className={fieldClass} disabled={saving} />
+              <YearSelect
+                value={year}
+                onChange={(val) => setYear(val)}
+                className={fieldClass}
+                disabled={saving}
+              />
             </div>
           </div>
         <div className="flex flex-col bg-input-bg border border-border rounded-xl p-3">

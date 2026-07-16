@@ -13,6 +13,7 @@ import {
   Copy
 } from 'lucide-react'
 import api, { getDonationsList, getBankDetailsList, exportDonationsExcel } from '../lib/api'
+import { confirm } from '../lib/confirm'
 import usePagination from '../hooks/usePagination'
 import Modal from '../components/Modal'
 
@@ -75,7 +76,7 @@ export default function Donations() {
   }, [])
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this donation?')) return
+    if (!await confirm('Are you sure you want to delete this donation?')) return
     try {
       await api.delete(`/donations/${id}`)
       await fetchDonations()

@@ -6,6 +6,7 @@ import {
   Facebook, Twitter, Instagram, Youtube, MessageCircle, Building2
 } from 'lucide-react'
 import api, { assetUrl } from '../lib/api'
+import { confirm } from '../lib/confirm'
 
 const DEFAULT_COLORS = {
   primaryColor: '#E65100',
@@ -332,8 +333,8 @@ export default function SettingsPage() {
     }
   }
 
-  const handleResetColors = () => {
-    if (!window.confirm('Reset color tokens to defaults?')) return
+  const handleResetColors = async () => {
+    if (!await confirm('Reset color tokens to defaults?', { confirmText: 'Reset', type: 'warning' })) return
     setConfig(prev => ({ ...prev, ...DEFAULT_COLORS }))
   }
 

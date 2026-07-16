@@ -29,6 +29,7 @@ import PrivacyPolicy from './components/webComponents/PrivacyAndPolicy'
 import TermsAndConditions from './components/webComponents/TermsAndConditions'
 
 const ReactToaster = lazy(() => import('./components/ReactToaster'))
+const ConfirmDialog = lazy(() => import('./components/ConfirmDialog'))
 
 
 // Bootstrap selected design system theme
@@ -40,6 +41,7 @@ export default function App() {
       <NotificationProvider>
       <Suspense fallback={null}>
         <ReactToaster />
+        <ConfirmDialog />
       </Suspense>
       <Routes>
         {/* Public Routes */}

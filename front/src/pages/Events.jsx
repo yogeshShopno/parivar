@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 ,Eye } from 'lucide-react'
 import api, { assetUrl, getEventsList } from '../lib/api'
+import { confirm } from '../lib/confirm'
 import Modal from '../components/Modal'
 import { useNavigate } from 'react-router-dom'
 
@@ -234,7 +235,7 @@ export default function Events() {
   const handleDelete = async (row) => {
     const id = row.id || row._id || ''
     if (!id) return
-    if (!window.confirm(`Delete ${row.title || 'this event'}?`)) return
+    if (!await confirm(`Delete ${row.title || 'this event'}?`)) return
     try {
       await api.delete(`${endpoint}/${id}`)
       await fetchRows()

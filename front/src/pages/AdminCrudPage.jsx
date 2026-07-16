@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
 import api, { assetUrl } from '../lib/api'
+import { confirm } from '../lib/confirm'
 import Modal from '../components/Modal'
 import usePagination from '../hooks/usePagination'
 
@@ -169,7 +170,7 @@ export default function AdminCrudPage({ title, subtitle, endpoint, fields, colum
   }
 
   const handleDelete = async (row) => {
-    if (!window.confirm(`Delete ${getRowTitle?.(row) || row.title || row.name || 'this record'}?`)) return
+    if (!await confirm(`Delete ${getRowTitle?.(row) || row.title || row.name || 'this record'}?`)) return
     try {
       await api.delete(`${endpoint}/${row._id || row.id}`)
       await fetchRows()

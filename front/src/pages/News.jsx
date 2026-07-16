@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { FileText, Calendar, Trash2, Clock, Search, RefreshCw, Plus, Edit2 } from 'lucide-react'
 import api, { assetUrl, getNewsList } from '../lib/api'
+import { confirm } from '../lib/confirm'
 import Modal from '../components/Modal'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
@@ -65,7 +66,7 @@ export default function News() {
   }
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this news announcement from the community board?')) return
+    if (!await confirm('Are you sure you want to delete this news announcement from the community board?')) return
     try {
       await api.delete(`/news/${id}`)
       await fetchNews()

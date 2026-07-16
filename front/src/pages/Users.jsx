@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Edit2, Trash2, Plus, Search, RefreshCw, Sparkles, Users as UsersIcon } from 'lucide-react'
 import api, { getUsersList } from '../lib/api'
+import { confirm } from '../lib/confirm'
 import { getUserRoleLabel, normalizeRoles, unwrapApiData } from '../lib/roles'
 import Modal from '../components/Modal'
 import UserForm from '../components/UserForm'
@@ -134,7 +135,7 @@ export default function Users() {
 
   // Delete user
   const handleDelete = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this family member? This action is permanent.')) return
+    if (!await confirm('Are you sure you want to delete this family member? This action is permanent.')) return
     try {
       await api.delete(`/users/${userId}`)
       await fetchUsers()

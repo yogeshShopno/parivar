@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Edit2, Plus, RefreshCw, Search, Trash2 } from 'lucide-react'
 import api, { getCommitteeMembersList } from '../lib/api'
+import { confirm } from '../lib/confirm'
 import { normalizeRoles, unwrapApiData } from '../lib/roles'
 import Modal from '../components/Modal'
 import CommitteeMemberForm from '../components/CommitteeMemberForm'
@@ -88,7 +89,7 @@ export default function CommitteeMembers() {
   }
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this committee member?')) {
+    if (!await confirm('Are you sure you want to delete this committee member?')) {
       return
     }
 
