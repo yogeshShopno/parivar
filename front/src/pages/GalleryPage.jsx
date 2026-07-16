@@ -3,7 +3,6 @@ import { Edit2, Image as ImageIcon, Plus, RefreshCw, Search, Trash2, X } from 'l
 import api, { assetUrl, getGalleryList } from '../lib/api'
 import { confirm } from '../lib/confirm'
 import Modal from '../components/Modal'
-import YearSelect from '../components/YearSelect'
 
 const fieldClass = 'w-full px-3 py-2.5 bg-input-bg text-text border border-border focus:border-primary/50 rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/10'
 const limit = 12
@@ -270,11 +269,12 @@ export default function GalleryPage() {
               className="w-full bg-input-bg text-text placeholder-text-secondary/50 border border-border rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none focus:border-primary/50"
             />
           </div>
-          <YearSelect
+          <input
+            type="month"
             value={filterYear}
-            onChange={handleFilterYear}
-            placeholder="All Years"
+            onChange={(e) => handleFilterYear(e.target.value)}
             className="bg-input-bg text-text border border-border rounded-xl py-2.5 px-3 text-sm outline-none focus:border-primary/50"
+            title="Filter by month & year"
           />
           <select
             value={filterCategoryId}
@@ -308,29 +308,35 @@ export default function GalleryPage() {
                 <tr className="border-b border-border bg-surface-secondary text-text-secondary text-sm font-semibold  tracking-wider">
                   <th className="p-4">Preview</th>
                   <th className="p-4">Category</th>
-                  <th className="p-4">Year</th>
+                  <th className="p-4">Month/Year</th>
+                  <th className="p-4 text-center">Images</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {rows.map((row) => (
-                  <tr key={row.id} className="hover:bg-surface-secondary/40 text-sm text-text">
+                  <tr key={row.id} className="hover:bg-surface-secondary/40 text-sm text-text border-b border-border/50 last:border-0 group">
                     <td className="p-4 max-w-[100px]">
                       {row.images?.[0] ? (
-                        <>
-                          <div className="relative inline-block">
-                            <img src={assetUrl(row.images[0])} alt={row.category || 'Gallery'} className="h-12 w-16 rounded-lg object-cover border border-border" />
-                            <span className="absolute -top-1.5 -right-2.5 bg-primary text-white text-xs font-semibold rounded-full p-1 w-5 h-5 flex items-center justify-center">
-                              {row.images.length}
-                            </span>
-                          </div>
-                        </>
+                        <div className="relative inline-block">
+                          <img src={assetUrl(row.images[0])} alt={row.category || 'Gallery'} className="h-12 w-16 rounded-lg object-cover border border-border" />
+                          <span className="absolute -top-1.5 -right-2.5 bg-primary text-white text-xs font-semibold rounded-full p-1 w-5 h-5 flex items-center justify-center">
+                            {row.images.length}
+                          </span>
+                        </div>
                       ) : (
                         <span className="text-text-secondary">No image</span>
                       )}
                     </td>
-                    <td className="p-4 max-w-xs line-clamp-1">{row.category || 'General'}</td>
-                    <td className="p-4">{row.year || '-'}</td>
+                    <td className="p-4 font-medium max-w-xs line-clamp-1">{row.category || 'General'}</td>
+                    <td className="p-4">
+                      {row.year ? new Date(row.year + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '-'}
+                    </td>
+                    <td className="p-4 text-center">
+                      <span className="inline-flex items-center px-2 py-1 rounded-lg bg-surface border border-border text-xs font-semibold">
+                        {row.images?.length || 0}
+                      </span>
+                    </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => openEdit(row)} className="p-2 text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl" title="Edit">
@@ -385,7 +391,7 @@ export default function GalleryPage() {
 
       <Modal isOpen={isModalOpen} title={selected ? 'Edit Images' : 'Add Images'} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSave} className="space-y-4 max-h-[76vh] overflow-y-auto pr-1 text-text">
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Category <span className='text-red-500'>*</span></label>
               <select value={categoryId} onChange={handleCategorySelect} className={fieldClass} disabled={saving}>
@@ -397,10 +403,11 @@ export default function GalleryPage() {
             </div>
 
             <div>
-              <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Year</label>
-              <YearSelect
+              <label className="block text-sm  font-semibold text-text-secondary mb-1.5">Month & Year</label>
+              <input
+                type="month"
                 value={year}
-                onChange={(val) => setYear(val)}
+                onChange={(e) => setYear(e.target.value)}
                 className={fieldClass}
                 disabled={saving}
               />

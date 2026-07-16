@@ -11,6 +11,7 @@ import Businesses from './pages/Businesses'
 import BusinessProfile from './pages/BusinessProfile'
 import Students from './pages/Students'
 import Donations from './pages/Donations'
+import Expenses from './pages/Expenses'
 import Settings from './pages/Settings'
 import CommitteeMembers from './pages/CommitteeMembers'
 import Roles from './pages/Roles'
@@ -78,6 +79,7 @@ export default function App() {
           <Route path="businesses" element={<PermissionRoute permission="businesses.list"><Businesses /></PermissionRoute>} />
           <Route path="students" element={<PermissionRoute permission="students.list"><Students /></PermissionRoute>} />
           <Route path="donations" element={<PermissionRoute permission="donations.list"><Donations /></PermissionRoute>} />
+          <Route path="expenses" element={<PermissionRoute permission="expenses.list"><Expenses /></PermissionRoute>} />
           <Route path="posts" element={<PermissionRoute permission="posts.list"><Posts /></PermissionRoute>} />
           <Route path="news" element={<PermissionRoute permission="news.list"><News /></PermissionRoute>} />
 

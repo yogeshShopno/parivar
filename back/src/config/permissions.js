@@ -28,7 +28,8 @@ const PERMISSION_MODULES = [
   { key: 'gallery', label: 'Gallery' },
   { key: 'banners', label: 'Banner' },
   { key: 'donations', label: 'Donations' },
-  { key: 'bank-details', label: 'Bank Details', masterType: 'bank-details' }
+  { key: 'bank-details', label: 'Bank Details', masterType: 'bank-details' },
+  { key: 'expenses', label: 'Expenses' }
 ];
 
 const PERMISSIONS = [
@@ -77,7 +78,9 @@ const LEGACY_PERMISSION_KEYS = [
   'masters.manage',
   'matrimonies.manage',
   'settings.manage',
-  'donations.manage'
+  'donations.manage',
+  'expenses.manage',
+  'expense-category.manage'
 ];
 
 const ALL_PERMISSION_KEYS = [

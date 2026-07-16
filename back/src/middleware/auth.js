@@ -234,7 +234,9 @@ const legacyPermissionFor = (permission) => {
     'feedback.': 'feedback.manage',
     'birthday.': 'users.manage',
     'job-vacancy.': 'job-vacancy.manage',
-    'bank-details.': 'masters.manage'
+    'bank-details.': 'masters.manage',
+    'expenses.': 'expenses.manage',
+    'expense-category.': 'expense-category.manage'
   };
 
   return Object.entries(legacyMap).find(([prefix]) => permission.startsWith(prefix))?.[1] || permission;

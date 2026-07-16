@@ -23,6 +23,7 @@ router.use('/donations', require('./donationRoutes'));
 router.use('/posts', require('./postRoutes'));
 router.use('/news', require('./newsRoutes'));
 router.use('/events', require('./eventRoutes'));
+router.use('/expenses', require('./expenseRoutes'));
 
 // Member/General Shared Routes
 router.use('/auth', require('./authRoutes')); // Normal member auth

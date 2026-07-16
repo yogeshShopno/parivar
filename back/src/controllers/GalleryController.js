@@ -58,6 +58,7 @@ const formatGallery = (req, item) => ({
   id: item.id || String(item._id),
   images: Array.isArray(item.images) ? item.images.map(img => publicUrl(req, img)) : [],
   year: item.year || '',
+  category: item.category || 'General',
   gallery_category_id: String(item.gallery_category_id || '')
 });
 
