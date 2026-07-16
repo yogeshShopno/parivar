@@ -1,10 +1,6 @@
 const mongoose = require('mongoose');
 
 const expenseSchema = new mongoose.Schema({
-  id: {
-    type: String,
-    unique: true
-  },
   date: {
     type: String,
     required: true,

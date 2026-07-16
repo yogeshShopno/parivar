@@ -53,13 +53,11 @@ const adminSaveExpense = async (req, res) => {
     const { id } = req.params;
     let existing = null;
     if (id) {
-      const orConditions = [{ id }];
       if (mongoose.isValidObjectId(id)) {
-        orConditions.push({ _id: id });
+        existing = await Expense.findById(id);
+      } else {
+        return res.status(400).json({ status: 400, message: 'Invalid expense ID', data: [] });
       }
-      existing = await Expense.findOne({
-        $or: orConditions
-      });
     }
 
     if (id && !existing) {
@@ -89,9 +87,7 @@ const adminSaveExpense = async (req, res) => {
       });
     }
 
-    const expense = existing || new Expense({
-      id: `EXP${Date.now()}`
-    });
+    const expense = existing || new Expense({});
 
     const updateFields = {};
     if (date !== undefined) updateFields.date = date;
@@ -110,7 +106,7 @@ const adminSaveExpense = async (req, res) => {
       status: existing ? 200 : 201,
       message: `Expense ${existing ? 'updated' : 'saved'} successfully`,
       data: {
-        id: expense.id || String(expense._id),
+        id: expense._id,
         date: expense.date || '',
         expense_category_id: expense.expense_category_id || '',
         expense_category_name: expense.expense_category_name || '',
@@ -134,14 +130,11 @@ const adminSaveExpense = async (req, res) => {
 const adminDeleteExpense = async (req, res) => {
   try {
     const { id } = req.params;
-    const orConditions = [{ id }];
-    if (mongoose.isValidObjectId(id)) {
-      orConditions.push({ _id: id });
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ status: 400, message: 'Invalid expense ID', data: [] });
     }
 
-    const result = await Expense.deleteOne({
-      $or: orConditions
-    });
+    const result = await Expense.deleteOne({ _id: id });
 
     if (result.deletedCount === 0) {
       return res.status(404).json({
