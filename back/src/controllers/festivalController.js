@@ -28,14 +28,14 @@ const imageFromRequest = (req, fallback = '') => {
 const getFestivals = async (req, res) => {
   try {
     const { data: festivals, pagination } = await queryHelper(Festival, req.query, {
-      searchFields: ['title', 'description', 'festival_name', 'festival_description', ],
+      searchFields: ['title', 'description', 'festival_name', 'description', ],
       filterFields: ['status']
     });
     const data = festivals.map((festival) => ({
       id: festival.id || String(festival._id),
       festival_name: festival.festival_name || festival.title || '',
       festival_date: festival.festival_date || festival.date || '',
-      festival_description: festival.festival_description || festival.description || '',
+      description: festival.description ||  '',
       image: publicUrl(req, festival.image || '')
     }));
 
@@ -49,7 +49,7 @@ const getFestivals = async (req, res) => {
 const formatFestival = (req, item) => ({
   id: item.id || String(item._id),
   title: item.title || item.festival_name || '',
-  description: item.description || item.festival_description || '',
+  description: item.description  || '',
   festival_name: item.festival_name || item.title || '',
   festival_date: item.festival_date || item.date || '',
 
@@ -60,7 +60,7 @@ const formatFestival = (req, item) => ({
 const adminGetFestivals = async (req, res) => {
   try {
     const { data, pagination } = await queryHelper(Festival, req.query, {
-      searchFields: ['title', 'description', 'festival_name', 'festival_description',],
+      searchFields: ['title', 'description', 'festival_name', 'description',],
       filterFields: ['status']
     });
     return apiResponse(res, 200, 'Festivals retrieved successfully', data.map((row) => formatFestival(req, row)), pagination);
@@ -84,14 +84,14 @@ const saveFestival = async (req, res) => {
     const existing = req.params.id ? await findById(req.params.id, {}) : null;
     
     const title = req.body.title || req.body.festival_name || existing?.title || existing?.festival_name || '';
-    const description = req.body.description || req.body.festival_description || existing?.description || existing?.festival_description || '';
+    const description = req.body.description || req.body.description || existing?.description || existing?.description || '';
     
     const payload = {
       ...req.body,
       title,
       description,
       festival_name: req.body.festival_name || title,
-      festival_description: req.body.festival_description || description,
+      description: req.body.description || description,
       image: imageFromRequest(req, existing?.image)
     };
 
