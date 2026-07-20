@@ -11,6 +11,10 @@ const businessCategorySchema = new mongoose.Schema({
     default: '',
     trim: true
   },
+   image: {
+    type: String,
+    default: '',
+  },
   state_id: {
     type: String,
     default: '',

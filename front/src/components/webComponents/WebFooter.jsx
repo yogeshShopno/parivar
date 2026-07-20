@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Phone, Mail, Facebook, Instagram, Twitter, Youtube, MessageCircle, Menu, X, LogIn } from 'lucide-react'
 import NotificationDropdown from '../NotificationDropdown'
+import { assetUrl } from '../../lib/api'
 
 export default function WebFooter() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -98,7 +99,7 @@ export default function WebFooter() {
             {/* Logo & Name - left */}
             <div className="flex items-center gap-3">
               {theme?.webLogo ? (
-                <img src={theme.webLogo} alt={`${theme.name} logo`} className="h-9 object-contain" />
+                <img src={assetUrl(theme.webLogo)} alt={`${theme.name} logo`} className="h-9 object-contain" />
               ) : null}
               <span className="text-sm font-medium">{theme?.name}</span>
             </div>

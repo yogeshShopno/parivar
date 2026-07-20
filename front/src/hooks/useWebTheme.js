@@ -33,12 +33,20 @@ export const useWebTheme = () => {
       if (response.status === 200 && response.data?.data) {
         const themeData = response.data.data
 
-        // Store each color with 'web_' prefix in localStorage
+        // Store each field with 'web_' prefix in localStorage
         Object.keys(themeData).forEach((key) => {
-          if (typeof themeData[key] === 'string' || typeof themeData[key] === 'number') {
-            localStorage.setItem(`web_${key}`, themeData[key])
+          const value = themeData[key]
+          if (typeof value === 'string' || typeof value === 'number') {
+            localStorage.setItem(`web_${key}`, value)
+          } else if (Array.isArray(value)) {
+            // Store arrays (e.g. bannerImages) as JSON strings
+            localStorage.setItem(`web_${key}`, JSON.stringify(value))
           }
         })
+
+        // Notify same-tab components to re-read from localStorage
+        // (localStorage.setItem does NOT fire 'storage' events in the same tab)
+        window.dispatchEvent(new Event('storage'))
 
         setTheme(themeData)
       }

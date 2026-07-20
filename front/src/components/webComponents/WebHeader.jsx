@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Phone, Mail, Facebook, Instagram, Twitter, Youtube, MessageCircle, Menu, X, LogIn } from 'lucide-react'
 import NotificationDropdown from '../NotificationDropdown'
+import { assetUrl } from '../../lib/api'
 
 export default function WebHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -12,16 +13,16 @@ export default function WebHeader() {
       const colorKeys = [
         'backgroundColor', 'borderColor', 'buttonColor', 'fontColor',
         'gradientEnd', 'gradientStart', 'primaryColor', 'secondaryColor', 'textColor',
-        'name','webLogo','favicon','phone','email','facebook','instagram','twitter','youtube','whatsapp',
+        'name', 'webLogo', 'favicon', 'phone', 'email', 'facebook', 'instagram', 'twitter', 'youtube', 'whatsapp',
       ]
-      
+
       const loadedTheme = {}
       colorKeys.forEach((key) => {
         const value = localStorage.getItem(`web_${key}`)
         if (value) loadedTheme[key] = value
       })
 
-    
+
 
       setTheme(loadedTheme)
     }
@@ -140,14 +141,14 @@ export default function WebHeader() {
                   <a
                     key={social.label}
                     href={social.href}
-                      target="_blank"
+                    target="_blank"
 
                     aria-label={social.label}
                     title={social.label}
                     className="rounded-full transition-all duration-200 p-1.5"
                     style={{
                       backgroundColor: shadeColor(theme.fontColor || '#FFFFFF', -80),
-                      color: theme.fontColor || '#FFFFFF'
+                      color: '#FFFFFF'
                     }}
 
                   >
@@ -173,7 +174,7 @@ export default function WebHeader() {
             {/* Logo & Title */}
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               {theme?.webLogo ? (
-                <img src={theme.webLogo} alt={`${theme.name} logo`} className="h-12 object-contain" />
+                <img src={assetUrl(theme.webLogo)} alt={`${theme.name} logo`} className="h-12 object-contain" />
               ) : null}
               <div className="hidden sm:block">
                 <h1 className="text-lg sm:text-xl font-semibold tracking-tight" style={{ color: theme.textColor || '#123524' }}>
