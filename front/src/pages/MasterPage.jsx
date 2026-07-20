@@ -16,6 +16,7 @@ export default function MasterPage({ type }) {
   const parentConfig = parentFieldsConfig[type]
   
   const fields = useMemo(() => [
+    ...(type === 'business' ? [{ name: 'image', label: 'Image', type: 'file', accept: 'image/*' }] : []),
     { name: 'name', label: `${label} Name` },
     ...(parentConfig ? [{ 
       name: 'parent_id', 
@@ -27,10 +28,11 @@ export default function MasterPage({ type }) {
   ], [label, type, parentConfig])
 
   const columns = useMemo(() => [
+    ...(type === 'business' ? [{ key: 'image', label: 'Image', type: 'image' }] : []),
     { key: 'name', label: 'Name' },
     ...(parentConfig ? [{ key: 'parent_id', label: parentConfig.label }] : []),
     { key: 'status', label: 'Status', render: (row) => Number(row.status) === 1 ? 'Active' : 'Inactive' }
-  ], [parentConfig])
+  ], [type, parentConfig])
 
   if (!label) {
     return (
