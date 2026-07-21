@@ -9,12 +9,20 @@ import TopStudents from '../../components/webComponents/TopStudents'
 import Donors from '../../components/webComponents/Donors'
 import Businesses from '../../components/webComponents/Businesses'
 import WebFooter from '../../components/webComponents/WebFooter'
+import { useWebTheme } from '../../hooks/useWebTheme'
 
 /**
  * Home Page - Website Landing Page
  * Features professional carousel with brand colors
+ * 
+ * useWebTheme() fetches colors from the API on first load
+ * and writes them to localStorage (web_* keys) so all child
+ * components can read them immediately — even for first-time visitors.
  */
 export default function Home() {
+  // Fetch theme from API and populate localStorage for child components
+  const { loading: themeLoading } = useWebTheme()
+
   return (
     <div className="w-full bg-white">
       <WebHeader />

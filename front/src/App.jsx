@@ -50,7 +50,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/businesses/:id" element={<BusinessProfile />} />
         <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />``
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
 
 

@@ -182,7 +182,8 @@ const formatMaster = (type, item, config) => {
     type,
     name,
     parent_id: config.parentKey ? item[config.parentKey] || '' : item.parent_id || '',
-    status: Number(item.status ?? 1)
+    status: Number(item.status ?? 1),
+    image: item.image || ''
   };
 };
 
@@ -237,6 +238,10 @@ const saveMaster = async (req, res) => {
       doc[primaryNameKey] = name;
       doc.name = name;
       if (config.parentKey) doc[config.parentKey] = req.body.parent_id || req.body[config.parentKey] || doc[config.parentKey] || '';
+    }
+    const image = imageFromRequest(req, existing?.image);
+    if (image || req.body.remove_image) {
+      doc.image = req.body.remove_image ? '' : image;
     }
     if (!existing) {
       doc.status = req.body.status !== undefined ? Number(req.body.status) : 1;
