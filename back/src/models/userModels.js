@@ -107,6 +107,11 @@ const userSchema = new mongoose.Schema({
     default: 'Self', // 'Self', 'Father', 'Mother', 'Spouse', 'Son', 'Daughter', 'Brother', 'Sister', etc.
     trim: true
   },
+  familyHead: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
 
   parent_id: {
     type: String,

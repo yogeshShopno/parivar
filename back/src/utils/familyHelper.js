@@ -53,10 +53,6 @@ const resolveFamilyHead = async ({ relation, family_head_id }) => {
     throw new Error('Family head information is required for non-self members');
   }
 
-  if (Number(head.status ?? 0) !== 1) {
-    throw new Error('Family head is not approved yet');
-  }
-
   return {
     family_head: {
       id: head._id,

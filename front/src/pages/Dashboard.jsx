@@ -109,18 +109,11 @@ export default function Dashboard() {
 
     const fetchDashboard = async () => {
       try {
-        const [statsRes, usersRes, businessesRes, committeeRes, festivalsRes, postsRes, eventsRes, studentsRes, donationsRes, newsRes, jobsRes] = await Promise.all([
+        const [statsRes, usersRes, businessesRes, postsRes] = await Promise.all([
           api.get('/stats'),
-          api.get('/users'),
-          api.get('/businesses'),
-          api.get('/committee-members'),
-          api.get('/festivals'),
-          api.get('/posts'),
-          api.get('/events'),
-          api.get('/students'),
-          api.get('/donations'),
-          api.get('/news'),
-          api.get('/job-vacancy'),
+          api.get('/users?limit=5'),
+          api.get('/businesses?limit=5'),
+          api.get('/posts?limit=5')
         ])
 
         if (!mounted) return
@@ -129,16 +122,9 @@ export default function Dashboard() {
         const users = usersRes.data?.data || usersRes.data || []
         const businesses = businessesRes.data?.data || businessesRes.data || []
         const posts = postsRes.data?.data || postsRes.data || []
-        const committee = committeeRes.data?.data || committeeRes.data || []
-        const festivals = festivalsRes.data?.data || festivalsRes.data || []
-        const events = eventsRes.data?.data || eventsRes.data || []
-        const students = studentsRes.data?.data || studentsRes.data || []
-        const donations = donationsRes.data?.data || donationsRes.data || []
-        const news = newsRes.data?.data || newsRes.data || []
-        const jobs = jobsRes.data?.data || jobsRes.data || []
 
         setStats(statsData)
-        setTableData({ users, businesses, posts, committee, festivals, events, students, donations, news, jobs })
+        setTableData(prev => ({ ...prev, users, businesses, posts }))
         setRecentActivities([
           ...users.slice(0, 2).map(user => ({
             id: `member-${user._id}`,
@@ -280,7 +266,7 @@ export default function Dashboard() {
 
       {/* ── Data Tables ─────────────────────────────────────────── */}
       <div className="space-y-6">
-        <h3 className="text-lg font-semibold text-text tracking-tight">All Records</h3>
+        <h3 className="text-lg font-semibold text-text tracking-tight">Recent Records</h3>
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
           {/* Users */}
@@ -295,20 +281,25 @@ export default function Dashboard() {
                 </span>
               )
             },
-
           ]} />
 
-          {/* Committee */}
-          <TableCard title="Committee Members" data={tableData.committee} routePath={'/admin/committee'} columns={[
-            { key: 'first_name', label: 'Name' },
-            { key: 'designation', label: 'Designation' },
-            { key: 'number', label: 'Number' },
+          {/* Businesses */}
+          <TableCard title="Business Directory" routePath={'/admin/businesses'} data={tableData.businesses} columns={[
+            { key: 'image', label: 'Image' },
+            { key: 'business_name', label: 'Name' },
+            { key: 'business_category_name', label: 'Category' },
+            { key: 'number', label: 'Contact' },
+            {
+              key: 'status', label: 'Status', render: v => (
+                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${Number(v) === 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-600'}`}>
+                  {Number(v) === 1 ? 'Approved' : 'Pending'}
+                </span>
+              )
+            },
           ]} />
-
         </div>
+        
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-
-
           {/* Posts */}
           <TableCard title="Posts" data={tableData.posts} routePath={'/admin/posts'} columns={[
             { key: 'image', label: 'Image' },
@@ -321,83 +312,6 @@ export default function Dashboard() {
                 </span>
               )
             },
-          ]} />
-
-
-          {/* News */}
-          <TableCard title="News" data={tableData.news} routePath={'/admin/news'} columns={[
-            { key: 'image', label: 'Image' },
-            { key: 'title', label: 'Headline' },
-            { key: 'cdate', label: 'Published' },
-          ]} />
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-
-          {/* Festivals */}
-          <TableCard title="Festivals" routePath={'/admin/festivals'} data={tableData.festivals} columns={[
-            { key: 'image', label: 'Image' },
-
-            { key: 'title', label: 'Festival' },
-
-            { key: 'festival_date', label: 'Date' },
-          ]} />
-
-          {/* Events */}
-          <TableCard title="Events" routePath={'/admin/events'} data={tableData.events} columns={[
-            { key: 'image', label: 'Image' },
-            { key: 'title', label: 'Event' },
-            { key: 'event_location', label: 'Location' },
-            { key: 'start_time', label: 'Date' },
-          ]} />
-        </div>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-
-          {/* Students */}
-          <TableCard title="Students" routePath={'/admin/students'} data={tableData.students} columns={[
-
-            { key: 'student_image', label: 'Image' },
-            { key: 'student_name', label: 'Name' },
-            { key: 'standard', label: 'Standard' },
-            { key: 'percentage', label: 'Percentage' },
-            { key: 'year', label: 'Year' },
-          ]} />
-
-          {/* Donations */}
-          <TableCard title="Donations" routePath={'/admin/donations'} data={tableData.donations} columns={[
-            { key: 'donator_name', label: 'Donor' },
-            { key: 'donate_amount', label: 'Amount', render: v => v ? `₹${v}` : '—' },
-            { key: 'donation_purpose', label: 'Purpose' },
-            { key: 'date', label: 'Date' },
-          ]} />
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-
-
-          {/* Businesses */}
-          <TableCard title="Business Directory" routePath={'/admin/businesses'} data={tableData.businesses} columns={[
-            { key: 'image', label: 'Image' },
-
-            { key: 'business_name', label: 'Name' },
-            { key: 'business_category_name', label: 'Category' },
-            { key: 'number', label: 'Contact' },
-            {
-              key: 'status', label: 'Status', render: v => (
-                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${Number(v) === 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-600'}`}>
-                  {Number(v) === 1 ? 'Approved' : 'Pending'}
-                </span>
-              )
-            },
-          ]} />
-
-          {/* Job Vacancies */}
-          <TableCard title="Job Vacancies" routePath={'/admin/job-vacancy'} data={tableData.jobs} columns={[
-            { key: 'image', label: 'Image' },
-            { key: 'title', label: 'Role' },
-            { key: 'company_name', label: 'Company' },
-            { key: 'job_type', label: 'Part/Full Time' },
-            { key: 'location', label: 'Location' },
           ]} />
         </div>
       </div>

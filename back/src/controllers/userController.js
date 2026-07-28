@@ -55,6 +55,7 @@ const register = async (req, res) => {
       address,
       image,
       family_head_id,
+      familyHead
 
     } = req.body;
 
@@ -106,6 +107,7 @@ const register = async (req, res) => {
       address,
       image: image || '',
       family_head: familyData.family_head,
+      familyHead: familyHead === true || familyHead === 'true',
       status: familyData.status,
 
     });
@@ -220,6 +222,10 @@ const getUsers = async (req, res) => {
       query.relation = 'Self';
     }
 
+    if (req.query.familyHead !== undefined) {
+      query.familyHead = req.query.familyHead === 'true';
+    }
+
     if (req.query.family_head_id) {
       const headId = mongooseQueryForUser(req.query.family_head_id)._id;
       if (mongoose.isValidObjectId(headId)) {
@@ -245,7 +251,7 @@ const getUsers = async (req, res) => {
     const { data: users, pagination } = await queryHelper(User, req.query, {
       baseQuery: query,
       searchFields: ['first_name', 'middle_name', 'last_name', 'number', 'email', 'family_head.name'],
-      filterFields: ['gender', 'blood_group', 'is_committee', 'committee_role', 'role_id', 'status'],
+      filterFields: ['gender', 'blood_group', 'is_committee', 'committee_role', 'role_id', 'status', 'familyHead'],
       select: birthday ? 'first_name middle_name last_name number dob anniversary' : '-password',
       populate: birthday ? '' : 'role_id',
       defaultSort: { createdAt: -1 },
@@ -288,6 +294,9 @@ const getUsers = async (req, res) => {
       is_committee: u.is_committee || false,
       committee_role: u.committee_role || '',
       designation: u.designation || '',
+      country_id: u.country_id || '',
+      state_id: u.state_id || '',
+      city_id: u.city_id || '',
       family_head: u.family_head ? {
         id: u.family_head.id ? String(u.family_head.id) : '',
         name: u.family_head.name || ''
@@ -297,6 +306,7 @@ const getUsers = async (req, res) => {
       permissions: getRolePermissions(u),
       address: u.address || '',
       status: Number(u.status ?? 1),
+      familyHead: u.familyHead || false,
       image: publicUrl(req, u.image || u.profile_image || ''),
       role: u.is_committee ? 'admin' : 'user'
     }));
@@ -339,11 +349,15 @@ const getUserById = async (req, res) => {
       is_committee: user.is_committee || false,
       committee_role: user.committee_role || '',
       designation: user.designation || '',
+      country_id: user.country_id || '',
+      state_id: user.state_id || '',
+      city_id: user.city_id || '',
       role_id: user.role_id?._id ? String(user.role_id._id) : '',
       role_name: user.role_id?.name || '',
       permissions: getRolePermissions(user),
       address: user.address || '',
       status: Number(user.status ?? 1),
+      familyHead: user.familyHead || false,
       image: publicUrl(req, user.image || user.profile_image || ''),
       role: user.is_committee ? 'admin' : 'user'
     };
@@ -392,7 +406,8 @@ const updateUser = async (req, res) => {
       designation,
       image,
       password,
-      status
+      status,
+      familyHead
     } = req.body;
 
 
@@ -427,6 +442,7 @@ const updateUser = async (req, res) => {
     if (address !== undefined) user.address = address;
     if (designation !== undefined) user.designation = designation;
     if (status !== undefined) user.status = Number(status);
+    if (familyHead !== undefined) user.familyHead = familyHead === true || familyHead === 'true';
     user.family_head = familyData.family_head;
     if (password) user.password = password;
     if (req.body.image) {
@@ -458,6 +474,7 @@ const updateUser = async (req, res) => {
       address: user.address || '',
       designation: user.designation || '',
       status: Number(user.status ?? 1),
+      familyHead: user.familyHead || false,
       image: publicUrl(req, user.image || ''),
 
     });
